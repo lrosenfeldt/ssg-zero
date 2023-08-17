@@ -1,3 +1,4 @@
 node_modules
 fixtures/pages_dump/
 fixtures/dist_dump/
+coverage/

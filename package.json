@@ -11,8 +11,9 @@
 	"license": "ISC",
 	"main": "./dist/main.js",
 	"scripts": {
-    "compile": "tsc",
-    "test": "tsc && node --enable-source-maps --test"
+		"compile": "tsc",
+		"test": "tsc && node --enable-source-maps --test",
+		"test:coverage": "tsc && NODE_DISABLE_COLORS=1 node --enable-source-maps --test --experimental-test-coverage --test-reporter tap | awk '/^# start of coverage/ {p=1} p' > coverage/$(date +'%Y%m%d_%H%M%S.report.txt')"
 	},
 	"version": "0.1.0",
 	"devDependencies": {
