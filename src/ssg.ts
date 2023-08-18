@@ -20,4 +20,8 @@ export class SSG {
 	async setup(): Promise<void> {
 		await mkdir(this.outputDir, { recursive: true })
 	}
+
+  async build(): Promise<void> {
+
+  }
 }
