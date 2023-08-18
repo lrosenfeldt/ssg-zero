@@ -1,4 +1,8 @@
 node_modules
+
+dist/
+
 fixtures/pages_dump/
 fixtures/dist_dump/
-coverage/
+
+coverage.txt

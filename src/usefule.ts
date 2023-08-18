@@ -1,6 +1,6 @@
 import { stat } from 'node:fs/promises'
 
-function anyToError(reason: unknown): NodeJS.ErrnoException {
+export function anyToError(reason: unknown): NodeJS.ErrnoException {
 	let errorMessage: string
 	switch (typeof reason) {
 		case 'object':
