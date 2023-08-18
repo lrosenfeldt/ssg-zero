@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
+import { mkdir, rm } from 'node:fs/promises'
 
 import { SSG } from './ssg.js'
-import { mkdir, rm } from 'node:fs/promises'
-import { exists } from './usefule'
+import { exists } from './usefule.js'
 
 describe('ssg.ts', () => {
 	describe('SSG', () => {
