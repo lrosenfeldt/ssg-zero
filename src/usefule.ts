@@ -1,4 +1,5 @@
-import { stat } from 'node:fs/promises'
+import { readdir, stat } from 'node:fs/promises'
+import { join } from 'node:path'
 
 export function anyToError(reason: unknown): NodeJS.ErrnoException {
 	let errorMessage: string
@@ -31,6 +32,7 @@ export function anyToError(reason: unknown): NodeJS.ErrnoException {
 	}
 	return new Error(errorMessage, { cause: reason })
 }
+
 export async function exists(path: string): Promise<boolean> {
 	try {
 		await stat(path)
@@ -41,5 +43,22 @@ export async function exists(path: string): Promise<boolean> {
 			return false
 		}
 		throw error
+	}
+}
+
+export type UsefulePath = { dir: string; base: string }
+export async function* walkFiles(root: string): AsyncGenerator<UsefulePath> {
+	const dirs = [root]
+	for (const dir of dirs) {
+		const entries = await readdir(dir, { withFileTypes: true })
+		for (const entry of entries) {
+			if (entry.isDirectory()) {
+				dirs.push(join(dir, entry.name))
+				continue
+			}
+			if (entry.isFile()) {
+				yield { dir, base: entry.name }
+			}
+		}
 	}
 }

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { anyToError, exists } from './usefule.js'
+import { anyToError, exists, walkFiles } from './usefule.js'
+import { join } from 'node:path'
 
 describe('usefule', () => {
 	describe('anyToError', () => {
@@ -69,6 +70,45 @@ describe('usefule', () => {
 		it('resolves to true if a file does exist', async () => {
 			const doesItExist = await exists('fixtures/pages/index.html')
 			assert.equal(doesItExist, true)
+		})
+	})
+	describe('walkFiles', () => {
+		it('yields nothing for an empty directory', async () => {
+			const walkedFiles: string[] = []
+
+			for await (const file of walkFiles('fixtures/empty')) {
+				walkedFiles.push(join(file.dir, file.base))
+			}
+
+			assert.deepEqual(walkedFiles, [])
+		})
+		it('yields the children of a directory', async () => {
+			const expectedFiles = new Set<string>([
+				'fixtures/simple/lol.gif',
+				'fixtures/simple/holiday_1.jpg',
+				'fixtures/simple/holiday_2.jpg',
+				'fixtures/simple/holiday_3.jpg',
+			])
+			const walkedFiles = new Set<string>([])
+
+			for await (const file of walkFiles('fixtures/simple')) {
+				walkedFiles.add(join(file.dir, file.base))
+			}
+
+			assert.deepEqual(walkedFiles, expectedFiles)
+		})
+		it('yields nested children of a directory', async () => {
+			const expectedFiles = new Set<string>([
+				'fixtures/pages/index.html',
+				'fixtures/pages/assets/style.css',
+			])
+			const walkedFiles = new Set<string>([])
+
+			for await (const file of walkFiles('fixtures/pages')) {
+				walkedFiles.add(join(file.dir, file.base))
+			}
+
+			assert.deepEqual(walkedFiles, expectedFiles)
 		})
 	})
 })
