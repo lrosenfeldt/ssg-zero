@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
-import { after, before, describe, it } from 'node:test'
+import { after, before, describe, it, mock } from 'node:test'
 import { mkdir, readFile, rm } from 'node:fs/promises'
 
-import { type FileHandler, SSG } from './ssg.js'
+import { type FileHandler, SSG, Renderer } from './ssg.js'
 import { exists } from './usefule.js'
 import { join } from 'node:path'
 
@@ -52,6 +52,14 @@ describe('ssg.ts', () => {
 			const outputDir = 'fixtures/dist'
 			const fileHandler: Map<string, FileHandler> = new Map()
 			fileHandler.set('.css', SSG.passthroughMarker)
+
+			const htmlDummyRenderer = {
+				generates: '.html',
+				render: mock.fn(content =>
+					content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, 'ZONK!'),
+				),
+			} satisfies Renderer
+			fileHandler.set('.html', htmlDummyRenderer)
 			const ssg = new SSG(inputDir, outputDir, fileHandler)
 
 			before(async () => {
@@ -65,6 +73,16 @@ describe('ssg.ts', () => {
 					await assert.doesNotReject(async () => await ssg.build())
 				})
 
+				await t.test('ignores README.md', async () => {
+					const readmePath = join(outputDir, 'README.md')
+
+					assert.equal(
+						await exists(readmePath),
+						false,
+						`README.md should be ignored, but appeared in the output directory ${outputDir}.`,
+					)
+				})
+
 				await t.test('copies style.css', async () => {
 					const path = 'assets/style.css'
 					const originalCss = await readFile(
@@ -76,6 +94,25 @@ describe('ssg.ts', () => {
 					const copiedCss = await readFile(copiedCssPath, 'utf-8')
 
 					assert.equal(copiedCss, originalCss)
+				})
+
+				await t.test('renders index.html', async t => {
+					await t.test('uses the given renderer', () => {
+						assert.equal(
+							htmlDummyRenderer.render.mock.callCount(),
+							1,
+						)
+					})
+
+					await t.test('produces rendered output', async () => {
+						const renderedHtmlPath = join(outputDir, 'index.html')
+						const renderedHtml = await readFile(
+							renderedHtmlPath,
+							'utf-8',
+						)
+
+						assert.match(renderedHtml, /<p>ZONK!<\/p>/)
+					})
 				})
 			})
 		})

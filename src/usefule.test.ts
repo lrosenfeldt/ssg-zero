@@ -100,6 +100,7 @@ describe('usefule', () => {
 		it('yields nested children of a directory', async () => {
 			const expectedFiles = new Set<string>([
 				'fixtures/pages/index.html',
+				'fixtures/pages/README.md',
 				'fixtures/pages/assets/style.css',
 			])
 			const walkedFiles = new Set<string>([])
