@@ -5,13 +5,19 @@ import { mkdir, readFile, rm } from 'node:fs/promises'
 import { type FileHandler, SSG, Renderer } from './ssg.js'
 import { exists } from './usefule.js'
 import { join } from 'node:path'
+import { ConsoleLogger, LogLevel } from './logger.js'
 
 describe('ssg.ts', () => {
 	describe('SSG', () => {
 		describe('setup', () => {
 			const inputDir = 'fixtures/pages_dump'
 			const outputDir = 'fixtures/dist_dump'
-			const ssg = new SSG(inputDir, outputDir, new Map())
+			const ssg = new SSG(
+				inputDir,
+				outputDir,
+				new Map(),
+				new ConsoleLogger(LogLevel.Error),
+			)
 
 			before(async () => {
 				await mkdir(inputDir, { recursive: true })
@@ -60,7 +66,12 @@ describe('ssg.ts', () => {
 				),
 			} satisfies Renderer
 			fileHandler.set('.html', htmlDummyRenderer)
-			const ssg = new SSG(inputDir, outputDir, fileHandler)
+			const ssg = new SSG(
+				inputDir,
+				outputDir,
+				fileHandler,
+				new ConsoleLogger(LogLevel.Error),
+			)
 
 			before(async () => {
 				await mkdir(inputDir, { recursive: true })
