@@ -1,0 +1,21 @@
+{
+  "name": "site",
+  "author": {
+    "name": "Lukas Rosenfeldt"
+  },
+  "description": "A blog generated with ssg-zero.",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "blog",
+    "html"
+  ],
+  "license": "ISC",
+  "scripts": {},
+  "type": "module",
+  "version": "0.1.0",
+  "dependencies": {
+    "ssg-zero": "file:../ssg-zero"
+  }
+}
