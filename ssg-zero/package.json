@@ -1,9 +1,12 @@
 {
 	"name": "ssg-zero",
 	"author": {
-		"name": "Lukas Rosenfel"
+		"name": "Lukas Rosenfeldt"
 	},
 	"description": "One static site generator, zero dependencies.*",
+	"engines": {
+		"node": ">=20"
+	},
 	"keywords": [
 		"ssg",
 		"html"
@@ -15,7 +18,7 @@
 		"test": "tsc && node --enable-source-maps --test",
 		"test:coverage": "tsc && NODE_DISABLE_COLORS=1 node --enable-source-maps --test --experimental-test-coverage --test-reporter tap | awk '/^# start of coverage/ {p=1} p' | sed '1d;$d;s/|//g;s/^# //g' | tee coverage.txt"
 	},
-  "type": "module",
+	"type": "module",
 	"version": "0.1.0",
 	"devDependencies": {
 		"@types/eslint": "^8.44.2",
