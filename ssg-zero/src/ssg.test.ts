@@ -2,22 +2,72 @@ import assert from 'node:assert/strict'
 import { after, before, describe, it, mock } from 'node:test'
 import { mkdir, readFile, rm } from 'node:fs/promises'
 
-import { type FileHandler, SSG, Renderer } from './ssg.js'
+import { type FileHandler, SSG, Renderer, SSGBuilder } from './ssg.js'
 import { exists } from './usefule.js'
 import { join } from 'node:path'
-import { ConsoleLogger, LogLevel } from './logger.js'
+import { LogLevel } from './logger.js'
 
 describe('ssg.ts', () => {
+	describe('SSGBuilder', () => {
+		const inputDir = 'fixtures/pages'
+		const outputDir = 'fixtures/dist'
+
+		const builder = new SSGBuilder()
+		const reverseRenderer = mock.fn<Renderer['render']>()
+
+		describe('build', () => {
+			it('builds the corresponding ssg', async t => {
+				builder
+					.setInputDir(inputDir)
+					.setOutputDir(outputDir)
+					.template('.html', {
+						render: reverseRenderer,
+						generates: '.txt',
+					})
+					.passthrough('.css')
+					.useDefaultLogger(LogLevel.Error)
+
+				const ssg = builder.build()
+
+				await t.test('builds a ssg', () => {
+					assert.equal(
+						ssg instanceof SSG,
+						true,
+						`Returned object ${ssg} is not of type SSG.`,
+					)
+				})
+
+				await t.test('has the correct input directory', () => {
+					assert.equal(ssg.inputDir, inputDir)
+				})
+
+				await t.test('has the correct output directory', () => {
+					assert.equal(ssg.outputDir, outputDir)
+				})
+
+				await t.test('marks .css for passthrough', () => {
+					assert.equal(
+						ssg.fileHandlers['.css'],
+						SSG.passthroughMarker,
+					)
+				})
+
+				await t.test('wants to render .html to .txt', () => {
+					const renderer = ssg.fileHandlers['.html'] as Renderer
+					assert.equal(renderer.generates, '.txt')
+				})
+			})
+		})
+	})
 	describe('SSG', () => {
 		describe('setup', () => {
 			const inputDir = 'fixtures/pages_dump'
 			const outputDir = 'fixtures/dist_dump'
-			const ssg = new SSG(
-				inputDir,
-				outputDir,
-				new Map(),
-				new ConsoleLogger(LogLevel.Error),
-			)
+			const ssg = new SSGBuilder()
+				.setInputDir(inputDir)
+				.setOutputDir(outputDir)
+				.useDefaultLogger(LogLevel.Error)
+				.build()
 
 			before(async () => {
 				await mkdir(inputDir, { recursive: true })
@@ -56,22 +106,17 @@ describe('ssg.ts', () => {
 		describe('build', () => {
 			const inputDir = 'fixtures/pages'
 			const outputDir = 'fixtures/dist'
-			const fileHandler: Map<string, FileHandler> = new Map()
-			fileHandler.set('.css', SSG.passthroughMarker)
 
-			const htmlDummyRenderer = {
-				generates: '.html',
-				render: mock.fn(content =>
-					content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, 'ZONK!'),
-				),
-			} satisfies Renderer
-			fileHandler.set('.html', htmlDummyRenderer)
-			const ssg = new SSG(
-				inputDir,
-				outputDir,
-				fileHandler,
-				new ConsoleLogger(LogLevel.Error),
+			const renderHtmlDummy = mock.fn(content =>
+				content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, 'ZONK!'),
 			)
+			const ssg = new SSGBuilder()
+				.setInputDir(inputDir)
+				.setOutputDir(outputDir)
+				.passthrough('.css')
+				.template('.html', renderHtmlDummy)
+				.useDefaultLogger(LogLevel.Error)
+				.build()
 
 			before(async () => {
 				await mkdir(inputDir, { recursive: true })
@@ -109,10 +154,7 @@ describe('ssg.ts', () => {
 
 				await t.test('renders index.html', async t => {
 					await t.test('uses the given renderer', () => {
-						assert.equal(
-							htmlDummyRenderer.render.mock.callCount(),
-							1,
-						)
+						assert.equal(renderHtmlDummy.mock.callCount(), 1)
 					})
 
 					await t.test('produces rendered output', async () => {

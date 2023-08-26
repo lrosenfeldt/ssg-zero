@@ -2,7 +2,7 @@ import { extname, join } from 'node:path'
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 
 import { walkFiles } from './usefule.js'
-import { ConsoleLogger, LogLevel } from './logger.js'
+import { ConsoleLogger, LogLevel, type Logger } from './logger.js'
 
 const passthroughMarker = Symbol('passthrough')
 export type PassthroughMarker = typeof passthroughMarker
@@ -18,10 +18,10 @@ export class SSG {
 	static passthroughMarker: PassthroughMarker = passthroughMarker
 
 	constructor(
-		private readonly inputDir: string,
-		private readonly outputDir: string,
-		private fileHandlers: Map<string, FileHandler>,
-		private logger = new ConsoleLogger(LogLevel.Debug),
+		public readonly inputDir: string,
+		public readonly outputDir: string,
+		public readonly fileHandlers: Readonly<Record<string, FileHandler>>,
+		private logger: Logger,
 	) {}
 
 	async setup(): Promise<void> {
@@ -36,7 +36,7 @@ export class SSG {
 				`Found file ${inputFilePath} with extension ${fileType}.`,
 			)
 
-			const renderer = this.fileHandlers.get(fileType)
+			const renderer = this.getFileHandler(fileType)
 			if (renderer === undefined) {
 				this.logger.info(
 					`Ignoring file '${inputFilePath}' because of unhandled extension '${fileType}'.`,
@@ -74,6 +74,13 @@ export class SSG {
 		}
 	}
 
+	private getFileHandler(extension: string): FileHandler | undefined {
+		if (!Object.hasOwn(this.fileHandlers, extension)) {
+			return undefined
+		}
+		return this.fileHandlers[extension]
+	}
+
 	private async passthroughFile(filePath: string): Promise<void> {
 		const outputFilePath = filePath.replace(this.inputDir, this.outputDir)
 		this.logger.info(`Copying file '${filePath}' to '${outputFilePath}'.`)
@@ -83,5 +90,59 @@ export class SSG {
 			recursive: true,
 		})
 		return
+	}
+}
+
+export class SSGBuilder {
+	private inputDir: string = ''
+	private outputDir: string = ''
+	private fileHandlers: Map<string, FileHandler> = new Map()
+	private logger: Logger = new ConsoleLogger(LogLevel.Debug)
+
+	build(): SSG {
+		// TODO: validation, optional properties
+		const fileHandlers: Record<string, FileHandler> = {}
+		this.fileHandlers.forEach((handler, format) => {
+			fileHandlers[format] = handler
+		})
+
+		return new SSG(this.inputDir, this.outputDir, fileHandlers, this.logger)
+	}
+
+	passthrough(...formats: string[]): this {
+		formats.forEach(format =>
+			this.fileHandlers.set(format, SSG.passthroughMarker),
+		)
+		return this
+	}
+
+	template(
+		format: string,
+		renderOrRenderer: Renderer['render'] | Renderer,
+	): this {
+		let renderer: Renderer
+		if (typeof renderOrRenderer === 'function') {
+			renderer = { render: renderOrRenderer, generates: format }
+		} else {
+			renderer = renderOrRenderer
+		}
+
+		this.fileHandlers.set(format, renderer)
+		return this
+	}
+
+	setInputDir(inputDir: string): this {
+		this.inputDir = inputDir
+		return this
+	}
+
+	setOutputDir(outputDir: string): this {
+		this.outputDir = outputDir
+		return this
+	}
+
+	useDefaultLogger(maxLogLevel: LogLevel): this {
+		this.logger = new ConsoleLogger(maxLogLevel)
+		return this
 	}
 }
