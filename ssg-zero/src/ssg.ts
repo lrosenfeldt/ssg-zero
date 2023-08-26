@@ -3,13 +3,14 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 
 import { walkFiles } from './usefule.js'
 import { ConsoleLogger, LogLevel, type Logger } from './logger.js'
+import { parse } from './frontmatter.js'
 
 const passthroughMarker = Symbol('passthrough')
 export type PassthroughMarker = typeof passthroughMarker
 
 export type Renderer = {
 	generates: string
-	render: (content: string) => string | Promise<string>
+	render: (content: string, data?: unknown) => string | Promise<string>
 }
 
 export type FileHandler = PassthroughMarker | Renderer
@@ -66,7 +67,11 @@ export class SSG {
 			this.logger.debug(
 				`Start generating rendered content for ${targetFile}.`,
 			)
-			const outputContent = await renderer.render(fileContent)
+			const parsedContent = parse(fileContent)
+			const outputContent = await renderer.render(
+				parsedContent.content,
+				parsedContent.data,
+			)
 			this.logger.debug(
 				`Finished generating rendered content for ${targetFile}.`,
 			)

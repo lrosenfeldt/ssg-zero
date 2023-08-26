@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, describe, it, mock } from 'node:test'
 import { mkdir, readFile, rm } from 'node:fs/promises'
 
-import { type FileHandler, SSG, Renderer, SSGBuilder } from './ssg.js'
+import { SSG, Renderer, SSGBuilder } from './ssg.js'
 import { exists } from './usefule.js'
 import { join } from 'node:path'
 import { LogLevel } from './logger.js'
@@ -107,8 +107,9 @@ describe('ssg.ts', () => {
 			const inputDir = 'fixtures/pages'
 			const outputDir = 'fixtures/dist'
 
-			const renderHtmlDummy = mock.fn(content =>
-				content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, 'ZONK!'),
+			const renderHtmlDummy = mock.fn<Renderer['render']>(
+				(content, data: { some: string }) =>
+					content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, data.some),
 			)
 			const ssg = new SSGBuilder()
 				.setInputDir(inputDir)
