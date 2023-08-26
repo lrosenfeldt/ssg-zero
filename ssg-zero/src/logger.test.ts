@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { describe, it, mock } from 'node:test'
+import { describe, it } from 'node:test'
 
 import { ConsoleLogger, LogLevel } from './logger.js'
 
@@ -32,7 +32,11 @@ describe('logger.ts', () => {
 			table.forEach(({ level, messages }) => {
 				it(`only runs for logs on ${level} and below`, t => {
 					const logger = new ConsoleLogger(level)
-					const consoleLog = t.mock.method(console, 'log')
+					const consoleLog = t.mock.method(
+						console,
+						'log',
+						() => void 0,
+					)
 
 					logger.debug(debugMessage)
 					logger.info(infoMessage)
@@ -47,7 +51,7 @@ describe('logger.ts', () => {
 		it('has a sane log format', t => {
 			const referenceDate = new Date('2020-04-20T06:09:11')
 
-			const consoleLog = t.mock.method(console, 'log')
+			const consoleLog = t.mock.method(console, 'log', () => void 0)
 			t.mock.method(global, 'Date', function () {
 				return referenceDate
 			})
