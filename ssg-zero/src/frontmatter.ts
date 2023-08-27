@@ -22,12 +22,9 @@ export function parse(input: string): ParserResult {
 	}
 
 	let endOfJson = -1
-	let json = '{'
-	for (let position = 1 + EOL.length; position < input.length; ++position) {
-		json += input[position]
+	for (let position = 1; position < input.length; ++position) {
 		if (input.startsWith(EOL + '}' + EOL, position)) {
 			endOfJson = position + 2 * EOL.length
-			json += EOL + '}'
 			break
 		}
 	}
@@ -36,6 +33,7 @@ export function parse(input: string): ParserResult {
 		throw new UnexpectedEndOfJsonError(input, 0)
 	}
 
+	const json = input.slice(0, endOfJson)
 	const data = JSON.parse(json)
 
 	return {

@@ -71,7 +71,8 @@ at line 32
 			})
 		})
 		describe('given valid frontmatter', () => {
-			const text = `\
+			it('parses content and fronmatter', async t => {
+				const text = `\
 {
   "number": 69,
   "bool": false,
@@ -82,7 +83,6 @@ at line 32
   }
 }
 Actual content`
-			it('parses content and fronmatter', async t => {
 				let result: ParserResult
 				assert.doesNotThrow(() => {
 					result = parse(text)
@@ -101,6 +101,26 @@ Actual content`
 							abc: 123,
 						},
 					})
+				})
+			})
+			it('parses empty frontmatter and content', async t => {
+				const text = `\
+{
+}
+<p>Someday everything will be alright</p>
+`
+				let result: ParserResult
+				assert.doesNotThrow(() => {
+					result = parse(text)
+				})
+				await t.test('strips frontmatter from the text', () => {
+					assert.equal(
+						result.content,
+						'<p>Someday everything will be alright</p>\n',
+					)
+				})
+				await t.test('contains empty data', () => {
+					assert.deepEqual(result.data, {})
 				})
 			})
 		})
