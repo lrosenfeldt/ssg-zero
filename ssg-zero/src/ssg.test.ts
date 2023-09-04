@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { after, before, describe as suite, test, mock } from 'node:test'
+import { join } from 'node:path'
 import { mkdir, readFile, rm } from 'node:fs/promises'
 
+import { LogLevel } from './logger.js'
 import { SSG, Renderer, SSGBuilder } from './ssg.js'
 import { exists } from './usefule.js'
-import { join } from 'node:path'
-import { LogLevel } from './logger.js'
 
 suite('ssg.ts', () => {
 	suite('SSGBuilder', () => {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
-import { join } from 'node:path'
 import { describe as suite, test } from 'node:test'
+import { join } from 'node:path'
 
 import { anyToError, exists, walkFiles } from './usefule.js'
 
