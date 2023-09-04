@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { after, before, describe, it, mock } from 'node:test'
+import { after, before, describe as suite, test, mock } from 'node:test'
 import { mkdir, readFile, rm } from 'node:fs/promises'
 
 import { SSG, Renderer, SSGBuilder } from './ssg.js'
@@ -7,16 +7,16 @@ import { exists } from './usefule.js'
 import { join } from 'node:path'
 import { LogLevel } from './logger.js'
 
-describe('ssg.ts', () => {
-	describe('SSGBuilder', () => {
+suite('ssg.ts', () => {
+	suite('SSGBuilder', () => {
 		const inputDir = 'fixtures/pages'
 		const outputDir = 'fixtures/dist'
 
 		const builder = new SSGBuilder()
 		const reverseRenderer = mock.fn<Renderer['render']>()
 
-		describe('build', () => {
-			it('builds the corresponding ssg', async t => {
+		suite('build', () => {
+			test('builds the corresponding ssg', async t => {
 				builder
 					.setInputDir(inputDir)
 					.setOutputDir(outputDir)
@@ -59,8 +59,8 @@ describe('ssg.ts', () => {
 			})
 		})
 	})
-	describe('SSG', () => {
-		describe('setup', () => {
+	suite('SSG', () => {
+		suite('setup', () => {
 			const inputDir = 'fixtures/pages_dump'
 			const outputDir = 'fixtures/dist_dump'
 			const ssg = new SSGBuilder()
@@ -77,8 +77,8 @@ describe('ssg.ts', () => {
 				await rm(outputDir, { force: true, recursive: true })
 			})
 
-			it('setups the output directory', async t => {
-				await t.test('has no directories initially', async () => {
+			test('setups the output directory', async t => {
+				await t.test('has no directories intestially', async () => {
 					assert.equal(
 						await exists(outputDir),
 						false,
@@ -98,12 +98,12 @@ describe('ssg.ts', () => {
 					)
 				})
 
-				await t.test('runs twice without problems', async () => {
+				await t.test('runs twice wtesthout problems', async () => {
 					await assert.doesNotReject(async () => await ssg.setup())
 				})
 			})
 		})
-		describe('build', () => {
+		suite('build', () => {
 			const inputDir = 'fixtures/pages'
 			const outputDir = 'fixtures/dist'
 
@@ -125,7 +125,7 @@ describe('ssg.ts', () => {
 				await ssg.setup()
 			})
 
-			it('builds the pages', async t => {
+			test('builds the pages', async t => {
 				await t.test('builds successfully', async () => {
 					await assert.doesNotReject(async () => await ssg.build())
 				})

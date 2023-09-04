@@ -1,24 +1,25 @@
 import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
+import { describe as suite, test } from 'node:test'
+
 import {
 	type ParserResult,
 	UnexpectedEndOfJsonError,
 	parse,
 } from './frontmatter.js'
 
-describe('frontmatter.ts', () => {
-	describe('parseFrontmatter', () => {
-		describe('given an empty text', () => {
+suite('frontmatter.ts', () => {
+	suite('parseFrontmatter', () => {
+		suite('given an empty text', () => {
 			const text = ''
 			const result = parse(text)
-			it('returns an empty string as content', () => {
+			test('returns an empty string as content', () => {
 				assert.equal(result.content, text)
 			})
-			it('returns no data', () => {
+			test('returns no data', () => {
 				assert.equal(result.data, undefined)
 			})
 		})
-		describe('given no frontmatter', () => {
+		suite('given no frontmatter', () => {
 			const text = `\
 Roses are red
 Violets are blue
@@ -27,15 +28,15 @@ Unexpected '{'
 at line 32
 `
 			const result = parse(text)
-			it('returns the full text', () => {
+			test('returns the full text', () => {
 				assert.equal(result.content, text)
 			})
-			it('returns no data', () => {
+			test('returns no data', () => {
 				assert.equal(result?.data, undefined)
 			})
 		})
-		describe('given invalid frontmatter', () => {
-			it('ignores frontmatter if preceeded by empty lines', () => {
+		suite('given invalid frontmatter', () => {
+			test('ignores frontmatter if preceeded by empty lines', () => {
 				const text = `\
 
 
@@ -47,7 +48,7 @@ at line 32
 				const result = parse(text)
 				assert.equal(result?.data, undefined)
 			})
-			it('passes through syntax errors from JSON.parse', () => {
+			test('passes through syntax errors from JSON.parse', () => {
 				const text = `\
 {
   "color": "red",
@@ -57,7 +58,7 @@ at line 32
 `
 				assert.throws(parse.bind(null, text), SyntaxError)
 			})
-			it('throws on unexpected end of json', () => {
+			test('throws on unexpected end of json', () => {
 				const text = `\
 {
   "unicorn": "awesome",
@@ -70,8 +71,8 @@ at line 32
 				)
 			})
 		})
-		describe('given valid frontmatter', () => {
-			it('parses content and fronmatter', async t => {
+		suite('given valid frontmatter', () => {
+			test('parses content and fronmatter', async t => {
 				const text = `\
 {
   "number": 69,
@@ -103,7 +104,7 @@ Actual content`
 					})
 				})
 			})
-			it('parses empty frontmatter and content', async t => {
+			test('parses empty frontmatter and content', async t => {
 				const text = `\
 {
 }

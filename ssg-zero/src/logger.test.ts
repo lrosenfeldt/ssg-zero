@@ -1,16 +1,16 @@
 import assert from 'node:assert/strict'
-import { describe, it } from 'node:test'
+import { describe as suite, test } from 'node:test'
 
 import { ConsoleLogger, LogLevel } from './logger.js'
 
-describe('logger.ts', () => {
-	describe('ConsoleLogger', () => {
+suite('logger.ts', () => {
+	suite('ConsoleLogger', () => {
 		const debugMessage = 'What is love?'
 		const infoMessage = "Baby, don't hurt me"
 		const warnMessage = "Don't hurt me"
 		const errorMessage = 'No more'
 
-		describe('configurable log level', () => {
+		suite('configurable log level', () => {
 			const table = [
 				{
 					level: LogLevel.Debug,
@@ -30,7 +30,7 @@ describe('logger.ts', () => {
 			]
 
 			table.forEach(({ level, messages }) => {
-				it(`only runs for logs on ${level} and below`, t => {
+				test(`only runs for logs on ${level} and below`, t => {
 					const logger = new ConsoleLogger(level)
 					const consoleLog = t.mock.method(
 						console,
@@ -48,7 +48,7 @@ describe('logger.ts', () => {
 			})
 		})
 
-		it('has a sane log format', t => {
+		test('has a sane log format', t => {
 			const referenceDate = new Date('2020-04-20T06:09:11')
 
 			const consoleLog = t.mock.method(console, 'log', () => void 0)
