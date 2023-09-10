@@ -10,7 +10,7 @@ export type PassthroughMarker = typeof passthroughMarker;
 
 export type Renderer = {
 	generates: string;
-	render: (content: string, data?: unknown) => string | Promise<string>;
+	render: (content: string, data?: any) => string | Promise<string>;
 };
 
 export type FileHandler = PassthroughMarker | Renderer;
