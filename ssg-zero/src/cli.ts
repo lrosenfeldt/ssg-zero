@@ -4,6 +4,6 @@ console.log(
 		.slice(2)
 		.map(str => `'${str}'`)
 		.join('  '),
-)
+);
 
-console.log('Done')
+console.log('Done');

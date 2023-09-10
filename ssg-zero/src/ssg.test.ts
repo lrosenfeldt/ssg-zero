@@ -1,19 +1,19 @@
-import assert from 'node:assert/strict'
-import { after, before, describe as suite, test, mock } from 'node:test'
-import { join } from 'node:path'
-import { mkdir, readFile, rm } from 'node:fs/promises'
+import assert from 'node:assert/strict';
+import { after, before, describe as suite, test, mock } from 'node:test';
+import { join } from 'node:path';
+import { mkdir, readFile, rm } from 'node:fs/promises';
 
-import { LogLevel } from './logger.js'
-import { SSG, Renderer, SSGBuilder } from './ssg.js'
-import { exists } from './usefule.js'
+import { LogLevel } from './logger.js';
+import { SSG, Renderer, SSGBuilder } from './ssg.js';
+import { exists } from './usefule.js';
 
 suite('ssg.ts', () => {
 	suite('SSGBuilder', () => {
-		const inputDir = 'fixtures/pages'
-		const outputDir = 'fixtures/dist'
+		const inputDir = 'fixtures/pages';
+		const outputDir = 'fixtures/dist';
 
-		const builder = new SSGBuilder()
-		const reverseRenderer = mock.fn<Renderer['render']>()
+		const builder = new SSGBuilder();
+		const reverseRenderer = mock.fn<Renderer['render']>();
 
 		suite('build', () => {
 			test('builds the corresponding ssg', async t => {
@@ -25,57 +25,57 @@ suite('ssg.ts', () => {
 						generates: '.txt',
 					})
 					.passthrough('.css')
-					.useDefaultLogger(LogLevel.Error)
+					.useDefaultLogger(LogLevel.Error);
 
-				const ssg = builder.build()
+				const ssg = builder.build();
 
 				await t.test('builds a ssg', () => {
 					assert.equal(
 						ssg instanceof SSG,
 						true,
 						`Returned object ${ssg} is not of type SSG.`,
-					)
-				})
+					);
+				});
 
 				await t.test('has the correct input directory', () => {
-					assert.equal(ssg.inputDir, inputDir)
-				})
+					assert.equal(ssg.inputDir, inputDir);
+				});
 
 				await t.test('has the correct output directory', () => {
-					assert.equal(ssg.outputDir, outputDir)
-				})
+					assert.equal(ssg.outputDir, outputDir);
+				});
 
 				await t.test('marks .css for passthrough', () => {
 					assert.equal(
 						ssg.fileHandlers['.css'],
 						SSG.passthroughMarker,
-					)
-				})
+					);
+				});
 
 				await t.test('wants to render .html to .txt', () => {
-					const renderer = ssg.fileHandlers['.html'] as Renderer
-					assert.equal(renderer.generates, '.txt')
-				})
-			})
-		})
-	})
+					const renderer = ssg.fileHandlers['.html'] as Renderer;
+					assert.equal(renderer.generates, '.txt');
+				});
+			});
+		});
+	});
 	suite('SSG', () => {
 		suite('setup', () => {
-			const inputDir = 'fixtures/pages_dump'
-			const outputDir = 'fixtures/dist_dump'
+			const inputDir = 'fixtures/pages_dump';
+			const outputDir = 'fixtures/dist_dump';
 			const ssg = new SSGBuilder()
 				.setInputDir(inputDir)
 				.setOutputDir(outputDir)
 				.useDefaultLogger(LogLevel.Error)
-				.build()
+				.build();
 
 			before(async () => {
-				await mkdir(inputDir, { recursive: true })
-				await rm(outputDir, { force: true, recursive: true })
-			})
+				await mkdir(inputDir, { recursive: true });
+				await rm(outputDir, { force: true, recursive: true });
+			});
 			after(async () => {
-				await rm(outputDir, { force: true, recursive: true })
-			})
+				await rm(outputDir, { force: true, recursive: true });
+			});
 
 			test('setups the output directory', async t => {
 				await t.test('has no directories intestially', async () => {
@@ -83,92 +83,92 @@ suite('ssg.ts', () => {
 						await exists(outputDir),
 						false,
 						`Output directory ${outputDir} on start of the test run.`,
-					)
-				})
+					);
+				});
 
 				await t.test('runs successfully', async () => {
-					await assert.doesNotReject(async () => await ssg.setup())
-				})
+					await assert.doesNotReject(async () => await ssg.setup());
+				});
 
 				await t.test('creates output directory', async () => {
 					assert.equal(
 						await exists(outputDir),
 						true,
 						`Output directory ${outputDir} was not created during setup.`,
-					)
-				})
+					);
+				});
 
 				await t.test('runs twice wtesthout problems', async () => {
-					await assert.doesNotReject(async () => await ssg.setup())
-				})
-			})
-		})
+					await assert.doesNotReject(async () => await ssg.setup());
+				});
+			});
+		});
 		suite('build', () => {
-			const inputDir = 'fixtures/pages'
-			const outputDir = 'fixtures/dist'
+			const inputDir = 'fixtures/pages';
+			const outputDir = 'fixtures/dist';
 
 			const renderHtmlDummy = mock.fn<Renderer['render']>(
 				(content, data: { some: string }) =>
 					content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, data.some),
-			)
+			);
 			const ssg = new SSGBuilder()
 				.setInputDir(inputDir)
 				.setOutputDir(outputDir)
 				.passthrough('.css')
 				.template('.html', renderHtmlDummy)
 				.useDefaultLogger(LogLevel.Error)
-				.build()
+				.build();
 
 			before(async () => {
-				await mkdir(inputDir, { recursive: true })
-				await rm(outputDir, { force: true, recursive: true })
-				await ssg.setup()
-			})
+				await mkdir(inputDir, { recursive: true });
+				await rm(outputDir, { force: true, recursive: true });
+				await ssg.setup();
+			});
 
 			test('builds the pages', async t => {
 				await t.test('builds successfully', async () => {
-					await assert.doesNotReject(async () => await ssg.build())
-				})
+					await assert.doesNotReject(async () => await ssg.build());
+				});
 
 				await t.test('ignores README.md', async () => {
-					const readmePath = join(outputDir, 'README.md')
+					const readmePath = join(outputDir, 'README.md');
 
 					assert.equal(
 						await exists(readmePath),
 						false,
 						`README.md should be ignored, but appeared in the output directory ${outputDir}.`,
-					)
-				})
+					);
+				});
 
 				await t.test('copies style.css', async () => {
-					const path = 'assets/style.css'
+					const path = 'assets/style.css';
 					const originalCss = await readFile(
 						join(inputDir, path),
 						'utf-8',
-					)
+					);
 
-					const copiedCssPath = join(outputDir, path)
-					const copiedCss = await readFile(copiedCssPath, 'utf-8')
+					const copiedCssPath = join(outputDir, path);
+					const copiedCss = await readFile(copiedCssPath, 'utf-8');
 
-					assert.equal(copiedCss, originalCss)
-				})
+					assert.equal(copiedCss, originalCss);
+				});
 
 				await t.test('renders index.html', async t => {
 					await t.test('uses the given renderer', () => {
-						assert.equal(renderHtmlDummy.mock.callCount(), 1)
-					})
+						assert.equal(renderHtmlDummy.mock.callCount(), 1);
+					});
 
 					await t.test('produces rendered output', async () => {
-						const renderedHtmlPath = join(outputDir, 'index.html')
+						const renderedHtmlPath = join(outputDir, 'index.html');
 						const renderedHtml = await readFile(
 							renderedHtmlPath,
 							'utf-8',
-						)
+						);
 
-						assert.match(renderedHtml, /<p>ZONK!<\/p>/)
-					})
-				})
-			})
-		})
-	})
-})
+						assert.match(renderedHtml, /<p>ZONK!<\/p>/);
+					});
+				});
+			});
+		});
+	});
+});
