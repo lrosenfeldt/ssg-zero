@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { after, before, describe as suite, test } from 'node:test';
 import { join } from 'node:path';
 
-import { anyToError, exists, walkFiles } from './usefule.js';
+import { UsefuleServer, anyToError, exists, walkFiles } from './usefule.js';
+import { readFile } from 'node:fs/promises';
 
 suite('usefule', () => {
 	suite('anyToError', () => {
@@ -110,6 +111,55 @@ suite('usefule', () => {
 			}
 
 			assert.deepEqual(walkedFiles, expectedFiles);
+		});
+	});
+	suite('UsefuleServer', function () {
+		test('can be started and stopped', async function () {
+			const server = new UsefuleServer('fixtures', 4269);
+			await assert.doesNotReject(server.serve());
+			await assert.doesNotReject(server.stop());
+		});
+		suite('serves files', function () {
+			const server = new UsefuleServer('fixtures', 4269);
+			const requestFile = async (path: string) => {
+				return await fetch(new URL(path, server.baseUrl), {
+					method: 'GET',
+				});
+			};
+
+			before(async function () {
+				await server.serve();
+			});
+
+			after(async function () {
+				await server.stop();
+			});
+
+			test('responds with 415 for unsupported file types', async function () {
+				const res = await requestFile('bad_files/audio.aiff');
+
+				assert.equal(res.status, 415);
+			});
+			test('responds with 404 for unexisting files', async function () {
+				const res = await requestFile('empty/does_not_exists.txt');
+
+				assert.equal(res.status, 404);
+			});
+			test('responds with the actual file', async function (t) {
+				const actualContent = await readFile(
+					'fixtures/pages/index.html',
+          'utf-8'
+				);
+				const res = await requestFile('pages/index.html');
+
+				assert.equal(res.status, 200);
+				await t.test('has the correct mime type', function () {
+					assert.equal(res.headers.get('Content-Type'), 'text/html');
+				});
+				await t.test('responds with the actual content', async function () {
+					assert.equal(await res.text(), actualContent);
+				});
+			});
 		});
 	});
 });
