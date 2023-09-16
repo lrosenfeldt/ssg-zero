@@ -250,7 +250,6 @@ export class UsefuleServer {
 
 		let fd: FileHandle | null = null;
 		try {
-      console.log(join(this.filesRoot, filePath))
 			fd = await open(join(this.filesRoot, filePath));
 
 			res.statusCode = 200;
