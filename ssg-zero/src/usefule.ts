@@ -215,6 +215,7 @@ export class UsefuleServer {
 				return;
 			}
 
+      this.server.closeIdleConnections();
 			this.server.close(error => {
 				if (error !== undefined) {
 					reject(error);
