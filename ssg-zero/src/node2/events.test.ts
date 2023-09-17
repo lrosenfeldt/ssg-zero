@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
-import { EventEmitter } from './nodwheee.js';
+import { EventEmitter } from './events.js';
 
 suite('nodwheee.ts', function () {
 	suite('EventEmitter', function () {
