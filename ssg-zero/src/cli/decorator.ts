@@ -1,5 +1,5 @@
 import { toKebabCase, toPascalCase } from '../util/string.js';
-import { numberType, type Command, type FlagSchema } from './flag.js';
+import { numberType, type Command, type FlagSchema, stringType } from './flag.js';
 
 type ClassNamedFieldDecoratorContext<This, Value> = ClassFieldDecoratorContext<
 	This,
@@ -8,7 +8,7 @@ type ClassNamedFieldDecoratorContext<This, Value> = ClassFieldDecoratorContext<
 
 type Clearify<T> = { [K in keyof T]: T[K] } & {};
 
-type FlagConfig = Clearify<Omit<FlagSchema, 'valueType'>>;
+type FlagConfig = Clearify<Omit<FlagSchema, 'valueType' | 'default'>>;
 
 export function typedFlag<This extends Command, BaseValue>(
 	flagType: FlagSchema['valueType'],
@@ -33,7 +33,9 @@ export function typedFlag<This extends Command, BaseValue>(
 
 		setFunctionName(
 			onBeforeInit,
-			`onBeforeInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`,
+			`onBeforeInit${toPascalCase(context.name)}As${toPascalCase(
+				typeName,
+			)}`,
 		);
 
 		context.addInitializer(onBeforeInit);
@@ -45,7 +47,10 @@ export function typedFlag<This extends Command, BaseValue>(
 			return value;
 		}
 
-		setFunctionName(onInit, `onInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`);
+		setFunctionName(
+			onInit,
+			`onInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`,
+		);
 
 		return onInit;
 	}
@@ -65,7 +70,7 @@ export const number = (typedFlag<Command, number | undefined>).bind(
 );
 export const string = (typedFlag<Command, string | undefined>).bind(
 	null,
-	String,
+	stringType,
 );
 
 function setFunctionName(fn: Function, name: string): void {

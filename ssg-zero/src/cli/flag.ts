@@ -1,3 +1,5 @@
+import { toKebabCase } from "../util/string.js";
+
 export type FlagType = (value: string) => any;
 
 export type FlagSchema = {
@@ -7,17 +9,20 @@ export type FlagSchema = {
 	default?: any;
 };
 
-function toKebabCase(str: string): string {
-	let kebabCased = str[0].toLowerCase();
-	for (const char of str.slice(1)) {
-		if (char === char.toUpperCase()) {
-			kebabCased += '-' + char.toLowerCase();
-		} else {
-			kebabCased += char;
-		}
+export const numberType: FlagType = function number(value) {
+	if (value.toLowerCase() === 'NaN') {
+		return NaN;
 	}
-	return kebabCased;
-}
+	const asNumber = Number(value);
+	if (Number.isNaN(asNumber)) {
+		return new Error(`Given '${value}' is not a valid number`);
+	}
+	return asNumber;
+};
+
+export const stringType: FlagType = function string(value) {
+	return value;
+};
 
 export class Command {
 	private schema: Record<string, FlagSchema> = {};
@@ -29,7 +34,7 @@ export class Command {
 
 	constructor(private description: string) {}
 
-	usage(): string {
+	usage(appName: string): string {
 		// format options
 		const lines: Array<[alias: string, description: string]> = [];
 		let aliasesColumnLength = 0;
@@ -50,7 +55,7 @@ export class Command {
 			.join('\n');
 
 		return `\
-Usage: app ${this.name} [OPTIONS]
+Usage: ${appName} ${this.name} [OPTIONS]
 ${this.description}
 
 Options:
@@ -76,20 +81,4 @@ ${optionsUsage}
 		const description = `${schema.description ?? ''}${defaultSuffix}`;
 		return [shortPrefix + `--${name}` + typeSuffix, description];
 	}
-
 }
-
-export const numberType: FlagType = function number(value) {
-	if (value.toLowerCase() === 'NaN') {
-		return NaN;
-	}
-	const asNumber = Number(value);
-	if (Number.isNaN(asNumber)) {
-		return new Error(`Given '${value}' is not a valid number`);
-	}
-	return asNumber;
-};
-
-export const stringType: FlagType = function string(value) {
-	return value;
-};
