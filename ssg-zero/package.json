@@ -19,7 +19,7 @@
 	"scripts": {
 		"compile": "tsc",
 		"test": "tsc && node --enable-source-maps --test",
-		"test:coverage": "tsc && NODE_DISABLE_COLORS=1 node --enable-source-maps --test --experimental-test-coverage --test-reporter tap | awk '/^# start of coverage/ {p=1} p' | sed '1d;$d;s/|//g;s/^# //g' | tee coverage.txt"
+		"test:coverage": "tsc && NODE_DISABLE_COLORS=1 node --enable-source-maps --test --experimental-test-coverage --test-reporter tap | awk '/^# start of coverage/ {p=1} p' | sed '1d;$d;s/|//g;s/^# //g' | awk '!/\\.test\\.js /' | tee coverage.txt"
 	},
 	"type": "module",
 	"version": "0.3.0",
