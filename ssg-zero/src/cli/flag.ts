@@ -8,15 +8,15 @@ export type FlagSchema = {
 };
 
 function toKebabCase(str: string): string {
-		let kebabCased = str[0].toLowerCase();
-		for (const char of str.slice(1)) {
-			if (char === char.toUpperCase()) {
-				kebabCased += '-' + char.toLowerCase();
-			} else {
-				kebabCased += char;
-			}
+	let kebabCased = str[0].toLowerCase();
+	for (const char of str.slice(1)) {
+		if (char === char.toUpperCase()) {
+			kebabCased += '-' + char.toLowerCase();
+		} else {
+			kebabCased += char;
 		}
-		return kebabCased;
+	}
+	return kebabCased;
 }
 
 export class Command {
@@ -34,27 +34,16 @@ export class Command {
 		const lines: Array<[alias: string, description: string]> = [];
 		let aliasesColumnLength = 0;
 		for (const name in this.schema) {
-			const option = this.schema[name];
-			const aliases = `${
-				option.short ? `-${option.short}, ` : '    '
-			}--${name}`;
-			aliasesColumnLength = Math.max(aliasesColumnLength, aliases.length);
-			let defaultSuffix = '';
-			if (option.default !== undefined) {
-				defaultSuffix =
-					typeof option.default === 'string'
-						? ` (default "${option.default}")`
-						: ` (default ${option.default})`;
-			}
-			const description = `${option.description ?? ''}${defaultSuffix}`;
-			lines.push([aliases, description]);
+      const line = this.formatFlagSchema(name)
+			lines.push(line);
+      aliasesColumnLength = Math.max(line[0].length, aliasesColumnLength);
 		}
 
 		const optionsUsage = lines
 			.map(
 				([aliases, description]) =>
 					'  ' +
-					aliases.padStart(aliasesColumnLength, ' ') +
+					aliases.padEnd(aliasesColumnLength, ' ') +
 					'  ' +
 					description,
 			)
@@ -68,6 +57,26 @@ Options:
 ${optionsUsage}
 `;
 	}
+
+	private formatFlagSchema(
+		name: string,
+	): [aliases: string, description: string] {
+    const schema = this.schema[name];
+    // aliases
+    const shortPrefix = schema.short ? `-${schema.short}, ` : '    ';
+    const typeSuffix = schema.valueType === null ? '' : ` <${schema.valueType.name}>`;
+    // description
+		let defaultSuffix = '';
+		if (schema.default !== undefined) {
+			defaultSuffix =
+				typeof schema.default === 'string'
+					? ` (default "${schema.default}")`
+					: ` (default ${schema.default})`;
+		}
+		const description = `${schema.description ?? ''}${defaultSuffix}`;
+		return [shortPrefix + `--${name}` + typeSuffix, description];
+	}
+
 }
 
 export const numberType: FlagType = function number(value) {
@@ -79,4 +88,8 @@ export const numberType: FlagType = function number(value) {
 		return new Error(`Given '${value}' is not a valid number`);
 	}
 	return asNumber;
+};
+
+export const stringType: FlagType = function string(value) {
+	return value;
 };

@@ -1,44 +1,36 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import { createTypedFlag } from './decorator.js';
+import { describe as suite, test } from 'node:test';
+import { typedFlag } from './decorator.js';
 
-test('sets the correct name for the decorator factory', function () {
-	const decoratorFactory = createTypedFlag('icedTea', null);
-
-	assert.equal(decoratorFactory.name, 'icedTea');
-});
-
-test('sets the correct name for the decorator', function () {
-	const decorator = createTypedFlag('icedTea', null)({});
-
-	assert.equal(decorator.name, 'icedTeaFlagDecorator');
-});
-
-test('sets the correct name for the field initializer', function () {
-	const contextMock: ClassFieldDecoratorContext<any, any> & { name: string } = {
-		name: 'field',
+suite('typedFlag', function () {
+	// custom flag type
+	function icedTea(value: string) {
+		return value;
+	}
+	const contextMock: ClassFieldDecoratorContext<any, any> & {
+		name: string;
+	} = {
+		name: 'coldDrink',
 		addInitializer() {
 			return;
 		},
 	} as any;
 
-	const fieldInitializer = createTypedFlag('icedTea', null)({})(undefined, contextMock);
+	test('sets the decorator name based on the flagType', function () {
+		const decorator = typedFlag(icedTea, {});
+		assert.equal(decorator.name, 'icedTeaFlagDecorator');
+	});
+	test('sets the name for the field initializer based on the type and field name', function () {
+		const fieldInitializer = typedFlag(icedTea, {})(undefined, contextMock);
 
-	assert.equal(fieldInitializer!.name, 'onIcedTeaFieldInit');
-});
+		assert.equal(fieldInitializer!.name, 'onInitColdDrinkAsIcedTea');
+	});
+	test('sets the name for the initializer based on the type and field name', function (t) {
+    const addInitializerMock = t.mock.method(contextMock, 'addInitializer')
+		typedFlag(icedTea, {})(undefined, contextMock);
+		const initializer = addInitializerMock.mock.calls[0].arguments[0];
 
-test('sets the correct name for the initializer', function (t) {
-	const contextMock: ClassFieldDecoratorContext<any, any> & { name: string } = {
-		name: 'field',
-		addInitializer() {
-			return;
-		},
-	} as any;
 
-  const addInitializerMock = t.mock.method(contextMock, 'addInitializer')
-	createTypedFlag('icedTea', null)({})(undefined, contextMock);
-
-  const initializer = addInitializerMock.mock.calls[0].arguments[0]
-
-	assert.equal(initializer.name, 'onBeforeIcedTeaFieldInit');
+		assert.equal(initializer.name, 'onBeforeInitColdDrinkAsIcedTea');
+	});
 });

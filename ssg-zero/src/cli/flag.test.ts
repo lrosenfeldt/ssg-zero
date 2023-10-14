@@ -21,8 +21,8 @@ Usage: app dev [OPTIONS]
 Develop a static site
 
 Options:
-  -d, --dry-run  Only print out what will been generated
-     -p, --port  Port to serve build output on (default 4269)
+  -d, --dry-run        Only print out what will been generated
+  -p, --port <number>  Port to serve build output on (default 4269)
 `;
 
 	assert.equal(dev.usage(), expectedUsage);
