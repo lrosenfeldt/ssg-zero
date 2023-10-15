@@ -56,6 +56,9 @@ suite('decorators', function () {
 
 			@string({ description: 'Caching strategy to use on files' })
 			cachingMethod: string = 'advanced-btree5';
+
+			@string({ description: 'Relative path to schema file' })
+			schema?: string;
 		}
 		const dev = new Dev('Develop a static site');
 
@@ -68,6 +71,7 @@ Options:
   -d, --dry-run                  Only print out what will been generated
   -p, --port <number>            Port to serve build output on (default 4269)
       --caching-method <string>  Caching strategy to use on files (default "advanced-btree5")
+      --schema <string>          Relative path to schema file
 `;
 
 		assert.equal(dev.usage('ssg-zero'), expectedUsage);

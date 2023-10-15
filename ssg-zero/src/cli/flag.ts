@@ -18,8 +18,10 @@ export type FlagSchema = {
 
 type FlagConfig = Clearify<Omit<FlagSchema, 'valueType' | 'default'>>;
 
+export const schemaKey = Symbol('schema');
+
 export class Command {
-	private schema: Record<string, FlagSchema> = {};
+	private [schemaKey]: Record<string, FlagSchema> = {};
 
 	private get name() {
 		// pascal case to kebab-case
@@ -32,7 +34,7 @@ export class Command {
 		// format options
 		const lines: Array<[alias: string, description: string]> = [];
 		let aliasesColumnLength = 0;
-		for (const name in this.schema) {
+		for (const name in this[schemaKey]) {
 			const line = this.formatFlagSchema(name);
 			lines.push(line);
 			aliasesColumnLength = Math.max(line[0].length, aliasesColumnLength);
@@ -60,7 +62,7 @@ ${optionsUsage}
 	private formatFlagSchema(
 		name: string,
 	): [aliases: string, description: string] {
-		const schema = this.schema[name];
+		const schema = this[schemaKey][name];
 		// aliases
 		const shortPrefix = schema.short ? `-${schema.short}, ` : '    ';
 		const typeSuffix =
@@ -93,7 +95,7 @@ export function typedFlag<BaseValue>(
 	) {
 		const flagName = toKebabCase(context.name);
 		function onBeforeInit(this: This): void {
-			this['schema'][flagName] = Object.assign<
+			this[schemaKey][flagName] = Object.assign<
 				FlagConfig,
 				Pick<FlagSchema, 'valueType'>
 			>(config, { valueType: flagType });
@@ -110,7 +112,7 @@ export function typedFlag<BaseValue>(
 
 		function onInit(this: This, value: Value) {
 			if (value !== undefined) {
-				this['schema'][flagName].default = value;
+				this[schemaKey][flagName].default = value;
 			}
 			return value;
 		}
