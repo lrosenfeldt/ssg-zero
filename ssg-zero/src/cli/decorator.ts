@@ -1,5 +1,10 @@
 import { toKebabCase, toPascalCase } from '../util/string.js';
-import { numberType, type Command, type FlagSchema, stringType } from './flag.js';
+import {
+	numberType,
+	type Command,
+	type FlagSchema,
+	stringType,
+} from './flag.js';
 
 type ClassNamedFieldDecoratorContext<This, Value> = ClassFieldDecoratorContext<
 	This,
@@ -10,16 +15,16 @@ type Clearify<T> = { [K in keyof T]: T[K] } & {};
 
 type FlagConfig = Clearify<Omit<FlagSchema, 'valueType' | 'default'>>;
 
-export function typedFlag<This extends Command, BaseValue>(
+export function typedFlag<BaseValue>(
 	flagType: FlagSchema['valueType'],
 	config: FlagConfig,
-): <Value extends BaseValue>(
+): <This extends Command, Value extends BaseValue>(
 	value: undefined,
 	context: ClassNamedFieldDecoratorContext<This, Value>,
 ) => ((this: This, value: Value) => Value) | void {
 	const typeName = flagType === null ? 'boolean' : flagType.name;
 
-	function decorator<Value extends BaseValue>(
+	function decorator<This extends Command, Value extends BaseValue>(
 		_: undefined,
 		context: ClassNamedFieldDecoratorContext<This, Value>,
 	) {
@@ -60,15 +65,15 @@ export function typedFlag<This extends Command, BaseValue>(
 	return decorator;
 }
 
-export const boolean = (typedFlag<Command, boolean | undefined>).bind(
+export const boolean = (typedFlag<boolean | undefined>).bind(
 	null,
 	null,
 );
-export const number = (typedFlag<Command, number | undefined>).bind(
+export const number = (typedFlag<number | undefined>).bind(
 	null,
 	numberType,
 );
-export const string = (typedFlag<Command, string | undefined>).bind(
+export const string = (typedFlag<string | undefined>).bind(
 	null,
 	stringType,
 );
