@@ -32,7 +32,7 @@ export function toKebabCase(str: string): string {
       kebabCased += char.toLowerCase();
     } else if (char === '_') {
       kebabCased += '-' + str[++i].toLowerCase(); 
-    } else if (char === char.toUpperCase()) {
+    } else if (char.match(/^[A-Z]$/)) {
       kebabCased += '-' + char.toLowerCase();
     } else {
       kebabCased += char;

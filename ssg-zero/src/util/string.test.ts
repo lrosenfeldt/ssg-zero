@@ -30,6 +30,9 @@ suite('toKebabCase', function () {
   test('leaves an empty string untouched', function () {
     assert.equal(toKebabCase(''), '');
   });
+  test('leaves kebab-case untouched', function () {
+    assert.equal(toKebabCase('eat-my-kebab'), 'eat-my-kebab');
+  });
   test('transforms camelCased word', function () {
     assert.equal(toKebabCase('oCamlMyCamel'), 'o-caml-my-camel');
   });
