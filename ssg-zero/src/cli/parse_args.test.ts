@@ -438,13 +438,13 @@ suite('parse_args.ts', function () {
 							type: Parsed.Problem,
 							index: 0,
 							message:
-								"Invalid value for option '--speed': Given 'fast' is not a valid number",
+								"Found invalid value for option '--speed': Given 'fast' is not a valid number",
 						},
 						{
 							type: Parsed.Problem,
 							index: 1,
 							message:
-								"Invalid value for option '--log-level': Given 'silent' is not a valid number",
+								"Found invalid value for option '--log-level': Given 'silent' is not a valid number",
 						},
 					];
 

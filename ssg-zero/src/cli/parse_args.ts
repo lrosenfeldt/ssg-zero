@@ -101,7 +101,7 @@ export class Parser {
 			return {
 				type: Parsed.Problem,
 				index: token.index,
-				message: `Invalid value for option '--${token.name}': ${result.message}`,
+				message: `Found invalid value for option '--${token.name}': ${result.message}`,
 			};
 		}
 		token.value = result;
