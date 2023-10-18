@@ -21,7 +21,7 @@ suite('parse_args.ts', function () {
       @boolean({type: 'boolean'})
 			switch?: boolean;
       @number({type: 'number'})
-			'log-level': number = 3;
+			logLevel: number = 3;
       @number({type: 'number', short: 's'})
 			speed?: number;
       @boolean({type: 'boolean', short: 'i' })
@@ -31,7 +31,7 @@ suite('parse_args.ts', function () {
 			@string({ type: 'string', short: 'c' })
 			config: string = 'config.json';
       @string({ type: 'string', short: 'o' })
-			'output-dir'?: string;
+			outputDir?: string;
   }
 
 	const registry = SchemaRegistry.fromApp(new SchemaClass(''));
