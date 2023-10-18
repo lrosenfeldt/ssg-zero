@@ -1,29 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
-import { Token, Parsed, Parser, SchemaRegistry, Schema } from './parse_args.js';
+import { Token, Parsed, Parser, SchemaRegistry } from './parse_args.js';
 import { App, Command, boolean, commands, number, string } from './flag.js';
 
 suite('parse_args.ts', function () {
-	const schema: Schema = {
-		globals: {
-			happy: { type: 'string', short: 'H', default: 'yes' },
-			unicorns: { type: 'number', short: 'u' },
-			switch: { type: 'boolean' },
-			'log-level': { type: 'number', default: 3 },
-			speed: { type: 'number', short: 's' },
-			intermediate: { type: 'boolean', short: 'i', default: false },
-			awesome: { type: 'boolean', short: 'A' },
-			config: { type: 'string', short: 'c', default: 'config.json' },
-			'output-dir': { type: 'string', short: 'o' },
-		},
-		commands: {
-			dance: {
-				style: { type: 'string', default: 'breakdance', short: 'S' },
-				fast: { type: 'boolean' },
-			},
-		},
-	};
-
   class Dance extends Command {
     @string({ short: 'S', type: 'string', })
     style: string = 'breakdance'
@@ -458,13 +438,13 @@ suite('parse_args.ts', function () {
 							type: Parsed.Problem,
 							index: 0,
 							message:
-								"Expected a number for option '--speed' but got 'fast'",
+								"Invalid value for option '--speed': Given 'fast' is not a valid number",
 						},
 						{
 							type: Parsed.Problem,
 							index: 1,
 							message:
-								"Expected a number for option '--log-level' but got 'silent'",
+								"Invalid value for option '--log-level': Given 'silent' is not a valid number",
 						},
 					];
 

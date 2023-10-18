@@ -1,21 +1,4 @@
-import { App, commandsKey, schemaKey } from './flag.js';
-
-export type FlagSchema =
-	| {
-			type: 'boolean';
-			short?: string;
-			default?: boolean;
-	  }
-	| {
-			type: 'number';
-			short?: string;
-			default?: number;
-	  }
-	| {
-			type: 'string';
-			short?: string;
-			default?: string;
-	  };
+import { App, FlagSchema, commandsKey, schemaKey } from './flag.js';
 
 export type CommandSchema = Record<string, FlagSchema>;
 
@@ -111,26 +94,17 @@ export class Parser {
 
 	private bindOption(
 		token: Extract<Token, { type: Parsed.Option }>,
-		schema: FlagSchema,
+		valueType: Exclude<FlagSchema['valueType'], null>,
 	): Token {
-		if (schema.type !== 'number') {
-			return token;
-		}
-
-		const value = (token.value as string).trim().toLowerCase();
-		if (value === 'nan') {
-			token.value = NaN;
-			return token;
-		}
-		const asNumber = Number(value);
-		if (Number.isNaN(asNumber)) {
+		const result = valueType(token.value);
+		if (result instanceof Error) {
 			return {
 				type: Parsed.Problem,
 				index: token.index,
-				message: `Expected a number for option '--${token.name}' but got '${token.value}'`,
+				message: `Invalid value for option '--${token.name}': ${result.message}`,
 			};
 		}
-		token.value = asNumber;
+		token.value = result;
 		return token;
 	}
 
@@ -172,7 +146,7 @@ export class Parser {
 			};
 		}
 
-		if (schema.type === 'boolean') {
+		if (schema.valueType === null) {
 			return {
 				type: Parsed.Problem,
 				index: this.position - 1,
@@ -187,7 +161,7 @@ export class Parser {
 				name: arg,
 				value: this.arg.slice(indexOfEqualSign + 1),
 			},
-			schema,
+			schema.valueType,
 		);
 	}
 
@@ -202,16 +176,13 @@ export class Parser {
 			};
 		}
 
-		if (schema.type === 'boolean') {
-			return this.bindOption(
-				{
-					type: Parsed.Option,
-					index: this.position - 1,
-					name: arg,
-					value: true,
-				},
-				schema,
-			);
+		if (schema.valueType === null) {
+			return {
+				type: Parsed.Option,
+				index: this.position - 1,
+				name: arg,
+				value: true,
+			};
 		}
 
 		this.nextArg();
@@ -231,7 +202,7 @@ export class Parser {
 				name: arg,
 				value,
 			},
-			schema,
+			schema.valueType,
 		);
 	}
 
@@ -251,16 +222,13 @@ export class Parser {
 
 		const [name, schema] = schemaEntry;
 
-		if (schema.type === 'boolean') {
-			return this.bindOption(
-				{
-					type: Parsed.Option,
-					index: this.position - 1,
-					name,
-					value: true,
-				},
-				schema,
-			);
+		if (schema.valueType === null) {
+			return {
+				type: Parsed.Option,
+				index: this.position - 1,
+				name,
+				value: true,
+			};
 		}
 
 		this.nextArg();
@@ -280,7 +248,7 @@ export class Parser {
 				name,
 				value,
 			},
-			schema,
+			schema.valueType,
 		);
 	}
 
@@ -302,18 +270,13 @@ export class Parser {
 			}
 
 			const [name, schema] = schemaEntry;
-			if (schema.type === 'boolean') {
-				tokens.push(
-					this.bindOption(
-						{
-							type: Parsed.Option,
-							index: this.position - 1,
-							name,
-							value: true,
-						},
-						schema,
-					),
-				);
+			if (schema.valueType === null) {
+				tokens.push({
+					type: Parsed.Option,
+					index: this.position - 1,
+					name,
+					value: true,
+				});
 			} else if (i < group.length - 1) {
 				tokens.push(
 					this.bindOption(
@@ -323,7 +286,7 @@ export class Parser {
 							name,
 							value: group.slice(i + 1),
 						},
-						schema,
+						schema.valueType,
 					),
 				);
 				break;
@@ -345,7 +308,7 @@ export class Parser {
 								name,
 								value,
 							},
-							schema,
+							schema.valueType,
 						),
 					);
 				}
@@ -369,18 +332,19 @@ export class Parser {
 export class SchemaRegistry {
 	static fromApp(app: App): SchemaRegistry {
 		const schema: Schema = { globals: {}, commands: {} };
-    for (const name in app[schemaKey]) {
-      const flagSchema = app[schemaKey][name];
-      schema.globals[name] = flagSchema as unknown as FlagSchema;
-    }
-    for (const command of app[commandsKey]) {
-      schema.commands[command.name] = {};
-      for (const name in command[schemaKey]) {
-        const flagSchema = command[schemaKey][name];
-        schema.commands[command.name][name] = flagSchema as unknown as FlagSchema;
-      }
-    }
-    return new SchemaRegistry(schema);
+		for (const name in app[schemaKey]) {
+			const flagSchema = app[schemaKey][name];
+			schema.globals[name] = flagSchema as unknown as FlagSchema;
+		}
+		for (const command of app[commandsKey]) {
+			schema.commands[command.name] = {};
+			for (const name in command[schemaKey]) {
+				const flagSchema = command[schemaKey][name];
+				schema.commands[command.name][name] =
+					flagSchema as unknown as FlagSchema;
+			}
+		}
+		return new SchemaRegistry(schema);
 	}
 
 	constructor(private schema: Schema) {}

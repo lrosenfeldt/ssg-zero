@@ -140,7 +140,7 @@ export const boolean = (typedFlag<boolean | undefined>).bind(null, null);
 export const number = (typedFlag<number | undefined>).bind(
 	null,
 	function number(value) {
-		if (value.toLowerCase() === 'NaN') {
+		if (value.toLowerCase() === 'nan') {
 			return NaN;
 		}
 		const asNumber = Number(value);
