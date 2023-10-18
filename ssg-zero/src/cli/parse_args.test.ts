@@ -5,32 +5,32 @@ import { App, Command, boolean, commands, number, string } from './flag.js';
 
 suite('parse_args.ts', function () {
   class Dance extends Command {
-    @string({ short: 'S', type: 'string', })
+    @string({ short: 'S',  })
     style: string = 'breakdance'
 
-    @boolean({ type: 'boolean' })
+    @boolean({})
     fast?: boolean
   }
 
   @commands([new Dance('')])
   class SchemaClass extends App {
-      @string({ type: 'string', short: 'H'})
+      @string({  short: 'H'})
 			happy: string = 'yes';
-      @number({type: 'number', short: 'u' })
+      @number({ short: 'u' })
 			unicorns?: number;
-      @boolean({type: 'boolean'})
+      @boolean({})
 			switch?: boolean;
-      @number({type: 'number'})
+      @number({})
 			logLevel: number = 3;
-      @number({type: 'number', short: 's'})
+      @number({ short: 's'})
 			speed?: number;
-      @boolean({type: 'boolean', short: 'i' })
+      @boolean({ short: 'i' })
 			intermediate: boolean = false;
-      @boolean({type: 'boolean', short: 'A' })
+      @boolean({ short: 'A' })
 			awesome?: boolean;
-			@string({ type: 'string', short: 'c' })
+			@string({  short: 'c' })
 			config: string = 'config.json';
-      @string({ type: 'string', short: 'o' })
+      @string({  short: 'o' })
 			outputDir?: string;
   }
 

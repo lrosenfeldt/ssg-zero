@@ -11,7 +11,6 @@ export type FlagType = (value: string) => any;
 
 export type FlagSchema = {
 	valueType: FlagType | null;
-  type: string;
 	short?: string;
 	description?: string;
 	default?: any;
