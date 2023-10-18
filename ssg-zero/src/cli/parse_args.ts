@@ -1,3 +1,5 @@
+import { App, commandsKey, schemaKey } from './flag.js';
+
 export type FlagSchema =
 	| {
 			type: 'boolean';
@@ -29,7 +31,7 @@ export enum Parsed {
 	Command = 'COMMAND',
 }
 
-export type ParsedArg = 
+export type ParsedArg =
 	| {
 			type: Parsed.Positional;
 			index: number;
@@ -52,14 +54,13 @@ export type ParsedArg =
 			name: string;
 	  };
 
-
 export type ParsedProblem = {
-  type: Parsed.Problem,
-  index: number;
-  message: string;
-}
+	type: Parsed.Problem;
+	index: number;
+	message: string;
+};
 
-export type Token = ParsedArg | ParsedProblem;
+export type Token = ParsedArg | ParsedProblem;
 
 export class Parser {
 	private args: string[] = [];
@@ -69,8 +70,8 @@ export class Parser {
 	private schemaRegistry: SchemaRegistry;
 	private command: string | undefined = undefined;
 
-	constructor(schema: Schema) {
-		this.schemaRegistry = new SchemaRegistry(schema);
+	constructor(schema: SchemaRegistry) {
+		this.schemaRegistry = schema;
 	}
 
 	parse(args: string[]): Token[] {
@@ -366,6 +367,22 @@ export class Parser {
 }
 
 export class SchemaRegistry {
+	static fromApp(app: App): SchemaRegistry {
+		const schema: Schema = { globals: {}, commands: {} };
+    for (const name in app[schemaKey]) {
+      const flagSchema = app[schemaKey][name];
+      schema.globals[name] = flagSchema as unknown as FlagSchema;
+    }
+    for (const command of app[commandsKey]) {
+      schema.commands[command.name] = {};
+      for (const name in command[schemaKey]) {
+        const flagSchema = command[schemaKey][name];
+        schema.commands[command.name][name] = flagSchema as unknown as FlagSchema;
+      }
+    }
+    return new SchemaRegistry(schema);
+	}
+
 	constructor(private schema: Schema) {}
 
 	isCommand(command: string): boolean {

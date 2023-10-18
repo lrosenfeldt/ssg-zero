@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 import { Token, Parsed, Parser, SchemaRegistry, Schema } from './parse_args.js';
+import { App, Command, boolean, commands, number, string } from './flag.js';
 
 suite('parse_args.ts', function () {
 	const schema: Schema = {
@@ -22,8 +23,40 @@ suite('parse_args.ts', function () {
 			},
 		},
 	};
+
+  class Dance extends Command {
+    @string({ short: 'S', type: 'string', })
+    style: string = 'breakdance'
+
+    @boolean({ type: 'boolean' })
+    fast?: boolean
+  }
+
+  @commands([new Dance('')])
+  class SchemaClass extends App {
+      @string({ type: 'string', short: 'H'})
+			happy: string = 'yes';
+      @number({type: 'number', short: 'u' })
+			unicorns?: number;
+      @boolean({type: 'boolean'})
+			switch?: boolean;
+      @number({type: 'number'})
+			'log-level': number = 3;
+      @number({type: 'number', short: 's'})
+			speed?: number;
+      @boolean({type: 'boolean', short: 'i' })
+			intermediate: boolean = false;
+      @boolean({type: 'boolean', short: 'A' })
+			awesome?: boolean;
+			@string({ type: 'string', short: 'c' })
+			config: string = 'config.json';
+      @string({ type: 'string', short: 'o' })
+			'output-dir'?: string;
+  }
+
+	const registry = SchemaRegistry.fromApp(new SchemaClass(''));
+
 	suite('SchemaRegistry', function () {
-		const registry = new SchemaRegistry(schema);
 		suite('isCommand', function () {
 			test('validates a defined command', function () {
 				assert.equal(
@@ -66,7 +99,7 @@ suite('parse_args.ts', function () {
 	});
 	suite('Tokenizer', function () {
 		suite('tokenize', function () {
-			const tokenizer = new Parser(schema);
+			const tokenizer = new Parser(registry);
 
 			test('tokenizes everything after the terminator as positionals', function () {
 				const args = ['--', '--unicorn', '--unit=fm', '-cats'];

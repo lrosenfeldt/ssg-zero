@@ -17,17 +17,20 @@ suite('typedFlag', function () {
 	} as any;
 
 	test('sets the decorator name based on the flagType', function () {
-		const decorator = typedFlag(icedTea, {});
+		const decorator = typedFlag(icedTea, { type: 'abc' });
 		assert.equal(decorator.name, 'icedTeaFlagDecorator');
 	});
 	test('sets the name for the field initializer based on the type and field name', function () {
-		const fieldInitializer = typedFlag(icedTea, {})(undefined, contextMock);
+		const fieldInitializer = typedFlag(icedTea, { type: 'abc' })(
+			undefined,
+			contextMock,
+		);
 
 		assert.equal(fieldInitializer!.name, 'onInitColdDrinkAsIcedTea');
 	});
 	test('sets the name for the initializer based on the type and field name', function (t) {
 		const addInitializerMock = t.mock.method(contextMock, 'addInitializer');
-		typedFlag(icedTea, {})(undefined, contextMock);
+		typedFlag(icedTea, { type: 'abc' })(undefined, contextMock);
 		const initializer = addInitializerMock.mock.calls[0].arguments[0];
 
 		assert.equal(initializer.name, 'onBeforeInitColdDrinkAsIcedTea');
@@ -39,25 +42,28 @@ suite('decorators', function () {
 		class Dev extends Command {
 			@boolean({
 				description: 'Show version information',
+        type: 'boolean',
 			})
 			version?: boolean;
 
 			@boolean({
 				short: 'd',
 				description: 'Only print out what will been generated',
+        type: 'boolean',
 			})
 			dryRun?: boolean;
 
 			@number({
 				short: 'p',
 				description: 'Port to serve build output on',
+        type: 'number',
 			})
 			port: number = 4269;
 
-			@string({ description: 'Caching strategy to use on files' })
+			@string({ description: 'Caching strategy to use on files', type: 'string' })
 			cachingMethod: string = 'advanced-btree5';
 
-			@string({ description: 'Relative path to schema file' })
+			@string({ description: 'Relative path to schema file', type: 'string'  })
 			schema?: string;
 		}
 		const dev = new Dev('Develop a static site');

@@ -11,6 +11,7 @@ export type FlagType = (value: string) => any;
 
 export type FlagSchema = {
 	valueType: FlagType | null;
+  type: string;
 	short?: string;
 	description?: string;
 	default?: any;
@@ -19,16 +20,20 @@ export type FlagSchema = {
 type FlagConfig = Clearify<Omit<FlagSchema, 'valueType' | 'default'>>;
 
 export const schemaKey = Symbol('schema');
+export const descriptionKey = Symbol('description');
 
 export class Command {
 	private [schemaKey]: Record<string, FlagSchema> = {};
+	private [descriptionKey]: string;
 
-	private get name() {
+	get name() {
 		// pascal case to kebab-case
 		return toKebabCase(this.constructor.name);
 	}
 
-	constructor(private description: string) {}
+  constructor(description: string) {
+    this[descriptionKey] = description;
+  }
 
 	usage(appName: string): string {
 		// format options
@@ -52,7 +57,7 @@ export class Command {
 
 		return `\
 Usage: ${appName} ${this.name} [OPTIONS]
-${this.description}
+${this[descriptionKey]}
 
 Options:
 ${optionsUsage}
@@ -79,6 +84,7 @@ ${optionsUsage}
 		return [shortPrefix + `--${name}` + typeSuffix, description];
 	}
 }
+
 
 export function typedFlag<BaseValue>(
 	flagType: FlagSchema['valueType'],
@@ -158,4 +164,20 @@ function setFunctionName(fn: Function, name: string): void {
 		configurable: true,
 		value: name,
 	});
+}
+
+export const commandsKey = Symbol('commands');
+
+export class App extends Command {
+  [commandsKey]: Command[] = [];
+}
+
+export function commands(cmds: Command[]): (value: typeof App, context: ClassDecoratorContext<typeof App>) => any {
+  return function(Base) {
+    class DecoratedWithCommands extends Base {
+      [commandsKey]: Command[] = cmds;
+    }
+
+    return DecoratedWithCommands;
+  }
 }
