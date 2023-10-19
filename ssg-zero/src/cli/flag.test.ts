@@ -25,13 +25,6 @@ suite('typedFlag', function () {
 
 		assert.equal(fieldInitializer!.name, 'onInitColdDrinkAsIcedTea');
 	});
-	test('sets the name for the initializer based on the type and field name', function (t) {
-		const addInitializerMock = t.mock.method(contextMock, 'addInitializer');
-		typedFlag(icedTea, {})(undefined, contextMock);
-		const initializer = addInitializerMock.mock.calls[0].arguments[0];
-
-		assert.equal(initializer.name, 'onBeforeInitColdDrinkAsIcedTea');
-	});
 });
 
 suite('decorators', function () {

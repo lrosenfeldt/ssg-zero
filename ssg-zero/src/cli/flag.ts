@@ -98,24 +98,12 @@ export function typedFlag<BaseValue>(
 		_: undefined,
 		context: ClassNamedFieldDecoratorContext<This, Value>,
 	) {
-		const flagName = toKebabCase(context.name);
-		function onBeforeInit(this: This): void {
+		function onInit(this: This, value: Value) {
+		  const flagName = toKebabCase(context.name);
 			this[schemaKey][flagName] = Object.assign<
 				FlagConfig,
 				Pick<FlagSchema, 'valueType'>
 			>(config, { valueType: flagType });
-		}
-
-		setFunctionName(
-			onBeforeInit,
-			`onBeforeInit${toPascalCase(context.name)}As${toPascalCase(
-				typeName,
-			)}`,
-		);
-
-		context.addInitializer(onBeforeInit);
-
-		function onInit(this: This, value: Value) {
 			if (value !== undefined) {
 				this[schemaKey][flagName].default = value;
 			}
