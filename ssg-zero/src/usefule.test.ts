@@ -3,7 +3,7 @@ import { after, before, describe as suite, test } from 'node:test';
 import { join } from 'node:path';
 
 import { UsefuleServer, anyToError, exists, walkFiles } from './usefule.js';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { chmod } from 'node:fs/promises';
 
 suite('anyToError', function () {
@@ -73,6 +73,11 @@ suite('exists', function () {
 	});
 });
 suite('walkFiles', function () {
+  before(async () => {
+    // directory is not tracked by git and we cant use gitkeep here
+    await mkdir('fixtures/empty', { recursive: true })
+  });
+
 	test('yields nothing for an empty directory', async function () {
 		const walkedFiles: string[] = [];
 
