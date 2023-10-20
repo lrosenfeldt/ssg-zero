@@ -8,7 +8,7 @@
 	},
 	"description": "One static site generator, zero dependencies.*",
 	"engines": {
-		"node": ">=20"
+		"node": ">=21"
 	},
 	"keywords": [
 		"ssg",
