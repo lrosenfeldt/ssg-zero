@@ -153,12 +153,18 @@ suite('SSG', function () {
 				assert.equal(renderHtmlDummy.mock.callCount(), 1);
 			});
 
-			await t.test('produces rendered output for index.html', async function () {
-				const renderedHtmlPath = join(outputDir, 'index.html');
-				const renderedHtml = await readFile(renderedHtmlPath, 'utf-8');
+			await t.test(
+				'produces rendered output for index.html',
+				async function () {
+					const renderedHtmlPath = join(outputDir, 'index.html');
+					const renderedHtml = await readFile(
+						renderedHtmlPath,
+						'utf-8',
+					);
 
-				assert.match(renderedHtml, /<p>ZONK!<\/p>/);
-			});
+					assert.match(renderedHtml, /<p>ZONK!<\/p>/);
+				},
+			);
 		});
 	});
 });

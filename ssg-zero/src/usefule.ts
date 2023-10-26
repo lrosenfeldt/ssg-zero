@@ -28,7 +28,7 @@ export function anyToError(reason: unknown): NodeJS.ErrnoException {
 		case 'function':
 			errorMessage = `Failed with function ${reason.name}.`;
 			break;
-    /* node:coverage ignore next 3 */
+		/* node:coverage ignore next 3 */
 		default:
 			errorMessage = `Failed with ${reason} of unhandled {typeof reason}. This is an implementation error '${__filename}'.`;
 			break;
@@ -44,7 +44,7 @@ export async function exists(path: string): Promise<boolean> {
 		const error = anyToError(reason);
 		if (error.code === 'ENOENT') {
 			return false;
-    /* node:coverage ignore next 3 */
+			/* node:coverage ignore next 3 */
 		}
 		throw error;
 	}
@@ -114,7 +114,7 @@ export class UsefuleServer {
 		'.js': { mimeType: 'text/javascript', encoding: 'utf-8' },
 		'.json': { mimeType: 'application/json', encoding: 'utf-8' },
 		'.jsonld': { mimeType: 'application/ld+json', encoding: 'utf-8' },
-    '.md': { mimeType: 'text/markdown', encoding: 'utf-8' },
+		'.md': { mimeType: 'text/markdown', encoding: 'utf-8' },
 		'.mid': { mimeType: 'audio/x-midi', encoding: 'binary' },
 		'.midi': { mimeType: 'audio/x-midi', encoding: 'binary' },
 		'.mjs': { mimeType: 'text/javascript', encoding: 'utf-8' },
@@ -218,7 +218,7 @@ export class UsefuleServer {
 				return;
 			}
 
-      this.server.closeIdleConnections();
+			this.server.closeIdleConnections();
 			this.server.close(error => {
 				if (error !== undefined) {
 					reject(error);
@@ -246,10 +246,10 @@ export class UsefuleServer {
 		} else {
 			res.statusCode = 415;
 			res.end();
-      return
+			return;
 		}
 
-    res.setHeader('Content-Type', mimeType)
+		res.setHeader('Content-Type', mimeType);
 
 		let fd: FileHandle | null = null;
 		try {

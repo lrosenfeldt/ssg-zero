@@ -121,12 +121,12 @@ suite('UsefuleServer', function () {
 	}
 
 	before(async function () {
-    await chmod('fixtures/bad_files/unreadable.json', 0o0344);
+		await chmod('fixtures/bad_files/unreadable.json', 0o0344);
 		await server.serve();
 	});
 
 	after(async function () {
-    await chmod('fixtures/bad_files/unreadable.json', 0o0644);
+		await chmod('fixtures/bad_files/unreadable.json', 0o0644);
 		await server.stop();
 	});
 
@@ -161,6 +161,6 @@ suite('UsefuleServer', function () {
 		assert.equal(res.status, 500);
 	});
 	test('fails if serve is called on running server', async function () {
-    await assert.rejects(async () => await server.serve());
+		await assert.rejects(async () => await server.serve());
 	});
 });
