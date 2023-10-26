@@ -11,119 +11,102 @@ export type FlagType = (value: string) => any;
 
 export type FlagSchema = {
 	valueType: FlagType | null;
+	key: string;
 	short?: string;
 	description?: string;
 	default?: any;
 };
 
-type FlagConfig = Clearify<Omit<FlagSchema, 'valueType' | 'default'>>;
+export type FlagConfig = Clearify<
+	Omit<FlagSchema, 'valueType' | 'default' | 'key'>
+>;
 
-export const schemaKey = Symbol('schema');
-export const descriptionKey = Symbol('description');
+export type Schema = Record<string, FlagSchema>;
+
+const commandsKey = Symbol('commands');
+const descriptionKey = Symbol('description');
+export const nameKey = Symbol('name');
+const schemaKey = Symbol('schema');
+const versionKey = Symbol('version');
 
 export class Command {
-	private [schemaKey]: Record<string, FlagSchema> = {};
-	private [descriptionKey]: string;
+	static [descriptionKey]: string;
+	static [schemaKey]: Schema;
 
-	get name() {
-		// pascal case to kebab-case
+	[option: string]: any;
+
+	get [nameKey](): string {
 		return toKebabCase(this.constructor.name);
-	}
-
-  constructor(description: string) {
-    this[descriptionKey] = description;
-  }
-
-	usage(appName: string): string {
-		// format options
-		const lines: Array<[alias: string, description: string]> = [];
-		let aliasesColumnLength = 0;
-		for (const name in this[schemaKey]) {
-			const line = this.formatFlagSchema(name);
-			lines.push(line);
-			aliasesColumnLength = Math.max(line[0].length, aliasesColumnLength);
-		}
-
-		const optionsUsage = lines
-			.map(
-				([aliases, description]) =>
-					'  ' +
-					aliases.padEnd(aliasesColumnLength, ' ') +
-					'  ' +
-					description,
-			)
-			.join('\n');
-
-		return `\
-Usage: ${appName} ${this.name} [OPTIONS]
-${this[descriptionKey]}
-
-Options:
-${optionsUsage}
-`;
-	}
-
-	private formatFlagSchema(
-		name: string,
-	): [aliases: string, description: string] {
-		const schema = this[schemaKey][name];
-		// aliases
-		const shortPrefix = schema.short ? `-${schema.short}, ` : '    ';
-		const typeSuffix =
-			schema.valueType === null ? '' : ` <${schema.valueType.name}>`;
-		// description
-		let defaultSuffix = '';
-		if (schema.default !== undefined) {
-			defaultSuffix =
-				typeof schema.default === 'string'
-					? ` (default "${schema.default}")`
-					: ` (default ${schema.default})`;
-		}
-		const description = `${schema.description ?? ''}${defaultSuffix}`;
-		return [shortPrefix + `--${name}` + typeSuffix, description];
 	}
 }
 
+export class App extends Command {
+	static [commandsKey]: Command[];
+	static [versionKey]: string;
+}
+
+export function commands(
+	cmds: Command[],
+): (value: typeof App, context: ClassDecoratorContext<typeof App>) => void {
+	return function commandsDecorator(value) {
+		value[commandsKey] = cmds;
+	};
+}
+
+export function version(
+	vers: string,
+): (value: typeof App, context: ClassDecoratorContext<typeof App>) => void {
+	return function versionDecorator(value) {
+		value[versionKey] = vers;
+	};
+}
+
+export function description(
+	desc: string,
+): (
+	value: typeof Command,
+	context: ClassDecoratorContext<typeof Command>,
+) => void {
+	return function descriptionDecorator(value) {
+		value[descriptionKey] = desc;
+	};
+}
 
 export function typedFlag<BaseValue>(
 	flagType: FlagSchema['valueType'],
 	config: FlagConfig,
-): <This extends Command, Value extends BaseValue>(
+): <Value extends BaseValue>(
 	value: undefined,
-	context: ClassNamedFieldDecoratorContext<This, Value>,
-) => ((this: This, value: Value) => Value) | void {
-	const typeName = flagType === null ? 'boolean' : flagType.name;
-
-	function decorator<This extends Command, Value extends BaseValue>(
-		_: undefined,
-		context: ClassNamedFieldDecoratorContext<This, Value>,
-	) {
-		function onInit(this: This, value: Value) {
-		  const flagName = toKebabCase(context.name);
-			this[schemaKey][flagName] = Object.assign<
-				FlagConfig,
-				Pick<FlagSchema, 'valueType'>
-			>(config, { valueType: flagType });
-			if (value !== undefined) {
-				this[schemaKey][flagName].default = value;
-			}
-			return value;
-		}
-
-		setFunctionName(
-			onInit,
+	context: ClassNamedFieldDecoratorContext<Command, Value>,
+) => (this: Command, initialValue: Value) => Value {
+	const typeName = flagType !== null ? flagType.name : 'boolean';
+	return setFunctionName(`${typeName}FlagDecorator`, function (_, context) {
+		return setFunctionName(
 			`onInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`,
+			function (initialValue) {
+				let schema: Schema;
+				if (Object.hasOwn(this.constructor, schemaKey)) {
+					schema = (this.constructor as typeof Command)[schemaKey];
+				} else {
+					schema = {};
+					(this.constructor as typeof Command)[schemaKey] = schema;
+				}
+				schema[toKebabCase(context.name)] = Object.assign<
+					FlagConfig,
+					Pick<FlagSchema, 'default' | 'valueType' | 'key'>
+				>(config, {
+					default: initialValue,
+					valueType: flagType,
+					key: context.name,
+				});
+				return initialValue;
+			},
 		);
-
-		return onInit;
-	}
-
-	setFunctionName(decorator, `${typeName}FlagDecorator`);
-
-	return decorator;
+	});
 }
 
 export const boolean = (typedFlag<boolean | undefined>).bind(null, null);
+
 export const number = (typedFlag<number | undefined>).bind(
 	null,
 	function number(value) {
@@ -132,11 +115,12 @@ export const number = (typedFlag<number | undefined>).bind(
 		}
 		const asNumber = Number(value);
 		if (Number.isNaN(asNumber)) {
-			return new Error(`Given '${value}' is not a valid number`);
+			return Error(`Given '${value}' is not a valid number`);
 		}
 		return asNumber;
 	},
 );
+
 export const string = (typedFlag<string | undefined>).bind(
 	null,
 	function string(value) {
@@ -144,27 +128,170 @@ export const string = (typedFlag<string | undefined>).bind(
 	},
 );
 
-function setFunctionName(fn: Function, name: string): void {
-	Object.defineProperty(fn, 'name', {
+export class SchemaRegistry {
+	private globals: Schema;
+	private commands: Command[];
+
+	constructor(app: App) {
+		const appMeta = app.constructor as typeof App;
+		this.globals = appMeta[schemaKey];
+		this.commands = appMeta[commandsKey];
+	}
+
+	isCommand(name: string): boolean {
+		return this.findCommandMeta(name) !== undefined;
+	}
+
+	find(name: string, command?: string): FlagSchema | undefined {
+		if (command !== undefined) {
+			const schema = this.strictFind(name, command);
+			if (schema !== undefined) return schema;
+		}
+
+		if (Object.hasOwn(this.globals, name)) {
+			return this.globals[name];
+		}
+
+		return undefined;
+	}
+
+	findCommandMeta(name: string): typeof Command | undefined {
+		const command = this.commands.find(cmd => cmd[nameKey] === name);
+		if (command === undefined) {
+			return undefined;
+		}
+
+		return command.constructor as typeof Command;
+	}
+
+	findEntryByShort(
+		short: string,
+		command?: string,
+	): [name: string, schema: FlagSchema] | undefined {
+		if (command !== undefined) {
+			const entry = this.strictFindEntryByShort(short, command);
+			if (entry !== undefined) return entry;
+		}
+
+		return Object.entries(this.globals).find(
+			([, s]) => s.short && s.short === short,
+		);
+	}
+
+	strictFind(name: string, command: string): FlagSchema | undefined {
+		const meta = this.findCommandMeta(command);
+		if (meta !== undefined && Object.hasOwn(meta[schemaKey], name)) {
+			return meta[schemaKey][name];
+		}
+		return undefined;
+	}
+
+	strictFindEntryByShort(
+		short: string,
+		command: string,
+	): [name: string, schema: FlagSchema] | undefined {
+		const meta = this.findCommandMeta(command);
+
+		if (meta !== undefined) {
+			return Object.entries(meta[schemaKey]).find(
+				([, s]) => s.short && s.short === short,
+			);
+		}
+
+		return undefined;
+	}
+}
+
+function optionsUsage(fullSchema: Schema): string {
+	let lines: Array<[aliases: string, description: string]> = [];
+	let aliasesColumnLength = 0;
+
+	for (const name in fullSchema) {
+		const schema = fullSchema[name];
+
+		const typeSuffix =
+			schema.valueType !== null ? ` <${schema.valueType.name}>` : '';
+		const aliases = `${
+			schema.short ? `-${schema.short}, ` : '    '
+		}--${name}${typeSuffix}`;
+		aliasesColumnLength = Math.max(aliasesColumnLength, aliases.length);
+
+		let defaultSuffix: string;
+		if (schema.default !== undefined) {
+			defaultSuffix =
+				typeof schema.default === 'string'
+					? ` (default "${schema.default}")`
+					: ` (default ${schema.default})`;
+		} else {
+			defaultSuffix = '';
+		}
+		const description = `${schema.description}${defaultSuffix}`;
+
+		lines.push([aliases, description]);
+	}
+
+	return lines
+		.map(
+			([aliases, description]) =>
+				'  ' +
+				aliases.padEnd(aliasesColumnLength, ' ') +
+				'  ' +
+				description,
+		)
+		.join('\n');
+}
+
+export function appUsage(app: App): string {
+	const appMeta = app.constructor as typeof App;
+
+	const lines: Array<[aliases: string, description: string]> = [];
+	let aliasesColumnLength = 0;
+	for (const command of appMeta[commandsKey]) {
+		const commandMeta = command.constructor as typeof Command;
+		const commandName = toKebabCase(commandMeta.name);
+		aliasesColumnLength = Math.max(aliasesColumnLength, commandName.length);
+		lines.push([commandName, commandMeta[descriptionKey]]);
+	}
+
+	const commandList = lines
+		.map(
+			([aliases, description]) =>
+				'  ' +
+				aliases.padEnd(aliasesColumnLength, ' ') +
+				'  ' +
+				description,
+		)
+		.join('\n');
+
+	return `\
+Usage: ${app[nameKey]} [GLOBAL_OPTIONS] <command>
+${appMeta[descriptionKey]}
+
+Commands:
+${commandList}
+
+Global Options:
+${optionsUsage(appMeta[schemaKey])}
+`;
+}
+
+export function commandUsage(command: Command): string {
+	const commandMeta = command.constructor as typeof Command;
+
+	return `\
+Usage: ssg-zero ${command[nameKey]} [OPTIONS]
+${commandMeta[descriptionKey]}
+
+Options:
+${optionsUsage(commandMeta[schemaKey])}
+`;
+}
+
+function setFunctionName<Fn extends Function>(name: string, fn: Fn): Fn {
+	return Object.defineProperty(fn, 'name', {
+		configurable: true,
 		enumerable: false,
 		writable: false,
-		configurable: true,
 		value: name,
 	});
-}
-
-export const commandsKey = Symbol('commands');
-
-export class App extends Command {
-  [commandsKey]: Command[] = [];
-}
-
-export function commands(cmds: Command[]): (value: typeof App, context: ClassDecoratorContext<typeof App>) => any {
-  return function(Base) {
-    class DecoratedWithCommands extends Base {
-      [commandsKey]: Command[] = cmds;
-    }
-
-    return DecoratedWithCommands;
-  }
 }

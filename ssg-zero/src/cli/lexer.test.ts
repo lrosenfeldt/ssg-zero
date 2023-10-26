@@ -1,40 +1,96 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
-import { Token, Parsed, Parser, SchemaRegistry } from './parse_args.js';
-import { App, Command, boolean, commands, number, string } from './flag.js';
+import { Lexeme, Lexed, Lexer, parse } from './lexer.js';
+import {
+	App,
+	Command,
+	boolean,
+	commands,
+	number,
+	string,
+	SchemaRegistry,
+} from './flag.js';
 
-suite('parse_args.ts', function () {
-  class Dance extends Command {
-    @string({ short: 'S',  })
-    style: string = 'breakdance'
+suite('lexer.ts', function () {
+	class Dance extends Command {
+		@string({ short: 'S' })
+		style: string = 'breakdance';
 
-    @boolean({})
-    fast?: boolean
-  }
+		@boolean({})
+		fast?: boolean;
+	}
 
-  @commands([new Dance('')])
-  class SchemaClass extends App {
-      @string({  short: 'H'})
-			happy: string = 'yes';
-      @number({ short: 'u' })
-			unicorns?: number;
-      @boolean({})
-			switch?: boolean;
-      @number({})
-			logLevel: number = 3;
-      @number({ short: 's'})
-			speed?: number;
-      @boolean({ short: 'i' })
-			intermediate: boolean = false;
-      @boolean({ short: 'A' })
-			awesome?: boolean;
-			@string({  short: 'c' })
-			config: string = 'config.json';
-      @string({  short: 'o' })
-			outputDir?: string;
-  }
+	@commands([new Dance()])
+	class Cli extends App {
+		@string({ short: 'H' })
+		happy: string = 'yes';
+		@number({ short: 'u' })
+		unicorns?: number;
+		@boolean({})
+		switch?: boolean;
+		@number({})
+		logLevel: number = 3;
+		@number({ short: 's' })
+		speed?: number;
+		@boolean({ short: 'i' })
+		intermediate: boolean = false;
+		@boolean({ short: 'A' })
+		awesome?: boolean;
+		@string({ short: 'c' })
+		config: string = 'config.json';
+		@string({ short: 'o' })
+		outputDir?: string;
+	}
 
-	const registry = SchemaRegistry.fromApp(new SchemaClass(''));
+	const registry = new SchemaRegistry(new Cli());
+
+	suite('parse', function () {
+		test('returns only global options if command is left out', function () {
+			const args = [
+				'--config=myconfig.json',
+				'-obuild',
+				'--awesome',
+				'-u',
+				'14',
+			];
+			const expectedGlobals = new Cli();
+			expectedGlobals.config = 'myconfig.json';
+			expectedGlobals.outputDir = 'build';
+			expectedGlobals.awesome = true;
+			expectedGlobals.unicorns = 14;
+
+			const [globals, options] = parse<Cli, Dance>(args, new Cli());
+
+			assert.equal(options, undefined);
+			assert.deepEqual(globals, expectedGlobals);
+		});
+		test('returns global options and commmand options correctly', function () {
+			const args = [
+				'--config=special_config.json',
+				'--switch',
+				'--output-dir=build',
+				'-u42',
+				'dance',
+				'-S',
+				'rave',
+				'--fast',
+			];
+			const expectedGlobals = new Cli();
+			expectedGlobals.config = 'special_config.json';
+			expectedGlobals.switch = true;
+			expectedGlobals.outputDir = 'build';
+			expectedGlobals.unicorns = 42;
+
+			const expectedDanceOptions = new Dance();
+			expectedDanceOptions.fast = true;
+			expectedDanceOptions.style = 'rave';
+
+			const [globals, danceOptions] = parse<Cli, Dance>(args, new Cli());
+
+			assert.deepEqual(globals, expectedGlobals);
+			assert.deepEqual(danceOptions, expectedDanceOptions);
+		});
+	});
 
 	suite('SchemaRegistry', function () {
 		suite('isCommand', function () {
@@ -53,99 +109,76 @@ suite('parse_args.ts', function () {
 				);
 			});
 		});
-		suite('getDefaults', function () {
-			test('only returns the global defaults when given no command', function () {
-				const defaults = registry.getDefaults();
-
-				assert.deepEqual(defaults, {
-					config: 'config.json',
-					happy: 'yes',
-					intermediate: false,
-					'log-level': 3,
-				});
-			});
-			test('returns the global defaults and command specific defaults when given a command', function () {
-				const defaults = registry.getDefaults('dance');
-
-				assert.deepEqual(defaults, {
-					style: 'breakdance',
-					config: 'config.json',
-					happy: 'yes',
-					intermediate: false,
-					'log-level': 3,
-				});
-			});
-		});
 	});
 	suite('Tokenizer', function () {
 		suite('tokenize', function () {
-			const tokenizer = new Parser(registry);
+			const lexer = new Lexer(registry);
 
 			test('tokenizes everything after the terminator as positionals', function () {
 				const args = ['--', '--unicorn', '--unit=fm', '-cats'];
-				const expectedTokens: Token[] = [
+				const expectedTokens: Lexeme[] = [
 					{
-						type: Parsed.Positional,
+						type: Lexed.Positional,
 						index: 1,
 						value: '--unicorn',
 					},
 					{
-						type: Parsed.Positional,
+						type: Lexed.Positional,
 						index: 2,
 						value: '--unit=fm',
 					},
 					{
-						type: Parsed.Positional,
+						type: Lexed.Positional,
 						index: 3,
 						value: '-cats',
 					},
 				];
 
-				assert.deepEqual(tokenizer.parse(args), expectedTokens);
+				assert.deepEqual(lexer.lex(args), expectedTokens);
 			});
 			test('tokenizes long options and inline values', function () {
 				const args = ['--switch', '--happy=yes', '--speed', '4269'];
-				const expectedTokens: Token[] = [
+				const expectedTokens: Lexeme[] = [
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 0,
 						name: 'switch',
 						value: true,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 1,
 						name: 'happy',
 						value: 'yes',
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 2,
 						name: 'speed',
 						value: 4269,
 					},
 				];
 
-				assert.deepEqual(tokenizer.parse(args), expectedTokens);
+				assert.deepEqual(lexer.lex(args), expectedTokens);
 			});
 			test('tokenizes short options', function () {
 				const args = ['-u', '4269', '-i'];
-				const expectedTokens: Token[] = [
+				const expectedTokens: Lexeme[] = [
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 0,
 						name: 'unicorns',
 						value: 4269,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 2,
 						name: 'intermediate',
 						value: true,
 					},
 				];
 
-				assert.deepEqual(tokenizer.parse(args), expectedTokens);
+				assert.deepEqual(lexer.lex(args), expectedTokens);
 			});
 			test('tokenizes short options with values', function () {
 				const args = [
@@ -158,51 +191,51 @@ suite('parse_args.ts', function () {
 					'dance',
 					'-Sdisco',
 				];
-				const expectedTokens: Token[] = [
+				const expectedTokens: Lexeme[] = [
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 0,
 						name: 'intermediate',
 						value: true,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 0,
 						name: 'config',
 						value: 'flags',
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 1,
 						name: 'speed',
 						value: 3141,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 3,
 						name: 'happy',
 						value: '9:00',
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 5,
-						name: 'output-dir',
+						name: 'outputDir',
 						value: 'main',
 					},
 					{
-						type: Parsed.Command,
+						type: Lexed.Command,
 						index: 6,
 						name: 'dance',
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 7,
 						name: 'style',
 						value: 'disco',
 					},
 				];
 
-				assert.deepEqual(tokenizer.parse(args), expectedTokens);
+				assert.deepEqual(lexer.lex(args), expectedTokens);
 			});
 			test('tokenizes a command and positionals', function () {
 				const args = [
@@ -213,43 +246,43 @@ suite('parse_args.ts', function () {
 					'arg1',
 					'something',
 				];
-				const expectedTokens: Token[] = [
+				const expectedTokens: Lexeme[] = [
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 0,
 						name: 'happy',
 						value: 'yes',
 					},
 					{
-						type: Parsed.Command,
+						type: Lexed.Command,
 						index: 1,
 						name: 'dance',
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 2,
 						name: 'switch',
 						value: true,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 3,
 						name: 'fast',
 						value: true,
 					},
 					{
-						type: Parsed.Positional,
+						type: Lexed.Positional,
 						index: 4,
 						value: 'arg1',
 					},
 					{
-						type: Parsed.Positional,
+						type: Lexed.Positional,
 						index: 5,
 						value: 'something',
 					},
 				];
 
-				assert.deepEqual(tokenizer.parse(args), expectedTokens);
+				assert.deepEqual(lexer.lex(args), expectedTokens);
 			});
 			test('tokenizes a full list of options', function () {
 				const args = [
@@ -266,62 +299,62 @@ suite('parse_args.ts', function () {
 					'-isAu',
 				];
 
-				const expectedTokens: Token[] = [
+				const expectedTokens: Lexeme[] = [
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 0,
 						name: 'unicorns',
 						value: NaN,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 1,
 						name: 'switch',
 						value: true,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 2,
-						name: 'log-level',
+						name: 'logLevel',
 						value: 4,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 4,
 						name: 'intermediate',
 						value: true,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 4,
 						name: 'awesome',
 						value: true,
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 4,
 						name: 'speed',
 						value: 9000,
 					},
 					{
-						type: Parsed.Command,
+						type: Lexed.Command,
 						index: 6,
 						name: 'dance',
 					},
 					{
-						type: Parsed.Option,
+						type: Lexed.Option,
 						index: 7,
 						name: 'style',
 						value: 'moshpit',
 					},
 					{
-						type: Parsed.Positional,
+						type: Lexed.Positional,
 						index: 10,
 						value: '-isAu',
 					},
 				];
 
-				assert.deepEqual(tokenizer.parse(args), expectedTokens);
+				assert.deepEqual(lexer.lex(args), expectedTokens);
 			});
 			suite('report problems', function () {
 				test('reports problems for inline values', function () {
@@ -329,126 +362,126 @@ suite('parse_args.ts', function () {
 						'--unknown-endeavours=offshore',
 						'--switch=yes',
 					];
-					const expectedTokens: Token[] = [
+					const expectedTokens: Lexeme[] = [
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 0,
 							message:
 								"Tried to set a value for unknown option '--unknown-endeavours'",
 						},
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 1,
 							message: "Got unexpected value for '--switch'",
 						},
 					];
 
-					assert.deepEqual(tokenizer.parse(args), expectedTokens);
+					assert.deepEqual(lexer.lex(args), expectedTokens);
 				});
 				test('reports problems for long options', function () {
 					const args = ['--say-what', '--log-level'];
 
-					const expectedTokens: Token[] = [
+					const expectedTokens: Lexeme[] = [
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 0,
 							message: "Found unknown option '--say-what'",
 						},
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 1,
 							message:
 								"Expected value for '--log-level' but reached end of arguments",
 						},
 					];
 
-					assert.deepEqual(tokenizer.parse(args), expectedTokens);
+					assert.deepEqual(lexer.lex(args), expectedTokens);
 				});
 				test('report problems for a short', function () {
 					const args = ['-l', '-u'];
-					const expectedTokens: Token[] = [
+					const expectedTokens: Lexeme[] = [
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 0,
 							message: "Found unknown alias '-l'",
 						},
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 1,
 							message:
 								"Expected value for '-u' but reached end of arguments",
 						},
 					];
 
-					assert.deepEqual(tokenizer.parse(args), expectedTokens);
+					assert.deepEqual(lexer.lex(args), expectedTokens);
 				});
 				test('reports problems for a group of shorts', function () {
 					const args = ['-nHi', '-Au'];
-					const expectedTokens: Token[] = [
+					const expectedTokens: Lexeme[] = [
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 0,
 							message:
 								"Got invalid group '-nHi', contains unknown alias '-n'",
 						},
 						{
-							type: Parsed.Option,
+							type: Lexed.Option,
 							index: 1,
 							name: 'awesome',
 							value: true,
 						},
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 1,
 							message:
 								"Expected value for '-u' at the end of group but reached end of arguments",
 						},
 					];
 
-					assert.deepEqual(tokenizer.parse(args), expectedTokens);
+					assert.deepEqual(lexer.lex(args), expectedTokens);
 				});
 				test('reports problems for a command', function () {
 					const args = ['-s42', '--switch', 'worktree'];
-					const expectedTokens: Token[] = [
+					const expectedTokens: Lexeme[] = [
 						{
-							type: Parsed.Option,
+							type: Lexed.Option,
 							index: 0,
 							name: 'speed',
 							value: 42,
 						},
 						{
-							type: Parsed.Option,
+							type: Lexed.Option,
 							index: 1,
 							name: 'switch',
 							value: true,
 						},
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 2,
 							message: "Found unknown command 'worktree'",
 						},
 					];
 
-					assert.deepEqual(tokenizer.parse(args), expectedTokens);
+					assert.deepEqual(lexer.lex(args), expectedTokens);
 				});
 				test('reports a type error for a number', function () {
 					const args = ['-sfast', '--log-level', 'silent'];
-					const expectedTokens: Token[] = [
+					const expectedTokens: Lexeme[] = [
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 0,
 							message:
-								"Found invalid value for option '--speed': Given 'fast' is not a valid number",
+								"Found invalid value at '-sfast': Given 'fast' is not a valid number",
 						},
 						{
-							type: Parsed.Problem,
+							type: Lexed.Problem,
 							index: 1,
 							message:
-								"Found invalid value for option '--log-level': Given 'silent' is not a valid number",
+								"Found invalid value at '--log-level': Given 'silent' is not a valid number",
 						},
 					];
 
-					assert.deepEqual(tokenizer.parse(args), expectedTokens);
+					assert.deepEqual(lexer.lex(args), expectedTokens);
 				});
 			});
 		});

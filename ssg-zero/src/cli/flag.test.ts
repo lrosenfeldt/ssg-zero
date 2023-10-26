@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
-import { Command, typedFlag, boolean, number, string } from './flag.js';
+import {
+	Command,
+	typedFlag,
+	boolean,
+	number,
+	string,
+	description,
+	commandUsage,
+} from './flag.js';
 
 suite('typedFlag', function () {
 	// custom flag type
@@ -29,6 +37,7 @@ suite('typedFlag', function () {
 
 suite('decorators', function () {
 	test('reports the usage based on the internal schema', function () {
+		@description('Develop a static site')
 		class Dev extends Command {
 			@boolean({
 				description: 'Show version information',
@@ -53,7 +62,7 @@ suite('decorators', function () {
 			@string({ description: 'Relative path to schema file' })
 			schema?: string;
 		}
-		const dev = new Dev('Develop a static site');
+		const dev = new Dev();
 
 		const expectedUsage = `\
 Usage: ssg-zero dev [OPTIONS]
@@ -67,21 +76,22 @@ Options:
       --schema <string>          Relative path to schema file
 `;
 
-		assert.equal(dev.usage('ssg-zero'), expectedUsage);
+		assert.equal(commandUsage(dev), expectedUsage);
 	});
 
 	test('converts the class name to kebab-case in usage', function () {
+		@description('DOOO IT!')
 		class DoIt extends Command {}
-		const doIt = new DoIt('DOOO IT!');
+		const doIt = new DoIt();
 
 		const expectedUsage = `\
-Usage: app do-it [OPTIONS]
+Usage: ssg-zero do-it [OPTIONS]
 DOOO IT!
 
 Options:
 
 `;
 
-		assert.equal(doIt.usage('app'), expectedUsage);
+		assert.equal(commandUsage(doIt), expectedUsage);
 	});
 });

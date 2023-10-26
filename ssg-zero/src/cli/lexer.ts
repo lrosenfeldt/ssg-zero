@@ -1,111 +1,106 @@
-import { App, FlagSchema, commandsKey, schemaKey } from './flag.js';
+import { App, Command, FlagSchema, SchemaRegistry, nameKey } from './flag.js';
 
 export type CommandSchema = Record<string, FlagSchema>;
 
-export type Schema = {
-	globals: Record<string, FlagSchema>;
-	commands: Record<string, CommandSchema>;
-};
-
-export enum Parsed {
+export enum Lexed {
 	Option = 'OPTION',
 	Problem = 'PROBLEM',
 	Positional = 'POSITIONAL',
 	Command = 'COMMAND',
 }
 
-export type ParsedArg =
+export type LexedArg =
 	| {
-			type: Parsed.Positional;
+			type: Lexed.Positional;
 			index: number;
 			value: string;
 	  }
 	| {
-			type: Parsed.Option;
+			type: Lexed.Option;
 			index: number;
 			name: string;
 			value: any;
 	  }
 	| {
-			type: Parsed.Positional;
+			type: Lexed.Positional;
 			index: number;
 			value: string;
 	  }
 	| {
-			type: Parsed.Command;
+			type: Lexed.Command;
 			index: number;
 			name: string;
 	  };
 
-export type ParsedProblem = {
-	type: Parsed.Problem;
+export type Problem = {
+	type: Lexed.Problem;
 	index: number;
 	message: string;
 };
 
-export type Token = ParsedArg | ParsedProblem;
+export type Lexeme = LexedArg | Problem;
 
-export class Parser {
-	private args: string[] = [];
+export class Lexer {
+	private args!: string[];
 	private arg: string = '\0';
 	private position: number = 0;
 	private reachedTerminator: boolean = false;
-	private schemaRegistry: SchemaRegistry;
 	private command: string | undefined = undefined;
 
-	constructor(schema: SchemaRegistry) {
-		this.schemaRegistry = schema;
+	constructor(private schemaRegistry: SchemaRegistry) {}
+
+	lex(args: string[]): Lexeme[] {
+		return [...this.lexemes(args)];
 	}
 
-	parse(args: string[]): Token[] {
+	*lexemes(args: string[]): Generator<Lexeme, void, undefined> {
 		this.setup(args);
 
-		const tokens: Array<Token | Token[]> = [];
 		for (; this.arg !== '\0'; this.nextArg()) {
 			if (this.reachedTerminator) {
-				tokens.push({
-					type: Parsed.Positional,
+				yield {
+					type: Lexed.Positional,
 					index: this.position - 1,
 					value: this.arg,
-				});
+				};
 			} else if (this.arg === '--') {
 				this.reachedTerminator = true;
 			} else if (this.arg.startsWith('--') && this.arg.includes('=')) {
-				tokens.push(this.getTokenForInlineValue());
+				yield this.getTokenForInlineValue();
 			} else if (this.arg.startsWith('--')) {
-				tokens.push(this.getTokenForLongOption());
+				yield this.getTokenForLongOption();
 			} else if (this.arg.startsWith('-') && this.arg.length === 2) {
-				tokens.push(this.getTokenForShortOption());
+				yield this.getTokenForShortOption();
 			} else if (this.arg.startsWith('-') && this.arg.length > 2) {
-				tokens.push(this.getTokensForShortOptionGroup());
+				yield* this.getTokensForShortOptionGroup();
 			} else if (this.command === undefined) {
-				tokens.push(this.getTokenForCommand());
+				yield this.getTokenForCommand();
 			} else {
-				tokens.push({
-					type: Parsed.Positional,
+				yield {
+					type: Lexed.Positional,
 					index: this.position - 1,
 					value: this.arg,
-				});
+				};
 			}
 		}
-
-		return tokens.flat(1);
 	}
 
 	private bindOption(
-		token: Extract<Token, { type: Parsed.Option }>,
+		lexeme: Extract<Lexeme, { type: Lexed.Option }>,
 		valueType: Exclude<FlagSchema['valueType'], null>,
-	): Token {
-		const result = valueType(token.value);
+	): Lexeme {
+		const result = valueType(lexeme.value);
 		if (result instanceof Error) {
 			return {
-				type: Parsed.Problem,
-				index: token.index,
-				message: `Found invalid value for option '--${token.name}': ${result.message}`,
+				type: Lexed.Problem,
+				index: lexeme.index,
+				message: `Found invalid value at '${
+					this.args[lexeme.index]
+				}': ${result.message}`,
 			};
 		}
-		token.value = result;
-		return token;
+		lexeme.value = result;
+		return lexeme;
 	}
 
 	private nextArg(): void {
@@ -116,10 +111,10 @@ export class Parser {
 		this.arg = this.args[this.position++];
 	}
 
-	private getTokenForCommand(): Token {
+	private getTokenForCommand(): Lexeme {
 		if (!this.schemaRegistry.isCommand(this.arg)) {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Found unknown command '${this.arg}'`,
 			};
@@ -127,20 +122,20 @@ export class Parser {
 
 		this.command = this.arg;
 		return {
-			type: Parsed.Command,
+			type: Lexed.Command,
 			index: this.position - 1,
 			name: this.command,
 		};
 	}
 
-	private getTokenForInlineValue(): Token {
+	private getTokenForInlineValue(): Lexeme {
 		const indexOfEqualSign = this.arg.indexOf('=');
 		const arg = this.arg.slice(2, indexOfEqualSign);
 
 		const schema = this.schemaRegistry.find(arg, this.command);
 		if (schema === undefined) {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Tried to set a value for unknown option '--${arg}'`,
 			};
@@ -148,7 +143,7 @@ export class Parser {
 
 		if (schema.valueType === null) {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Got unexpected value for '--${arg}'`,
 			};
@@ -156,21 +151,21 @@ export class Parser {
 
 		return this.bindOption(
 			{
-				type: Parsed.Option,
+				type: Lexed.Option,
 				index: this.position - 1,
-				name: arg,
+				name: schema.key,
 				value: this.arg.slice(indexOfEqualSign + 1),
 			},
 			schema.valueType,
 		);
 	}
 
-	private getTokenForLongOption(): Token {
+	private getTokenForLongOption(): Lexeme {
 		const arg = this.arg.slice(2);
 		const schema = this.schemaRegistry.find(arg, this.command);
 		if (schema === undefined) {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Found unknown option '--${arg}'`,
 			};
@@ -178,9 +173,9 @@ export class Parser {
 
 		if (schema.valueType === null) {
 			return {
-				type: Parsed.Option,
+				type: Lexed.Option,
 				index: this.position - 1,
-				name: arg,
+				name: schema.key,
 				value: true,
 			};
 		}
@@ -188,7 +183,7 @@ export class Parser {
 		this.nextArg();
 		if (this.arg === '\0') {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Expected value for '--${arg}' but reached end of arguments`,
 			};
@@ -197,16 +192,16 @@ export class Parser {
 		const value = this.arg;
 		return this.bindOption(
 			{
-				type: Parsed.Option,
+				type: Lexed.Option,
 				index: this.position - 2,
-				name: arg,
+				name: schema.key,
 				value,
 			},
 			schema.valueType,
 		);
 	}
 
-	private getTokenForShortOption(): Token {
+	private getTokenForShortOption(): Lexeme {
 		const short = this.arg[1];
 		const schemaEntry = this.schemaRegistry.findEntryByShort(
 			short,
@@ -214,7 +209,7 @@ export class Parser {
 		);
 		if (schemaEntry === undefined) {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Found unknown alias '-${short}'`,
 			};
@@ -224,9 +219,9 @@ export class Parser {
 
 		if (schema.valueType === null) {
 			return {
-				type: Parsed.Option,
+				type: Lexed.Option,
 				index: this.position - 1,
-				name,
+				name: schema.key,
 				value: true,
 			};
 		}
@@ -234,7 +229,7 @@ export class Parser {
 		this.nextArg();
 		if (this.arg === '\0') {
 			return {
-				type: Parsed.Problem,
+				type: Lexed.Problem,
 				index: this.position - 1,
 				message: `Expected value for '-${short}' but reached end of arguments`,
 			};
@@ -243,26 +238,25 @@ export class Parser {
 		const value = this.arg;
 		return this.bindOption(
 			{
-				type: Parsed.Option,
+				type: Lexed.Option,
 				index: this.position - 2,
-				name,
+				name: schema.key,
 				value,
 			},
 			schema.valueType,
 		);
 	}
 
-	private getTokensForShortOptionGroup(): Token[] {
-		const tokens: Token[] = [];
+	private getTokensForShortOptionGroup(): Lexeme[] {
+		const lexemes: Lexeme[] = [];
 		const group = this.arg.slice(1);
 		for (let i = 0, char = group[i]; i < group.length; char = group[++i]) {
-			const schemaEntry = this.schemaRegistry.findEntryByShort(
-				char,
-				this.command,
-			);
+			const schemaEntry =
+				this.schemaRegistry.findEntryByShort(char, this.command) ??
+				this.schemaRegistry.findEntryByShort(char);
 			if (schemaEntry === undefined) {
-				tokens.push({
-					type: Parsed.Problem,
+				lexemes.push({
+					type: Lexed.Problem,
 					index: this.position - 1,
 					message: `Got invalid group '${this.arg}', contains unknown alias '-${char}'`,
 				});
@@ -271,19 +265,19 @@ export class Parser {
 
 			const [name, schema] = schemaEntry;
 			if (schema.valueType === null) {
-				tokens.push({
-					type: Parsed.Option,
+				lexemes.push({
+					type: Lexed.Option,
 					index: this.position - 1,
-					name,
+					name: schema.key,
 					value: true,
 				});
 			} else if (i < group.length - 1) {
-				tokens.push(
+				lexemes.push(
 					this.bindOption(
 						{
-							type: Parsed.Option,
+							type: Lexed.Option,
 							index: this.position - 1,
-							name,
+							name: schema.key,
 							value: group.slice(i + 1),
 						},
 						schema.valueType,
@@ -294,18 +288,18 @@ export class Parser {
 				this.nextArg();
 				const value = this.arg;
 				if (value === '\0') {
-					tokens.push({
-						type: Parsed.Problem,
+					lexemes.push({
+						type: Lexed.Problem,
 						index: this.position - 1,
 						message: `Expected value for '-${char}' at the end of group but reached end of arguments`,
 					});
 				} else {
-					tokens.push(
+					lexemes.push(
 						this.bindOption(
 							{
-								type: Parsed.Option,
+								type: Lexed.Option,
 								index: this.position - 2,
-								name,
+								name: schema.key,
 								value,
 							},
 							schema.valueType,
@@ -315,90 +309,56 @@ export class Parser {
 			}
 		}
 
-		return tokens;
+		return lexemes;
 	}
 
 	private setup(args: string[]): void {
 		this.args = args;
-		this.position = 0;
-		this.arg = '\0';
-		this.nextArg();
 
-		this.command = undefined;
+		this.arg = '\0';
+		this.position = 0;
 		this.reachedTerminator = false;
+		this.command = undefined;
+
+		this.nextArg();
 	}
 }
 
-export class SchemaRegistry {
-	static fromApp(app: App): SchemaRegistry {
-		const schema: Schema = { globals: {}, commands: {} };
-		for (const name in app[schemaKey]) {
-			const flagSchema = app[schemaKey][name];
-			schema.globals[name] = flagSchema as unknown as FlagSchema;
+export function parse<Globals extends App, CmdOptions extends Command>(
+	args: string[],
+	app: Globals,
+): [Globals, CmdOptions | undefined] {
+	const registry = new SchemaRegistry(app);
+	const lexer = new Lexer(registry);
+
+	const lexedArgs: LexedArg[] = [];
+	for (const lexed of lexer.lexemes(args)) {
+		if (lexed.type === Lexed.Problem) {
+			throw new Error(lexed.message);
+		} else if (lexed.type === Lexed.Positional) {
+			throw new Error(`Handling of positionals unimplemented`);
 		}
-		for (const command of app[commandsKey]) {
-			schema.commands[command.name] = {};
-			for (const name in command[schemaKey]) {
-				const flagSchema = command[schemaKey][name];
-				schema.commands[command.name][name] =
-					flagSchema as unknown as FlagSchema;
-			}
-		}
-		return new SchemaRegistry(schema);
+		lexedArgs.push(lexed);
 	}
 
-	constructor(private schema: Schema) {}
+	const appMeta = app.constructor as typeof App;
+	const globalOptions = new appMeta();
+	let commandOptions: Command | undefined;
 
-	isCommand(command: string): boolean {
-		return command in this.schema.commands;
+	for (const lexed of lexedArgs) {
+		if (
+			lexed.type === Lexed.Option &&
+			commandOptions !== undefined &&
+			registry.strictFind(lexed.name, commandOptions[nameKey])
+		) {
+			commandOptions[lexed.name] = lexed.value;
+		} else if (lexed.type === Lexed.Option) {
+			globalOptions[lexed.name] = lexed.value;
+		} else if (lexed.type === Lexed.Command) {
+			const commandMeta = registry.findCommandMeta(lexed.name)!;
+			commandOptions = new commandMeta();
+		}
 	}
 
-	getDefaults(command?: string): Record<string, any> {
-		const defaults: Record<string, any> = {};
-		for (const name in this.schema.globals) {
-			const flagSchema = this.schema.globals[name];
-			if (flagSchema?.default !== undefined) {
-				defaults[name] = flagSchema.default;
-			}
-		}
-
-		if (command === undefined) {
-			return defaults;
-		}
-
-		const commandSchema = this.schema.commands[command];
-		for (const name in commandSchema) {
-			const flagSchema = commandSchema[name];
-			if (flagSchema?.default !== undefined) {
-				defaults[name] = flagSchema.default;
-			}
-		}
-
-		return defaults;
-	}
-
-	find(name: string, command?: string): FlagSchema | undefined {
-		if (command !== undefined && name in this.schema.commands[command]) {
-			return this.schema.commands[command][name];
-		}
-		if (name in this.schema.globals) {
-			return this.schema.globals[name];
-		}
-		return undefined;
-	}
-
-	findEntryByShort(
-		short: string,
-		command?: string,
-	): [name: string, schema: FlagSchema] | undefined {
-		if (command !== undefined) {
-			const schemaEntry = Object.entries(
-				this.schema.commands[command],
-			).find(([, s]) => s.short && s.short === short);
-			if (schemaEntry !== undefined) return schemaEntry;
-		}
-		return Object.entries(this.schema.globals).find(
-			([, s]) => s.short && s.short === short,
-		);
-	}
+	return [globalOptions as Globals, commandOptions as any];
 }
