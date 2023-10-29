@@ -1,4 +1,5 @@
-import { App, Command, FlagSchema, SchemaRegistry, nameKey } from './flag.js';
+import { toKebabCase } from '../util/string.js';
+import { App, Command, FlagSchema, SchemaRegistry } from './flag.js';
 
 export type CommandSchema = Record<string, FlagSchema>;
 
@@ -215,7 +216,7 @@ export class Lexer {
 			};
 		}
 
-		const [name, schema] = schemaEntry;
+		const [, schema] = schemaEntry;
 
 		if (schema.valueType === null) {
 			return {
@@ -263,7 +264,7 @@ export class Lexer {
 				break;
 			}
 
-			const [name, schema] = schemaEntry;
+			const [, schema] = schemaEntry;
 			if (schema.valueType === null) {
 				lexemes.push({
 					type: Lexed.Option,
@@ -324,11 +325,11 @@ export class Lexer {
 	}
 }
 
-export function parse<Globals extends App, CmdOptions extends Command>(
+export function parse<Globals extends object, CmdOptions extends object>(
 	args: string[],
 	app: Globals,
 ): [Globals, CmdOptions | undefined] {
-	const registry = new SchemaRegistry(app);
+	const registry = SchemaRegistry.fromApp(app);
 	const lexer = new Lexer(registry);
 
 	const lexedArgs: LexedArg[] = [];
@@ -341,7 +342,7 @@ export function parse<Globals extends App, CmdOptions extends Command>(
 		lexedArgs.push(lexed);
 	}
 
-	const appMeta = app.constructor as typeof App;
+	const appMeta = (app as App).constructor;
 	const globalOptions = new appMeta();
 	let commandOptions: Command | undefined;
 
@@ -349,7 +350,10 @@ export function parse<Globals extends App, CmdOptions extends Command>(
 		if (
 			lexed.type === Lexed.Option &&
 			commandOptions !== undefined &&
-			registry.strictFind(lexed.name, commandOptions[nameKey])
+			registry.strictFind(
+				lexed.name,
+				toKebabCase(commandOptions.constructor.name),
+			)
 		) {
 			commandOptions[lexed.name] = lexed.value;
 		} else if (lexed.type === Lexed.Option) {

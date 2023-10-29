@@ -2,17 +2,18 @@ import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 import { Lexeme, Lexed, Lexer, parse } from './lexer.js';
 import {
-	App,
-	Command,
 	boolean,
 	commands,
 	number,
 	string,
 	SchemaRegistry,
+description,
+version,
 } from './flag.js';
 
 suite('lexer.ts', function () {
-	class Dance extends Command {
+  @description('')
+	class Dance {
 		@string({ short: 'S' })
 		style: string = 'breakdance';
 
@@ -20,8 +21,9 @@ suite('lexer.ts', function () {
 		fast?: boolean;
 	}
 
-	@commands([new Dance()])
-	class Cli extends App {
+  @description('')
+  @version('v1.0.0')
+	class Cli {
 		@string({ short: 'H' })
 		happy: string = 'yes';
 		@number({ short: 'u' })
@@ -40,9 +42,12 @@ suite('lexer.ts', function () {
 		config: string = 'config.json';
 		@string({ short: 'o' })
 		outputDir?: string;
+
+	  @commands([new Dance()])
+    command?: Dance;
 	}
 
-	const registry = new SchemaRegistry(new Cli());
+	const registry = SchemaRegistry.fromApp(new Cli());
 
 	suite('parse', function () {
 		test('returns only global options if command is left out', function () {

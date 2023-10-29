@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 import {
-	Command,
+  commands,
 	typedFlag,
 	boolean,
 	number,
@@ -35,10 +35,49 @@ suite('typedFlag', function () {
 	});
 });
 
+@description('Build a static site for production')
+class Build {
+	@boolean({
+		short: 'd',
+		description: 'Only print out what will been generated',
+	})
+	dryRun?: boolean;
+
+	@string({ description: 'Caching strategy to use on files' })
+	cachingMethod: string = 'advanced-btree5';
+}
+
+@description('Serve build output on localhost')
+class Serve {
+	@number({
+		short: 'p',
+		description: 'Port to serve build output on',
+	})
+	port: number = 4269;
+
+	@string({ description: 'Strategy to use for hot reloading' })
+	hotReload?: string;
+}
+
+@description('Toolkit for developing static sites')
+class Cli {
+	@commands([new Serve(), new Build()])
+	command?: Serve | Build;
+
+	@boolean({ description: 'Show this message', short: 'h' })
+	help?: boolean;
+
+	@string({ description: 'Relative path to config file', short: 'c' })
+	configFile: string = 'config.json';
+
+	@number({ description: 'Number of threads to use' })
+	concurrency: number = 1;
+}
+
 suite('decorators', function () {
 	test('reports the usage based on the internal schema', function () {
 		@description('Develop a static site')
-		class Dev extends Command {
+		class Dev {
 			@boolean({
 				description: 'Show version information',
 			})
@@ -76,12 +115,12 @@ Options:
       --schema <string>          Relative path to schema file
 `;
 
-		assert.equal(commandUsage(dev), expectedUsage);
+		assert.equal(commandUsage(dev as any), expectedUsage);
 	});
 
 	test('converts the class name to kebab-case in usage', function () {
 		@description('DOOO IT!')
-		class DoIt extends Command {}
+		class DoIt {}
 		const doIt = new DoIt();
 
 		const expectedUsage = `\
@@ -92,6 +131,6 @@ Options:
 
 `;
 
-		assert.equal(commandUsage(doIt), expectedUsage);
+		assert.equal(commandUsage(doIt as any), expectedUsage);
 	});
 });

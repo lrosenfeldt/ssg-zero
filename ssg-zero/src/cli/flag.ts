@@ -25,37 +25,47 @@ export type Schema = Record<string, FlagSchema>;
 
 const commandsKey = Symbol('commands');
 const descriptionKey = Symbol('description');
-export const nameKey = Symbol('name');
 const schemaKey = Symbol('schema');
 const versionKey = Symbol('version');
 
-export class Command {
-	static [descriptionKey]: string;
-	static [schemaKey]: Schema;
+export type CommandMeta = (new () => any) & {
+	[descriptionKey]: string;
+	[schemaKey]: Schema;
+};
 
-	[option: string]: any;
+export type Command = Record<string, any> & {
+	constructor: CommandMeta;
+};
 
-	get [nameKey](): string {
-		return toKebabCase(this.constructor.name);
-	}
-}
+export type AppMeta = (new () => any) & {
+	[commandsKey]: Command[];
+	[descriptionKey]: string;
+	[schemaKey]: Schema;
+	[versionKey]: string;
+};
 
-export class App extends Command {
-	static [commandsKey]: Command[];
-	static [versionKey]: string;
-}
+export type App = Record<string, any> & { constructor: AppMeta };
 
-export function commands(
-	cmds: Command[],
-): (value: typeof App, context: ClassDecoratorContext<typeof App>) => void {
-	return function commandsDecorator(value) {
-		value[commandsKey] = cmds;
+export function commands<Commands>(
+	cmds: Commands[],
+): (
+	value: undefined,
+	context: ClassFieldDecoratorContext<object, Commands | undefined>,
+) => (this: object, initialValue: Commands | undefined) => undefined {
+	return function commandsDecorator(_, context) {
+		return setFunctionName(
+			`onInit${context.name.toString()}AsCommandField`,
+			function () {
+				(this.constructor as any)[commandsKey] = cmds;
+				return undefined;
+			},
+		);
 	};
 }
 
 export function version(
 	vers: string,
-): (value: typeof App, context: ClassDecoratorContext<typeof App>) => void {
+): (value: any, context: ClassDecoratorContext) => void {
 	return function versionDecorator(value) {
 		value[versionKey] = vers;
 	};
@@ -63,10 +73,7 @@ export function version(
 
 export function description(
 	desc: string,
-): (
-	value: typeof Command,
-	context: ClassDecoratorContext<typeof Command>,
-) => void {
+): (value: any, context: ClassDecoratorContext) => void {
 	return function descriptionDecorator(value) {
 		value[descriptionKey] = desc;
 	};
@@ -77,8 +84,8 @@ export function typedFlag<BaseValue>(
 	config: FlagConfig,
 ): <Value extends BaseValue>(
 	value: undefined,
-	context: ClassNamedFieldDecoratorContext<Command, Value>,
-) => (this: Command, initialValue: Value) => Value {
+	context: ClassNamedFieldDecoratorContext<object, Value>,
+) => (this: object, initialValue: Value) => Value {
 	const typeName = flagType !== null ? flagType.name : 'boolean';
 	return setFunctionName(`${typeName}FlagDecorator`, function (_, context) {
 		return setFunctionName(
@@ -86,10 +93,10 @@ export function typedFlag<BaseValue>(
 			function (initialValue) {
 				let schema: Schema;
 				if (Object.hasOwn(this.constructor, schemaKey)) {
-					schema = (this.constructor as typeof Command)[schemaKey];
+					schema = (this.constructor as any)[schemaKey];
 				} else {
 					schema = {};
-					(this.constructor as typeof Command)[schemaKey] = schema;
+					(this.constructor as any)[schemaKey] = schema;
 				}
 				schema[toKebabCase(context.name)] = Object.assign<
 					FlagConfig,
@@ -129,14 +136,44 @@ export const string = (typedFlag<string | undefined>).bind(
 );
 
 export class SchemaRegistry {
-	private globals: Schema;
-	private commands: Command[];
-
-	constructor(app: App) {
-		const appMeta = app.constructor as typeof App;
-		this.globals = appMeta[schemaKey];
-		this.commands = appMeta[commandsKey];
+	private static isApp(target: object): target is App {
+		if (!this.isCommand(target)) {
+			return false;
+		}
+		const meta = target.constructor;
+		return (
+			Object.hasOwn(meta, commandsKey) &&
+			Array.isArray((meta as any)[commandsKey]) &&
+			(meta as any)[commandsKey].every(SchemaRegistry.isCommand)
+		);
 	}
+
+	private static isCommand(target: object): target is Command {
+		return (
+			Object.hasOwn(target.constructor, descriptionKey) &&
+			typeof (target.constructor as any)[descriptionKey] === 'string' &&
+			Object.hasOwn(target.constructor, schemaKey) &&
+			typeof (target.constructor as any)[schemaKey] === 'object'
+		);
+	}
+
+	static fromApp(app: object): SchemaRegistry {
+		if (!SchemaRegistry.isApp(app)) {
+			throw new Error(
+				`Cannot construct schema registry from invalid app definition`,
+			);
+		}
+
+		return new SchemaRegistry(
+			app.constructor[schemaKey],
+			app.constructor[commandsKey],
+		);
+	}
+
+	private constructor(
+		private globals: Schema,
+		private commands: Command[],
+	) {}
 
 	isCommand(name: string): boolean {
 		return this.findCommandMeta(name) !== undefined;
@@ -155,13 +192,15 @@ export class SchemaRegistry {
 		return undefined;
 	}
 
-	findCommandMeta(name: string): typeof Command | undefined {
-		const command = this.commands.find(cmd => cmd[nameKey] === name);
+	findCommandMeta(name: string): CommandMeta | undefined {
+		const command = this.commands.find(
+			cmd => toKebabCase(cmd.constructor.name) === name,
+		);
 		if (command === undefined) {
 			return undefined;
 		}
 
-		return command.constructor as typeof Command;
+		return command.constructor;
 	}
 
 	findEntryByShort(
@@ -242,12 +281,12 @@ function optionsUsage(fullSchema: Schema): string {
 }
 
 export function appUsage(app: App): string {
-	const appMeta = app.constructor as typeof App;
+	const appMeta = app.constructor;
 
 	const lines: Array<[aliases: string, description: string]> = [];
 	let aliasesColumnLength = 0;
 	for (const command of appMeta[commandsKey]) {
-		const commandMeta = command.constructor as typeof Command;
+		const commandMeta = command.constructor;
 		const commandName = toKebabCase(commandMeta.name);
 		aliasesColumnLength = Math.max(aliasesColumnLength, commandName.length);
 		lines.push([commandName, commandMeta[descriptionKey]]);
@@ -264,7 +303,7 @@ export function appUsage(app: App): string {
 		.join('\n');
 
 	return `\
-Usage: ${app[nameKey]} [GLOBAL_OPTIONS] <command>
+Usage: ${toKebabCase(appMeta.name)} [GLOBAL_OPTIONS] <command>
 ${appMeta[descriptionKey]}
 
 Commands:
@@ -276,10 +315,10 @@ ${optionsUsage(appMeta[schemaKey])}
 }
 
 export function commandUsage(command: Command): string {
-	const commandMeta = command.constructor as typeof Command;
+	const commandMeta = command.constructor;
 
 	return `\
-Usage: ssg-zero ${command[nameKey]} [OPTIONS]
+Usage: ssg-zero ${toKebabCase(commandMeta.name)} [OPTIONS]
 ${commandMeta[descriptionKey]}
 
 Options:
