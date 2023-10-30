@@ -1,13 +1,10 @@
 ## Currently
 
-Global options in the cli module could be improved. Currently I would need to return 2 objects, 1 for the global options and one for the command specified options. Would be cool to only get one combined object.
-
-- [ ] Options must be unique between command and globals, no silent override
-    - [ ] provide nice error message for this case
-- [ ] find a way to combine globals with command options
-
-- [ ] move schema registry tests in to flag.test
-
+- [ ] Add extensive tests for new parser implementation
+- [ ] Make FlagSchema generic to provide nice type checking for decorator - default and valueType should match
+- [ ] don't use constructor of schema directly use, assert that given constructor adheres to interface
+- [ ] what should I check to assert a correct appMeta in parser?
+- [ ] add description decorator
 
 ## General
 
