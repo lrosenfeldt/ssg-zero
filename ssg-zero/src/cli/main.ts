@@ -153,7 +153,7 @@ function setFunctionName<Fn extends Function>(name: string, fn: Fn): Fn {
 }
 
 class Parser<Cli extends object> {
-	private static assertIsCommandMeta(
+	static assertIsCommandMeta(
 		ctor: Function,
 	): asserts ctor is AppMeta {
 		if (

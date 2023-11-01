@@ -9,7 +9,7 @@ import {
 	parse,
 	string,
 	typedFlag,
-} from './here_we_go_again.js';
+} from './main.js';
 
 suite('typedFlag', function () {
 	// custom dummy flag type
