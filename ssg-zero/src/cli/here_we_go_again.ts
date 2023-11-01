@@ -1,22 +1,26 @@
 import { toKebabCase, toPascalCase } from '../util/string.js';
 
-export type FlagType = (value: string) => any;
+type Clearify<T> = { [K in keyof T]: T[K] } & {};
+type ClassNamedFieldDecoratorContext<This, Value> = ClassFieldDecoratorContext<
+	This,
+	Value
+> & { name: string };
+
+export type FlagParser = (value: string, arg: string, group?: string) => any;
 
 export type FlagSchema = {
-	valueType: FlagType | null;
-	setValue: (target: object, value: any) => void;
+	parse: FlagParser | null;
+	setValue: (value: any) => void;
 	short?: string;
 	description?: string;
 	default?: any;
 };
 
-type Clearify<T> = { [K in keyof T]: T[K] } & {};
-
 export type FlagConfig = Clearify<
-	Omit<FlagSchema, 'default' | 'setValue' | 'valueType'>
+	Omit<FlagSchema, 'default' | 'parse' | 'setValue'>
 >;
 
-export class Schema {
+class Schema {
 	private schema: Record<string, FlagSchema> = {};
 
 	find(name: string): FlagSchema | undefined {
@@ -51,8 +55,6 @@ type AppMeta<App extends object = object> = (new () => App) & {
 	[schemaKey]: Schema;
 };
 
-type App<Self extends object = object> = Self & { constructor: AppMeta<Self> };
-
 export function command<
 	Commands extends object,
 	Constructor extends new () => Commands,
@@ -60,9 +62,7 @@ export function command<
 	cmds: Array<Constructor>,
 ): (
 	value: undefined,
-	context: ClassFieldDecoratorContext<object, Commands | undefined> & {
-		name: string;
-	},
+	context: ClassNamedFieldDecoratorContext<object, Commands | undefined>,
 ) => (this: object, initial: Commands | undefined) => undefined {
 	return function commandDecorator(_, context) {
 		return setFunctionName(
@@ -79,14 +79,49 @@ export function command<
 	};
 }
 
-export function typedFlag<BaseValue>(
-	flagType: FlagSchema['valueType'],
+export function boolean(
+	config: FlagConfig,
+): <Value extends boolean | undefined>(
+	value: undefined,
+	context: ClassNamedFieldDecoratorContext<object, Value>,
+) => (this: object, initial: Value) => Value {
+	return function booleanFlagDecorator(_, context) {
+		return setFunctionName(
+			`onInit${toPascalCase(context.name)}AsBoolean`,
+			function (initial) {
+				let schema: Schema;
+				if (Object.hasOwn(this.constructor, schemaKey)) {
+					schema = (this.constructor as any)[schemaKey];
+				} else {
+					schema = new Schema();
+					(this.constructor as any)[schemaKey] = schema;
+				}
+
+				schema.insert(
+					toKebabCase(context.name),
+					Object.assign<
+						FlagConfig,
+						Pick<FlagSchema, 'default' | 'parse' | 'setValue'>
+					>(config, {
+						default: initial,
+						parse: null,
+						setValue: context.access.set.bind(null, this),
+					}),
+				);
+				return initial;
+			},
+		);
+	};
+}
+
+export function typedValueFlag<BaseValue>(
+	flagType: FlagParser,
 	config: FlagConfig,
 ): <Value extends BaseValue>(
 	value: undefined,
-	context: ClassFieldDecoratorContext<object, Value> & { name: string },
+	context: ClassNamedFieldDecoratorContext<object, Value>,
 ) => (this: object, initial: Value) => Value {
-	const typeName = flagType !== null ? flagType.name : 'boolean';
+	const typeName = flagType.name;
 	return setFunctionName(`${typeName}FlagDecorator`, function (_, context) {
 		return setFunctionName(
 			`onInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`,
@@ -102,11 +137,11 @@ export function typedFlag<BaseValue>(
 					toKebabCase(context.name),
 					Object.assign<
 						FlagConfig,
-						Pick<FlagSchema, 'default' | 'setValue' | 'valueType'>
+						Pick<FlagSchema, 'default' | 'parse' | 'setValue'>
 					>(config, {
 						default: initialValue,
-						valueType: flagType,
-						setValue: context.access.set,
+						parse: flagType,
+						setValue: context.access.set.bind(null, this),
 					}),
 				);
 
@@ -116,23 +151,25 @@ export function typedFlag<BaseValue>(
 	});
 }
 
-export const boolean = (typedFlag<boolean | undefined>).bind(null, null);
-
-export const number = (typedFlag<number | undefined>).bind(
+export const number = (typedValueFlag<number | undefined>).bind(
 	null,
-	function number(value) {
+	function number(value, arg, group) {
 		if (value.toLowerCase() === 'nan') {
 			return NaN;
 		}
 		const asNumber = Number(value);
 		if (Number.isNaN(asNumber)) {
-			return Error(`Given '${value}' is not a valid number`);
+			throw new Error(
+				`Found invalid number '${value}' for '${arg}'${
+					group ? ` in '${group}'` : ''
+				}`,
+			);
 		}
 		return asNumber;
 	},
 );
 
-export const string = (typedFlag<string | undefined>).bind(
+export const string = (typedValueFlag<string | undefined>).bind(
 	null,
 	function string(value) {
 		return value;
@@ -149,6 +186,30 @@ function setFunctionName<Fn extends Function>(name: string, fn: Fn): Fn {
 }
 
 class Parser<Cli extends object> {
+	private static assertIsCommandMeta(
+		ctor: Function,
+	): asserts ctor is AppMeta {
+		if (!Object.hasOwn(ctor, schemaKey)) {
+			throw new Error(
+				`Given class ${ctor.name} has no schema configured. Use the 'boolean', 'number or 'string' decorator on at least one field.`,
+			);
+		}
+		if (!((ctor as any)[schemaKey] instanceof Schema)) {
+			throw new Error(
+				`Class ${ctor.name} was setup with a schema that is not an actual Schema instance.`,
+			);
+		}
+	}
+
+	static from<Cli extends object>(
+		args: string[],
+		cli: new () => Cli,
+	): Parser<Cli> {
+		const dto = new cli();
+		Parser.assertIsCommandMeta(cli);
+		return new Parser<Cli>(args, cli, dto);
+	}
+
 	// parser state
 	private args: string[];
 	private arg: string = '\0';
@@ -156,18 +217,17 @@ class Parser<Cli extends object> {
 	private reachedTerminator: boolean = false;
 
 	// parsed options and control structures for them
-	private meta: AppMeta<Cli>;
-	private cli: Cli;
-	private activeOptions: object;
+	private cli: AppMeta<Cli>;
+	private dto: Cli;
 	private activeSchema: Schema;
+	private activeCommand: string | undefined = undefined;
 
-	constructor(args: string[], meta: AppMeta<Cli>) {
+	private constructor(args: string[], cli: AppMeta<Cli>, cliDto: Cli) {
 		this.args = args;
 
-		this.meta = meta;
-		this.cli = new meta();
-		this.activeOptions = this.cli;
-		this.activeSchema = meta[schemaKey];
+		this.cli = cli;
+		this.dto = cliDto;
+		this.activeSchema = cli[schemaKey];
 
 		this.nextArg();
 	}
@@ -188,7 +248,7 @@ class Parser<Cli extends object> {
 				this.parseShortOption();
 			} else if (this.arg.startsWith('-') && this.arg.length > 2) {
 				this.parseShortOptionGroup();
-			} else if (this.activeOptions === this.cli) {
+			} else if (this.activeCommand === undefined) {
 				this.parseCommand();
 			} else {
 				// positionals
@@ -196,7 +256,7 @@ class Parser<Cli extends object> {
 			}
 		}
 
-		return this.cli;
+		return this.dto;
 	}
 
 	private nextArg(): void {
@@ -209,16 +269,18 @@ class Parser<Cli extends object> {
 	}
 
 	private parseCommand(): void {
-		const commandMeta = this.meta[commandsKey].find(
-			command => this.arg === toKebabCase(command.name),
+		const commandName = this.arg;
+		const commandMeta = this.cli[commandsKey].find(
+			command => commandName === toKebabCase(command.name),
 		);
 		if (commandMeta === undefined) {
 			throw new Error(`Found unknown command '${this.arg}'`);
 		}
 
 		const command = new commandMeta();
-		this.activeOptions = command;
-		this.meta[injectKey](command);
+		Parser.assertIsCommandMeta(commandMeta);
+		this.activeCommand = commandName;
+		this.cli[injectKey](command);
 		this.activeSchema = commandMeta[schemaKey];
 	}
 
@@ -233,11 +295,13 @@ class Parser<Cli extends object> {
 			);
 		}
 
-		if (schema.valueType === null) {
+		if (schema.parse === null) {
 			throw new Error(`Got unexpected value for '--${argName}'`);
 		}
 
-		this.parseValueBySchema(this.arg.slice(indexOfEqualSign + 1), schema);
+		schema.setValue(
+			schema.parse(this.arg.slice(indexOfEqualSign + 1), `--${argName}`),
+		);
 	}
 
 	private parseLongOption(): void {
@@ -248,8 +312,8 @@ class Parser<Cli extends object> {
 			throw new Error(`Found unknown option '--${argName}'`);
 		}
 
-		if (schema.valueType === null) {
-			schema.setValue(this.activeOptions, true);
+		if (schema.parse === null) {
+			schema.setValue(true);
 			return;
 		}
 
@@ -260,7 +324,7 @@ class Parser<Cli extends object> {
 			);
 		}
 
-		this.parseValueBySchema(this.arg, schema);
+		schema.setValue(schema.parse(this.arg, `--${argName}`));
 	}
 
 	private parseShortOption(): void {
@@ -271,8 +335,8 @@ class Parser<Cli extends object> {
 			throw new Error(`Found unknown alias '-${short}'`);
 		}
 
-		if (schema.valueType === null) {
-			schema.setValue(this.activeOptions, true);
+		if (schema.parse === null) {
+			schema.setValue(true);
 			return;
 		}
 
@@ -283,7 +347,7 @@ class Parser<Cli extends object> {
 			);
 		}
 
-		this.parseValueBySchema(this.arg, schema);
+		schema.setValue(schema.parse(this.arg, `-${this.arg}`));
 	}
 
 	private parseShortOptionGroup(): void {
@@ -297,12 +361,13 @@ class Parser<Cli extends object> {
 				);
 			}
 
-			if (schema.valueType !== null && i < group.length - 1) {
+			if (schema.parse !== null && i < group.length - 1) {
 				// middle of group
 				const value = group.slice(i + 1);
-				this.parseValueBySchema(value, schema);
+				const argGroup = i === 0 ? undefined : group.slice(0, i + 1);
+				schema.setValue(schema.parse(value, `-${char}`, argGroup));
 				break;
-			} else if (schema.valueType !== null) {
+			} else if (schema.parse !== null) {
 				this.nextArg();
 				if (this.arg === '\0') {
 					throw new Error(
@@ -310,28 +375,20 @@ class Parser<Cli extends object> {
 					);
 				}
 
-				this.parseValueBySchema(this.arg, schema);
+				schema.setValue(schema.parse(this.arg, `-${char}`, group));
 				break;
 			} else {
-				schema.setValue(this.activeOptions, true);
+				schema.setValue(true);
 				continue;
 			}
 		}
 	}
-
-	private parseValueBySchema(value: string, schema: FlagSchema) {
-		const parsedValue = schema.valueType!(value);
-		// TODO: do proper error handling
-		if (parsedValue instanceof Error) {
-			parsedValue.message = `Found invalid value '${this.arg}': ${parsedValue.message}`;
-			throw parsedValue;
-		}
-
-		schema.setValue(this.activeOptions, parsedValue);
-	}
 }
 
-export function parse<Cli extends object>(args: string[], cli: new () => Cli): Cli {
-  const parser =  new Parser(args, cli as AppMeta<Cli>);
-  return parser.parse();
+export function parse<Cli extends object>(
+	args: string[],
+	cli: new () => Cli,
+): Cli {
+	const parser = Parser.from(args, cli);
+	return parser.parse();
 }
