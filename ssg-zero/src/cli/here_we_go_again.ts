@@ -79,49 +79,14 @@ export function command<
 	};
 }
 
-export function boolean(
-	config: FlagConfig,
-): <Value extends boolean | undefined>(
-	value: undefined,
-	context: ClassNamedFieldDecoratorContext<object, Value>,
-) => (this: object, initial: Value) => Value {
-	return function booleanFlagDecorator(_, context) {
-		return setFunctionName(
-			`onInit${toPascalCase(context.name)}AsBoolean`,
-			function (initial) {
-				let schema: Schema;
-				if (Object.hasOwn(this.constructor, schemaKey)) {
-					schema = (this.constructor as any)[schemaKey];
-				} else {
-					schema = new Schema();
-					(this.constructor as any)[schemaKey] = schema;
-				}
-
-				schema.insert(
-					toKebabCase(context.name),
-					Object.assign<
-						FlagConfig,
-						Pick<FlagSchema, 'default' | 'parse' | 'setValue'>
-					>(config, {
-						default: initial,
-						parse: null,
-						setValue: context.access.set.bind(null, this),
-					}),
-				);
-				return initial;
-			},
-		);
-	};
-}
-
-export function typedValueFlag<BaseValue>(
-	flagType: FlagParser,
+export function typedFlag<BaseValue>(
+	flagType: FlagSchema['parse'],
 	config: FlagConfig,
 ): <Value extends BaseValue>(
 	value: undefined,
 	context: ClassNamedFieldDecoratorContext<object, Value>,
 ) => (this: object, initial: Value) => Value {
-	const typeName = flagType.name;
+	const typeName = flagType !== null ? flagType.name : 'boolean';
 	return setFunctionName(`${typeName}FlagDecorator`, function (_, context) {
 		return setFunctionName(
 			`onInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`,
@@ -151,7 +116,9 @@ export function typedValueFlag<BaseValue>(
 	});
 }
 
-export const number = (typedValueFlag<number | undefined>).bind(
+export const boolean = (typedFlag<boolean | undefined>).bind(null, null);
+
+export const number = (typedFlag<number | undefined>).bind(
 	null,
 	function number(value, arg, group) {
 		if (value.toLowerCase() === 'nan') {
@@ -169,7 +136,7 @@ export const number = (typedValueFlag<number | undefined>).bind(
 	},
 );
 
-export const string = (typedValueFlag<string | undefined>).bind(
+export const string = (typedFlag<string | undefined>).bind(
 	null,
 	function string(value) {
 		return value;
@@ -189,14 +156,12 @@ class Parser<Cli extends object> {
 	private static assertIsCommandMeta(
 		ctor: Function,
 	): asserts ctor is AppMeta {
-		if (!Object.hasOwn(ctor, schemaKey)) {
+		if (
+			!Object.hasOwn(ctor, schemaKey) ||
+			!((ctor as any)[schemaKey] instanceof Schema)
+		) {
 			throw new Error(
 				`Given class ${ctor.name} has no schema configured. Use the 'boolean', 'number or 'string' decorator on at least one field.`,
-			);
-		}
-		if (!((ctor as any)[schemaKey] instanceof Schema)) {
-			throw new Error(
-				`Class ${ctor.name} was setup with a schema that is not an actual Schema instance.`,
 			);
 		}
 	}
@@ -365,7 +330,7 @@ class Parser<Cli extends object> {
 				// middle of group
 				const value = group.slice(i + 1);
 				const argGroup = i === 0 ? undefined : group.slice(0, i + 1);
-				schema.setValue(schema.parse(value, `-${char}`, argGroup));
+				schema.setValue(schema.parse(value, `-${char}`, `-${argGroup}`));
 				break;
 			} else if (schema.parse !== null) {
 				this.nextArg();
@@ -375,7 +340,7 @@ class Parser<Cli extends object> {
 					);
 				}
 
-				schema.setValue(schema.parse(this.arg, `-${char}`, group));
+				schema.setValue(schema.parse(this.arg, `-${char}`, `-${group}`));
 				break;
 			} else {
 				schema.setValue(true);
