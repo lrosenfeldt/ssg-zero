@@ -1,10 +1,10 @@
 ## Currently
 
-- [ ] Add extensive tests for new parser implementation
-- [ ] Make FlagSchema generic to provide nice type checking for decorator - default and valueType should match
-- [ ] don't use constructor of schema directly use, assert that given constructor adheres to interface
-- [ ] what should I check to assert a correct appMeta in parser?
+- [x] Add extensive tests for new parser implementation
+- [ ] add positionals decorator
+- [x] validate commandMeta structure dynamically
 - [ ] add description decorator
+- [ ] Make FlagSchema generic to provide nice type checking for decorator - default and valueType should match
 
 ## General
 
