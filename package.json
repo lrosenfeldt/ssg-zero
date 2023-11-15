@@ -19,9 +19,10 @@
 		"format:write": "prettier --write --ignore-unknown ./ssg-zero"
 	},
 	"type": "module",
-	"version": "0.4.0",
+	"version": "0.5.0",
   "workspaces": [
-    "./ssg-zero"
+    "ssg-zero",
+    "site"
   ],
 	"devDependencies": {
 		"@types/node": "^20.8.10",

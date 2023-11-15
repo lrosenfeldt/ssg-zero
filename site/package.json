@@ -5,17 +5,17 @@
   },
   "description": "A blog generated with ssg-zero.",
   "engines": {
-    "node": ">=20"
+    "node": ">=21"
   },
   "keywords": [
     "blog",
     "html"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {},
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "dependencies": {
-    "ssg-zero": "file:../ssg-zero"
+    "@ssg/zero": "^0.5.0"
   }
 }
