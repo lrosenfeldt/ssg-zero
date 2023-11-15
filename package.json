@@ -15,8 +15,8 @@
 	"main": "./dist/main.js",
 	"scripts": {
 		"compile": "tsc --build",
-		"format": "prettier --check --ignore-unknown ./ssg-zero",
-		"format:write": "prettier --write --ignore-unknown ./ssg-zero"
+		"format": "prettier --check --ignore-unknown ./ssg-zero ./site",
+		"format:write": "prettier --write --ignore-unknown ./ssg-zero ./site"
 	},
 	"type": "module",
 	"version": "0.5.0",
