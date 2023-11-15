@@ -185,7 +185,7 @@ export class Parser<Cli extends object> {
 		cli: new () => Cli,
 	): Parser<Cli> {
 		const instance = new cli();
-    Parser.assertIsCommandMeta(cli);
+		Parser.assertIsCommandMeta(cli);
 		return new Parser(args, instance, cli as any);
 	}
 
@@ -203,11 +203,16 @@ export class Parser<Cli extends object> {
 			);
 		}
 
-    if (!(Object.hasOwn(target, kDescription) && typeof (target as any)[kDescription] === 'string')) {
+		if (
+			!(
+				Object.hasOwn(target, kDescription) &&
+				typeof (target as any)[kDescription] === 'string'
+			)
+		) {
 			throw new Error(
 				`Tried to use class '${target.name}' as a command or cli but is missing a description`,
 			);
-    }
+		}
 	}
 
 	// parser state

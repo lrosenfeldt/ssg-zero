@@ -73,10 +73,10 @@ suite('exists', function () {
 	});
 });
 suite('walkFiles', function () {
-  before(async () => {
-    // directory is not tracked by git and we cant use gitkeep here
-    await mkdir('fixtures/empty', { recursive: true })
-  });
+	before(async () => {
+		// directory is not tracked by git and we cant use gitkeep here
+		await mkdir('fixtures/empty', { recursive: true });
+	});
 
 	test('yields nothing for an empty directory', async function () {
 		const walkedFiles: string[] = [];

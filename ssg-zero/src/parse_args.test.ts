@@ -159,7 +159,7 @@ suite('Parser', function () {
 	});
 
 	test('throws on unexpected positional', function () {
-    @description('')
+		@description('')
 		class NoArgs {
 			@number({ short: 'c' })
 			count: number = 0;

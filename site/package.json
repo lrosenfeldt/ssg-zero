@@ -1,21 +1,21 @@
 {
-  "name": "site",
-  "author": {
-    "name": "Lukas Rosenfeldt"
-  },
-  "description": "A blog generated with ssg-zero.",
-  "engines": {
-    "node": ">=21"
-  },
-  "keywords": [
-    "blog",
-    "html"
-  ],
-  "license": "MIT",
-  "scripts": {},
-  "type": "module",
-  "version": "0.2.0",
-  "dependencies": {
-    "@ssg/zero": "^0.5.0"
-  }
+	"name": "site",
+	"author": {
+		"name": "Lukas Rosenfeldt"
+	},
+	"description": "A blog generated with ssg-zero.",
+	"engines": {
+		"node": ">=21"
+	},
+	"keywords": [
+		"blog",
+		"html"
+	],
+	"license": "MIT",
+	"scripts": {},
+	"type": "module",
+	"version": "0.2.0",
+	"dependencies": {
+		"@ssg/zero": "^0.5.0"
+	}
 }
