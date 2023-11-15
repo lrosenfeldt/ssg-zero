@@ -1,17 +1,8 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"declaration": true,
-		"declarationMap": true,
-		"forceConsistentCasingInFileNames": true,
-		"module": "nodenext",
-		"moduleResolution": "nodenext",
-		"noEmitOnError": true,
 		"outDir": "./dist",
-		"pretty": true,
 		"rootDir": "./src",
-		"sourceMap": true,
-    "strict": true,
-		"target": "es2022"
 	}
 }

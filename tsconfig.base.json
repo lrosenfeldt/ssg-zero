@@ -1,0 +1,17 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+    "composite": true,
+		"declaration": true,
+		"declarationMap": true,
+		"forceConsistentCasingInFileNames": true,
+    "incremental": true,
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"noEmitOnError": true,
+		"pretty": true,
+		"sourceMap": true,
+    "strict": true,
+		"target": "es2022"
+	}
+}

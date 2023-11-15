@@ -1,6 +1,7 @@
 node_modules
 
 dist/
+*.tsbuildinfo
 
 fixtures/pages_dump/
 fixtures/dist_dump/

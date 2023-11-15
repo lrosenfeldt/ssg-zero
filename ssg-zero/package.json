@@ -1,12 +1,12 @@
 {
-	"name": "ssg-zero",
+	"name": "@ssg/zero",
 	"author": {
 		"name": "Lukas Rosenfeldt"
 	},
 	"bin": {
 		"ssg-zero": "./bin/ssg-zero.js"
 	},
-	"description": "One static site generator, zero dependencies.*",
+	"description": "The static site generator. Look at the dependencies",
 	"engines": {
 		"node": ">=21"
 	},
@@ -14,21 +14,12 @@
 		"ssg",
 		"html"
 	],
-	"license": "ISC",
+	"license": "MIT",
 	"main": "./dist/main.js",
 	"scripts": {
-		"compile": "tsc",
-		"format": "prettier --write ./src",
-		"format:check": "prettier --check ./src",
 		"test": "tsc && node --enable-source-maps --test",
 		"test:coverage": "tsc && NODE_DISABLE_COLORS=1 node --enable-source-maps --test --experimental-test-coverage --test-reporter tap | awk '/^# start of coverage/ {p=1} p' | sed '1d;$d;s/|//g;s/^# //g' | awk '!/\\.test\\.js /' | tee coverage.txt"
 	},
 	"type": "module",
-	"version": "0.4.0",
-	"devDependencies": {
-		"@types/eslint": "^8.44.6",
-		"@types/node": "^20.8.10",
-		"prettier": "^3.0.3",
-		"typescript": "^5.2.2"
-	}
+	"version": "0.4.0"
 }
