@@ -55,9 +55,9 @@ suite('parse_args.ts: decorators', function () {
 
 			@cli({ desc: 'git gud' })
 			class Git {
-        @subcommand([Diff])
-        command?: Diff
-      }
+				@subcommand([Diff])
+				command?: Diff;
+			}
 		});
 	});
 
@@ -152,11 +152,11 @@ suite('parse_args.ts: parse', function () {
 		files?: string[];
 	}
 
-  @command({ desc: 'Provide help' })
-  class Help {
-    @boolean({ short: 'C' })
-    concise: boolean = false;
-  }
+	@command({ desc: 'Provide help' })
+	class Help {
+		@boolean({ short: 'C' })
+		concise: boolean = false;
+	}
 
 	@cli({ desc: 'A cli tool' })
 	class Cli {

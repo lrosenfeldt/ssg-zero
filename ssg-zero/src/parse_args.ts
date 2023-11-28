@@ -113,7 +113,7 @@ export function subcommand<
 	Command extends object,
 	Ctor extends new () => Command,
 >(
-	cmds: Ctor[]
+	cmds: Ctor[],
 ): (
 	value: undefined,
 	context: ClassFieldDecoratorContext<object, Command | undefined>,
@@ -377,9 +377,7 @@ export class Parser<Cli extends object> {
 	private parsePositionals(): void {
 		const inject = this.activeMeta[kInjectPositionals];
 		if (inject === undefined) {
-			throw new Error(
-				`Got unexpected positional '${this.arg}'`,
-			);
+			throw new Error(`Got unexpected positional '${this.arg}'`);
 		}
 
 		const rest = this.args.slice(this.position - 1);
