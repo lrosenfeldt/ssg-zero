@@ -36,56 +36,104 @@ class Schema {
 	}
 }
 
-const kSchema = Symbol('schema');
-const kDescription = Symbol('description');
-const kInjectPositionals = Symbol('inject-positionals');
+const register = new WeakSet<Function>();
 
 const kCommands = Symbol('description');
+const kDescription = Symbol('description');
 const kInjectCommand = Symbol('inject-command');
+const kInjectPositionals = Symbol('inject-positionals');
+const kSchema = Symbol('schema');
+const kRoot = Symbol('root');
 
-type CommandMeta = (new () => object) & {
+type Meta<Cli extends object = object> = (new () => Cli) & {
+	[kRoot]: boolean;
+	[kCommands]: Meta[];
 	[kDescription]: string;
-	[kInjectPositionals]?: (target: object, arg: string[]) => void;
+	[kInjectCommand]: ((target: object, command: object) => void) | undefined;
+	[kInjectPositionals]: ((target: object, arg: string[]) => void) | undefined;
 	[kSchema]: Schema;
 };
-type CliMeta<Cli extends object> = (new () => Cli) & {
-	[kCommands]: CommandMeta[];
-	[kInjectCommand]: (target: Cli, command: object) => void;
-	[kDescription]: string;
-	[kInjectPositionals]?: (target: Cli, command: object) => void;
-	[kSchema]: Schema;
-};
 
-export function commands<
-	Commands extends object,
-	Ctor extends new () => Commands,
+export function cli(config: {
+	desc: string;
+}): (
+	value: new () => object,
+	context: ClassDecoratorContext<new () => object>,
+) => void {
+	return function cliDecorator(value, context) {
+		if (register.has(value)) {
+			throw new Error(
+				`Tried to register cli '${value.name}' multiple times. Use '@cli' only once on a class.`,
+			);
+		}
+		register.add(value);
+		(value as Meta)[kRoot] = true;
+		(value as Meta)[kCommands] = [];
+		(value as Meta)[kDescription] = config.desc;
+		(value as Meta)[kInjectCommand] = undefined;
+		(value as Meta)[kInjectPositionals] = undefined;
+		(value as Meta)[kSchema] = new Schema();
+		context.addInitializer(function () {
+			// ensure an instance is constructed to populate schema
+			new value();
+			const needsCheck = (value as Meta)[kCommands];
+			for (const commandMeta of needsCheck) {
+				new commandMeta();
+				needsCheck.push(...commandMeta[kCommands]);
+			}
+			// add any sanity checks here if needed
+			// for now the defaults are fine if the user doesn't provide anything
+		});
+	};
+}
+
+export function command(config: {
+	desc: string;
+}): (
+	value: new () => object,
+	context: ClassDecoratorContext<new () => object>,
+) => void {
+	return function commandDecorator(value) {
+		if (register.has(value)) {
+			throw new Error(
+				`Tried to register command '${value.name}' multiple times. Use '@command' only once on a class.`,
+			);
+		}
+		register.add(value);
+		(value as Meta)[kRoot] = false;
+		(value as Meta)[kCommands] = [];
+		(value as Meta)[kDescription] = config.desc;
+		(value as Meta)[kInjectCommand] = undefined;
+		(value as Meta)[kInjectPositionals] = undefined;
+		(value as Meta)[kSchema] = new Schema();
+	};
+}
+
+export function subcommand<
+	Command extends object,
+	Ctor extends new () => Command,
 >(
-	...cmds: Ctor[]
+	cmds: Ctor[]
 ): (
 	value: undefined,
-	context: ClassFieldDecoratorContext<object, Commands | undefined>,
-) => (this: object, initial: Commands | undefined) => undefined {
-	return function commandsDecorator(_, context) {
+	context: ClassFieldDecoratorContext<object, Command | undefined>,
+) => (this: object, initial: Command | undefined) => undefined {
+	return function subommandDecorator(_, context) {
 		const name =
 			typeof context.name === 'string'
 				? toPascalCase(context.name)
 				: context.name.toString();
-		return setFunctionName(
-			`onInit${name}AsCommandField`,
-			function (this, _) {
-				(this.constructor as any)[kCommands] = cmds;
-				(this.constructor as any)[kInjectCommand] = context.access.set;
-				return undefined;
-			},
-		);
-	};
-}
-
-export function description(
-	desc: string,
-): (value: new () => object, context: ClassDecoratorContext) => void {
-	return function descriptionDecorator(value) {
-		(value as any)[kDescription] = desc;
+		return setFunctionName(`onInit${name}AsCommandField`, function () {
+			if (!register.has(this.constructor)) {
+				throw new Error(
+					`Tried to add subcommand to unregistered command ${this.constructor.name}. Use '@command' to register the command first.`,
+				);
+			}
+			(this.constructor as Meta)[kCommands] = cmds as any[];
+			(this.constructor as Meta)[kInjectCommand] = context.access
+				.set as any;
+			return undefined;
+		});
 	};
 }
 
@@ -101,9 +149,13 @@ export function positionals(): (
 		return setFunctionName(
 			`onInit${name}AsPositionalsField`,
 			function (initial) {
-				(this.constructor as unknown as CommandMeta)[
-					kInjectPositionals
-				] = context.access.set;
+				if (!register.has(this.constructor)) {
+					throw new Error(
+						`Tried to allow positionals on unregistered command ${this.constructor.name}. Use '@command' to register the command first.`,
+					);
+				}
+				(this.constructor as Meta)[kInjectPositionals] =
+					context.access.set;
 				return initial;
 			},
 		);
@@ -121,15 +173,14 @@ function typedFlag<BaseValue>(
 	const typeName = parse !== null ? parse.name : 'boolean';
 	return setFunctionName(`${typeName}FlagDecorator`, function (_, context) {
 		return setFunctionName(
-			`onInit${toPascalCase(context.name)}As${typeName}`,
+			`onInit${toPascalCase(context.name)}As${toPascalCase(typeName)}`,
 			function (initial) {
-				let schema: Schema;
-				if (Object.hasOwn(this.constructor, kSchema)) {
-					schema = (this.constructor as any)[kSchema];
-				} else {
-					schema = new Schema();
-					(this.constructor as any)[kSchema] = schema;
+				if (!register.has(this.constructor)) {
+					throw new Error(
+						`Tried to add flag on unregistered command ${this.constructor.name}. Use '@command' to register the command first.`,
+					);
 				}
+				const schema: Schema = (this.constructor as Meta)[kSchema];
 
 				schema.insert(
 					toKebabCase(context.name),
@@ -184,33 +235,22 @@ export class Parser<Cli extends object> {
 		args: string[],
 		cli: new () => Cli,
 	): Parser<Cli> {
-		const instance = new cli();
-		Parser.assertIsCommandMeta(cli);
-		return new Parser(args, instance, cli as any);
+		this.assertIsCliMeta(cli);
+		return new Parser(args, cli);
 	}
 
-	private static assertIsCommandMeta(
-		target: new () => object,
-	): asserts target is CommandMeta {
-		if (
-			!(
-				Object.hasOwn(target, kSchema) &&
-				(target as any)[kSchema] instanceof Schema
-			)
-		) {
+	private static assertIsCliMeta<Cli extends object>(
+		target: new () => Cli,
+	): asserts target is Meta<Cli> {
+		if (!Object.hasOwn(target, kRoot)) {
 			throw new Error(
-				`Tried to use class '${target.name}' as a command or cli but is missing a schema`,
+				`Can't use arbitrary class '${target.name}' as cli definition.`,
 			);
 		}
 
-		if (
-			!(
-				Object.hasOwn(target, kDescription) &&
-				typeof (target as any)[kDescription] === 'string'
-			)
-		) {
+		if (!(target as Meta<Cli>)[kRoot]) {
 			throw new Error(
-				`Tried to use class '${target.name}' as a command or cli but is missing a description`,
+				`Tried to use command '${target.name}' as cli. Use the '@cli' decorator on the class.`,
 			);
 		}
 	}
@@ -222,20 +262,17 @@ export class Parser<Cli extends object> {
 	private reachedPositionals: boolean = false;
 
 	// parsed result and related
-	private cliMeta: CliMeta<Cli>;
 	private options: Cli;
+	private activeMeta: Meta;
 	private activeOptions: object;
-	private activeCommand: object | undefined = undefined;
-	private activeSchema: Schema;
 
-	constructor(args: string[], cli: Cli, cliMeta: CliMeta<Cli>) {
+	constructor(args: string[], cliMeta: Meta<Cli>) {
 		this.args = args;
 		this.nextArg();
 
-		this.cliMeta = cliMeta;
-		this.options = cli;
-		this.activeOptions = cli;
-		this.activeSchema = cliMeta[kSchema];
+		this.options = new cliMeta();
+		this.activeMeta = cliMeta;
+		this.activeOptions = this.options;
 	}
 
 	parse(): Cli {
@@ -252,7 +289,7 @@ export class Parser<Cli extends object> {
 				this.parseShortOption();
 			} else if (this.arg.startsWith('-') && this.arg.length > 2) {
 				this.parseShortOptionGroup();
-			} else if (this.activeCommand === undefined) {
+			} else if (this.needsCommand()) {
 				this.parseCommand();
 			} else {
 				this.reachedPositionals = true;
@@ -267,6 +304,10 @@ export class Parser<Cli extends object> {
 		return this.options;
 	}
 
+	private needsCommand(): boolean {
+		return this.activeMeta[kInjectCommand] !== undefined;
+	}
+
 	private nextArg(): void {
 		if (this.position >= this.args.length) {
 			this.arg = '\0';
@@ -276,7 +317,7 @@ export class Parser<Cli extends object> {
 	}
 
 	private parseCommand(): void {
-		const commandMeta = this.cliMeta[kCommands].find(
+		const commandMeta = this.activeMeta[kCommands].find(
 			command => this.arg === toKebabCase(command.name),
 		);
 		if (commandMeta === undefined) {
@@ -284,19 +325,17 @@ export class Parser<Cli extends object> {
 		}
 
 		const command = new commandMeta();
-		Parser.assertIsCommandMeta(commandMeta);
-		this.cliMeta[kInjectCommand](this.options, command);
+		this.activeMeta[kInjectCommand]!(this.activeOptions, command);
 
-		this.activeCommand = command;
+		this.activeMeta = commandMeta;
 		this.activeOptions = command;
-		this.activeSchema = commandMeta[kSchema];
 	}
 
 	private parseInlineValue(): void {
 		const indexOfEqualSign = this.arg.indexOf('=');
 		const argName = this.arg.slice(2, indexOfEqualSign);
 
-		const schema = this.activeSchema.find(argName);
+		const schema = this.activeMeta[kSchema].find(argName);
 		if (schema === undefined) {
 			throw new Error(
 				`Tried to set value for unknown option '--${argName}'`,
@@ -314,7 +353,7 @@ export class Parser<Cli extends object> {
 	private parseLongOption(): void {
 		const argName = this.arg.slice(2);
 
-		const schema = this.activeSchema.find(argName);
+		const schema = this.activeMeta[kSchema].find(argName);
 		if (schema === undefined) {
 			throw new Error(`Found unknown option '--${argName}'`);
 		}
@@ -336,18 +375,10 @@ export class Parser<Cli extends object> {
 	}
 
 	private parsePositionals(): void {
-		const inject = (
-			this.activeOptions.constructor as unknown as CommandMeta
-		)[kInjectPositionals];
+		const inject = this.activeMeta[kInjectPositionals];
 		if (inject === undefined) {
 			throw new Error(
-				`Got unexpected positional '${this.arg}'${
-					this.activeCommand !== undefined
-						? `for command '${toKebabCase(
-								this.activeCommand.constructor.name,
-						  )}'`
-						: ''
-				}`,
+				`Got unexpected positional '${this.arg}'`,
 			);
 		}
 
@@ -358,7 +389,7 @@ export class Parser<Cli extends object> {
 	private parseShortOption(): void {
 		const short = this.arg[1];
 
-		const schema = this.activeSchema.findByShort(short);
+		const schema = this.activeMeta[kSchema].findByShort(short);
 		if (schema === undefined) {
 			throw new Error(`Found unknown alias '-${short}'`);
 		}
@@ -382,7 +413,7 @@ export class Parser<Cli extends object> {
 	private parseShortOptionGroup(): void {
 		const group = this.arg.slice(1);
 		for (let i = 0, char = group[i]; i < group.length; char = group[++i]) {
-			const schema = this.activeSchema.findByShort(char);
+			const schema = this.activeMeta[kSchema].findByShort(char);
 			if (schema === undefined) {
 				throw new Error(
 					`Found invalid group '-${group}', contains unknown alias '-${char}'`,

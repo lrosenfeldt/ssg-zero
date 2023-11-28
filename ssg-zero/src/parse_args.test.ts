@@ -1,18 +1,143 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe as suite, test, mock } from 'node:test';
 
 import {
 	boolean,
 	number,
 	string,
-	commands,
+	command,
+	cli,
+	subcommand,
 	positionals,
 	parse,
-	description,
 } from './parse_args.js';
 
-suite('Parser', function () {
-	@description('Build a static site')
+suite('parse_args.ts: decorators', function () {
+	test('fails if @cli is used twice', function () {
+		assert.throws(() => {
+			@cli({ desc: 'foo' })
+			@cli({ desc: 'foofoo' })
+			class Foo {}
+		}, /use '@cli' only once/i);
+	});
+
+	test('fails if @command is used twice', function () {
+		assert.throws(() => {
+			@command({ desc: 'foo' })
+			@command({ desc: 'foofoo' })
+			class Bar {}
+		}, /use '@command' only once/i);
+	});
+
+	test('fails if @subcommand is used on unregistered class', function () {
+		assert.throws(() => {
+			@command({ desc: 'Provide help' })
+			class Help {
+				@boolean({})
+				summary?: boolean;
+			}
+
+			class Baz {
+				@subcommand([Help])
+				command?: Help;
+			}
+
+			new Baz();
+		}, /use '@command' to register/i);
+	});
+
+	test('fails on if @subcommand is passed an unregistered class', function () {
+		assert.throws(function () {
+			class Diff {
+				@number({})
+				tabsize: number = 4;
+			}
+
+			@cli({ desc: 'git gud' })
+			class Git {
+        @subcommand([Diff])
+        command?: Diff
+      }
+		});
+	});
+
+	test('fails if @positionals is used on unregistered class', function () {
+		assert.throws(() => {
+			class Cat {
+				@positionals()
+				command?: string[];
+			}
+
+			new Cat();
+		}, /use '@command' to register/i);
+	});
+
+	test('fails if a flag decorator is used on unregistered class', function () {
+		assert.throws(() => {
+			class Echo {
+				@boolean({ short: 'n' })
+				noNewLine?: boolean;
+			}
+
+			new Echo();
+		}, /use '@command' to register/i);
+	});
+
+	const decoratorContextMock: ClassFieldDecoratorContext<{}, any> & {
+		name: string;
+	} = {
+		kind: 'field',
+		addInitializer: mock.fn(),
+		name: 'icedTea',
+		static: false,
+		private: false,
+		access: {
+			get: mock.fn(),
+			has: mock.fn(),
+			set: mock.fn(),
+		},
+		metadata: undefined,
+	};
+
+	test('sets helpful names within boolean flag decorator', function () {
+		const decorator = boolean({});
+		assert.equal(decorator.name, 'booleanFlagDecorator');
+
+		const init = decorator(undefined, decoratorContextMock);
+		assert.equal(init.name, 'onInitIcedTeaAsBoolean');
+	});
+
+	test('sets helpful names within number flag decorator', function () {
+		const decorator = number({});
+		assert.equal(decorator.name, 'numberFlagDecorator');
+
+		const init = decorator(undefined, decoratorContextMock);
+		assert.equal(init.name, 'onInitIcedTeaAsNumber');
+	});
+});
+
+suite('parse_args.ts: parse', function () {
+	test('disallows arbitrary class to be passed in', function () {
+		class Foo {
+			foo: string = 'foo';
+		}
+
+		assert.throws(
+			parse.bind(null, Foo, ['bar']),
+			/can't use arbitrary class/i,
+		);
+	});
+
+	test('disallows command to be passed in', function () {
+		@command({ desc: 'bar, not foo' })
+		class Bar {
+			bar: number = 69;
+		}
+
+		assert.throws(parse.bind(null, Bar, []), /use the '@cli' decorator/i);
+	});
+
+	@command({ desc: 'Build a static site' })
 	class Build {
 		@string({ short: 'h' })
 		hashMethod: string = 'none';
@@ -27,7 +152,13 @@ suite('Parser', function () {
 		files?: string[];
 	}
 
-	@description('A cli tool')
+  @command({ desc: 'Provide help' })
+  class Help {
+    @boolean({ short: 'C' })
+    concise: boolean = false;
+  }
+
+	@cli({ desc: 'A cli tool' })
 	class Cli {
 		@boolean({ short: 'h' })
 		help?: boolean;
@@ -38,8 +169,8 @@ suite('Parser', function () {
 		@number({})
 		logLevel: number = 2;
 
-		@commands(Build)
-		command: Build | undefined;
+		@subcommand([Build, Help])
+		command: Build | Help | undefined;
 
 		@positionals()
 		rest?: string[];
@@ -99,75 +230,6 @@ suite('Parser', function () {
 		];
 
 		assert.deepEqual(parse(Cli, args), expectedCli);
-	});
-
-	test('throws on missing schema', function () {
-		@description('')
-		class Invalid {
-			@commands(Build)
-			target?: Build;
-		}
-
-		assert.throws(
-			parse.bind(null, Invalid, ['--no-build', '--fast', '69']),
-			{
-				message: /missing a schema/,
-			},
-		);
-	});
-
-	test('throws on missing description', function () {
-		class Invalid {
-			@boolean({})
-			version?: boolean;
-
-			@commands(Build)
-			target?: Build;
-		}
-
-		assert.throws(
-			parse.bind(null, Invalid, ['--no-build', '--fast', '69']),
-			{
-				message: /missing a description/,
-			},
-		);
-	});
-
-	test('throws on missing schema of subcommand', function () {
-		@description('')
-		class InvalidCommand {
-			foo: string = 'foo';
-		}
-
-		@description('')
-		class ValidCli {
-			@string({})
-			unicornName?: string;
-
-			@commands(InvalidCommand)
-			target?: InvalidCommand;
-		}
-
-		assert.throws(
-			parse.bind(null, ValidCli, [
-				'--unicorn-name',
-				'awesome',
-				'invalid-command',
-			]),
-			{ message: /InvalidCommand/ },
-		);
-	});
-
-	test('throws on unexpected positional', function () {
-		@description('')
-		class NoArgs {
-			@number({ short: 'c' })
-			count: number = 0;
-		}
-
-		assert.throws(parse.bind(null, NoArgs, ['--count', '4', '--', 'foo']), {
-			message: /unexpected positional/i,
-		});
 	});
 
 	const table: Array<{
@@ -234,6 +296,11 @@ suite('Parser', function () {
 			name: 'throws on invalid number and reports the group',
 			args: ['--help', 'build', '-Ct', '421l'],
 			expectedMessage: "Given '421l' is not a valid number",
+		},
+		{
+			name: 'throws on unexpected positional',
+			args: ['--config', 'empty.ini', 'help', '-C', 'input'],
+			expectedMessage: "Got unexpected positional 'input'",
 		},
 	];
 
