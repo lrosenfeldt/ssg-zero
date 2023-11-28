@@ -162,7 +162,7 @@ export function positionals(): (
 	};
 }
 
-type FlagConfig = Clearify<Omit<FlagSchema, 'parse' | 'setValue'>>;
+type FlagConfig = Clearify<Omit<FlagSchema, 'default' | 'parse' | 'setValue'>>;
 function typedFlag<BaseValue>(
 	parse: FlagSchema['parse'],
 	config: FlagConfig,

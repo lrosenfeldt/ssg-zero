@@ -1,5 +1,5 @@
 {
-	"name": "@ssg/monorepo",
+	"name": "@ssg-zero/root",
 	"author": {
 		"name": "Lukas Rosenfeldt"
 	},
@@ -19,7 +19,7 @@
 		"format:write": "prettier --write --no-error-on-unmatched-pattern ./{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}"
 	},
 	"type": "module",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"workspaces": [
 		"ssg-zero",
 		"site"
