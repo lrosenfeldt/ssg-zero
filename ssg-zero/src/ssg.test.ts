@@ -5,7 +5,7 @@ import { mkdir, readFile, rm } from 'node:fs/promises';
 
 import { LogLevel } from './logger.js';
 import { SSG, Renderer, SSGBuilder } from './ssg.js';
-import { exists } from './usefule.js';
+import { exists } from './usefule/core.js';
 
 suite('SSGBuilder', function () {
 	const inputDir = 'fixtures/pages';

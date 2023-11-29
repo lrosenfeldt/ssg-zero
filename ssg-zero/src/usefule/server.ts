@@ -1,71 +1,15 @@
-import { FileHandle, open, readdir, stat } from 'node:fs/promises';
-import { IncomingMessage, ServerResponse } from 'node:http';
-import { Server, createServer } from 'node:http';
+import { Stats } from 'node:fs';
+import { type FileHandle, constants, open, stat } from 'node:fs/promises';
+import {
+	type IncomingMessage,
+	type Server,
+	type ServerResponse,
+	createServer,
+} from 'node:http';
 import { extname, join } from 'node:path';
 
-export function anyToError(reason: unknown): NodeJS.ErrnoException {
-	let errorMessage: string;
-	switch (typeof reason) {
-		case 'object':
-			if (reason instanceof Error) {
-				return reason;
-			} else if (reason === null) {
-				errorMessage = `Failed with value null.`;
-				break;
-			}
-			errorMessage = `Failed with object of type ${reason.constructor.name}.`;
-			break;
-		case 'undefined':
-			errorMessage = `Failed with value of undefined.`;
-			break;
-		case 'string':
-		case 'bigint':
-		case 'boolean':
-		case 'number':
-		case 'symbol':
-			errorMessage = `Failed with value ${reason.toString()} of type ${typeof reason}.`;
-			break;
-		case 'function':
-			errorMessage = `Failed with function ${reason.name}.`;
-			break;
-		/* node:coverage ignore next 3 */
-		default:
-			errorMessage = `Failed with ${reason} of unhandled {typeof reason}. This is an implementation error '${__filename}'.`;
-			break;
-	}
-	return new Error(errorMessage, { cause: reason });
-}
-
-export async function exists(path: string): Promise<boolean> {
-	try {
-		await stat(path);
-		return true;
-	} catch (reason) {
-		const error = anyToError(reason);
-		if (error.code === 'ENOENT') {
-			return false;
-			/* node:coverage ignore next 3 */
-		}
-		throw error;
-	}
-}
-
-export type UsefulePath = { dir: string; base: string };
-export async function* walkFiles(root: string): AsyncGenerator<UsefulePath> {
-	const dirs = [root];
-	for (const dir of dirs) {
-		const entries = await readdir(dir, { withFileTypes: true });
-		for (const entry of entries) {
-			if (entry.isDirectory()) {
-				dirs.push(join(dir, entry.name));
-				continue;
-			}
-			if (entry.isFile()) {
-				yield { dir, base: entry.name };
-			}
-		}
-	}
-}
+import { anyToError } from './core.js';
+import { ConsoleLogger, LogLevel, Logger } from '../logger.js';
 
 type MimeTypeInfo = {
 	mimeType: string;
@@ -74,6 +18,7 @@ type MimeTypeInfo = {
 
 export class UsefuleServer {
 	public static readonly mime: Record<string, MimeTypeInfo> = {
+		'': { mimeType: 'text/plain', encoding: 'utf-8' },
 		'.aac': { mimeType: 'audio/aac', encoding: 'base64' },
 		'.abw': { mimeType: 'application/x-abiword', encoding: 'binary' },
 		'.arc': { mimeType: 'application/x-freearc', encoding: 'binary' },
@@ -176,6 +121,7 @@ export class UsefuleServer {
 	};
 
 	private server: Server | null = null;
+	private logger: Logger;
 	public get baseUrl(): string {
 		return `http://localhost${this.port === 80 ? '' : `:${this.port}`}/`;
 	}
@@ -183,7 +129,10 @@ export class UsefuleServer {
 	constructor(
 		public readonly filesRoot: string,
 		public readonly port: number,
-	) {}
+		maxLogLevel: LogLevel = LogLevel.Debug,
+	) {
+		this.logger = new ConsoleLogger(maxLogLevel);
+	}
 
 	serve(): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
@@ -192,15 +141,30 @@ export class UsefuleServer {
 			}
 
 			try {
-				this.server = createServer((req, res) =>
-					this.serveFile(req, res),
-				);
+				this.server = createServer((req, res) => {
+					const relativePath = new URL(req.url ?? '', this.baseUrl)
+						.pathname;
+					this.logger.info(`UsefuleServer GET ${relativePath}`);
+					this.handleRequest(req, res).catch(error =>
+						this.logger.error(`UsefuleServer ${error}`),
+					);
+					req.once('close', () =>
+						this.logger.info(
+							`UsefuleServer GET ${relativePath} req closed`,
+						),
+					);
+					res.once('close', () =>
+						this.logger.info(
+							`UsefuleServer GET ${relativePath} res closed`,
+						),
+					);
+				});
 				this.server.on('error', error =>
-					console.log('UsefuleServerError:', error),
+					this.logger.error(`UsefuleServer ${error}`),
 				);
 				this.server.listen(this.port, () => {
 					console.log(
-						`Serving files from ${this.filesRoot} at ${this.baseUrl}.`,
+						`Serving files from ${this.filesRoot} at ${this.baseUrl}`,
 					);
 					resolve();
 				});
@@ -219,43 +183,84 @@ export class UsefuleServer {
 			}
 
 			this.server.closeIdleConnections();
+			this.logger.debug('UsefuleServer closed idle connections');
+			this.server.closeAllConnections();
 			this.server.close(error => {
+				this.logger.debug(
+					`UsefuleServer is being closed with error: ${error}`,
+				);
 				if (error !== undefined) {
 					reject(error);
 					return;
 				}
 
+				this.server!.unref();
 				this.server = null;
 				resolve();
 			});
 		});
 	}
 
-	private async serveFile(
+	private async handleRequest(
 		req: IncomingMessage,
 		res: ServerResponse & { req: IncomingMessage },
 	): Promise<void> {
-		const filePath: string = new URL(req.url ?? '', this.baseUrl).pathname;
+		const relativePath = new URL(req.url ?? '', this.baseUrl).pathname;
+		const targetPath = join(this.filesRoot, relativePath);
 
+		let stats: Stats;
+		try {
+			stats = await stat(targetPath);
+		} catch (reason) {
+			const error = anyToError(reason);
+			if (error.code === 'ENOENT') {
+				res.statusCode = 404;
+				res.end();
+			} else {
+				res.statusCode = 500;
+				res.end();
+				this.logger.error(`UsefuleServerError: ${error}`);
+			}
+			return;
+		}
+
+		if (stats.isFile()) {
+			await this.serveFile(req, res, targetPath);
+		} else {
+			const type = stats.mode & constants.S_IFMT;
+			this.logger.error(
+				`UsefuleServerError: Tried to access ${targetPath} of type ${type}`,
+			);
+			res.statusCode = 403;
+		}
+
+		if (!res.closed) {
+			res.end();
+		}
+	}
+
+	private async serveFile(
+		_: IncomingMessage,
+		res: ServerResponse & { req: IncomingMessage },
+		filePath: string,
+	): Promise<void> {
 		const extension = extname(filePath);
-		let mimeType: string;
 		if (Object.hasOwn(UsefuleServer.mime, extension)) {
-			mimeType = UsefuleServer.mime[extension].mimeType;
-		} else if (extension === '') {
-			mimeType = 'text/plain';
+			res.setHeader(
+				'Content-Type',
+				UsefuleServer.mime[extension].mimeType,
+			);
+			res.statusCode = 200;
 		} else {
 			res.statusCode = 415;
 			res.end();
 			return;
 		}
 
-		res.setHeader('Content-Type', mimeType);
-
-		let fd: FileHandle | null = null;
+		let fd: FileHandle | undefined = undefined;
 		try {
-			fd = await open(join(this.filesRoot, filePath));
+			fd = await open(filePath);
 
-			res.statusCode = 200;
 			for await (const chunk of fd.createReadStream()) {
 				res.write(chunk);
 			}
@@ -265,13 +270,13 @@ export class UsefuleServer {
 				res.statusCode = 404;
 			} else {
 				res.statusCode = 500;
-				console.log('UsefuleServerError', error);
 			}
 		} finally {
-			if (fd !== null) {
+			res.end();
+
+			if (fd !== undefined) {
 				await fd.close();
 			}
-			res.end();
 		}
 	}
 }

@@ -1,7 +1,7 @@
 import { extname, join } from 'node:path';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 
-import { walkFiles } from './usefule.js';
+import { walkFiles } from './usefule/core.js';
 import { ConsoleLogger, LogLevel, type Logger } from './logger.js';
 import { parse } from './frontmatter.js';
 
