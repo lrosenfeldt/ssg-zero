@@ -2,11 +2,9 @@ import { writeFileSync } from 'node:fs';
 
 const HOOK = `\
 #!/bin/sh
-
-files=$(git status --porcelain=v2 | awk '/\\.ts|json|js|md|css$/ {print $9}')
-echo $files
-npm exec prettier -- --check $files
-`;
+git diff --cached --name-only --diff-filter=d | \
+  awk '/\\.ts|js|json/' | \
+  xargs npm exec prettier -- --no-color --check`;
 
 const PRE_COMMIT_PATH = './.git/hooks/pre-commit';
 
