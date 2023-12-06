@@ -14,7 +14,7 @@ export class UnexpectedEndOfJsonError
 
 export type ParserResult = {
 	content: string;
-	data?: unknown;
+	data?: object;
 };
 export function parse(input: string): ParserResult {
 	if (!input.startsWith('{' + EOL)) {
