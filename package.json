@@ -15,8 +15,8 @@
 	"main": "./dist/main.js",
 	"scripts": {
 		"compile": "tsc --build",
-		"format": "prettier --check --no-error-on-unmatched-pattern ./{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}",
-		"format:write": "prettier --write --no-error-on-unmatched-pattern ./{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}"
+		"format": "prettier --check --no-error-on-unmatched-pattern './{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}'",
+		"format:write": "prettier --write --no-error-on-unmatched-pattern './{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}'"
 	},
 	"type": "module",
 	"version": "0.6.1",
@@ -25,8 +25,8 @@
 		"site"
 	],
 	"devDependencies": {
-		"@types/node": "^20.11.14",
-		"prettier": "^3.2.4",
+		"@types/node": "^20.11.19",
+		"prettier": "^3.2.5",
 		"typescript": "^5.3.3"
 	}
 }
