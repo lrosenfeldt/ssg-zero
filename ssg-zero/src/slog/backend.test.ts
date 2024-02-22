@@ -9,12 +9,14 @@ suite('stringifySafe', function () {
 			number: 42,
 			string: 'Hello, World!',
 			isBoolean: true,
+			nullable: null,
 		};
 
 		const expected = {
 			number: 42,
 			string: 'Hello, World!',
 			isBoolean: true,
+			nullable: null,
 		};
 
 		const json = stringifySafe(input, 1, 5);
@@ -118,6 +120,25 @@ suite('stringifySafe', function () {
 					name: 'You know the name!',
 				},
 			},
+		};
+
+		const json = stringifySafe(input, 1, 5);
+		const data = JSON.parse(json);
+
+		assert.deepEqual(data, expected);
+	});
+
+	test('unserializable properties are skipped', function () {
+		const input = {
+			foo: 'bar',
+			fn: () => undefined,
+			[Symbol('dont care this is a test')]: 'Hi!',
+			largeN: 4269n,
+			empty: undefined,
+		};
+
+		const expected = {
+			foo: 'bar',
 		};
 
 		const json = stringifySafe(input, 1, 5);

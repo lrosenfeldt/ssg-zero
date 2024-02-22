@@ -2,6 +2,7 @@ import { Writable } from 'node:stream';
 
 import { backendSym, SlogBackend } from './backend.js';
 import {
+	child,
 	createLogFn,
 	epochTime,
 	type LogFn,
@@ -55,16 +56,21 @@ export function slog<CustomLevels extends LogLevels>(
 	const backend = new SlogBackend(
 		levels,
 		destination ?? process.stdout,
+		undefined,
 		time,
 	);
 	const slog = Object.assign<
-		{ levels: LogLevels; [backendSym]: SlogBackend },
+		{
+			levels: LogLevels;
+			[backendSym]: SlogBackend;
+			child: Slog<LogLevels>['child'];
+		},
 		Record<string, LogFn>
 	>(
-		{ levels, [backendSym]: backend },
+		{ levels, [backendSym]: backend, child },
 		Object.entries(levels).reduce(
 			(o, [k, v]) => {
-				o[k] = createLogFn(v).bind(backend);
+				o[k] = createLogFn(v);
 				return o;
 			},
 			{} as Record<string, LogFn>,

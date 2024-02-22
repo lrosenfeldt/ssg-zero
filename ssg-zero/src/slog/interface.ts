@@ -11,7 +11,7 @@ export type LogFn = {
 
 export function createLogFn(level: number): LogFn {
 	return function log(
-		this: SlogBackend,
+		this: Slog<LogLevels>,
 		mesageOrAttrs?: string | object | undefined,
 		attrs?: object,
 	): void {
@@ -23,13 +23,32 @@ export function createLogFn(level: number): LogFn {
 			message = mesageOrAttrs;
 		}
 
-		this.write(level, message, attrs);
+		this[backendSym].write(level, message, attrs);
 	};
+}
+
+export function child<Levels extends LogLevels>(
+	this: Slog<Levels>,
+	bindings?: Record<string, any>,
+): Slog<Levels> {
+	const backend = this[backendSym].child(this.levels, bindings);
+
+	const slog = Object.assign<{}, Slog<Levels>, { [backendSym]: SlogBackend }>(
+		{},
+		this,
+		{
+			[backendSym]: backend,
+		},
+	);
+
+	return slog;
 }
 
 export type Slog<Levels extends LogLevels> = {
 	readonly levels: Levels;
 	readonly [backendSym]: SlogBackend;
+
+	child(bindings?: Record<string, any>): Slog<Levels>;
 } & {
 	[Label in keyof Levels]: LogFn;
 };

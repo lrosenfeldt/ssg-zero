@@ -116,6 +116,7 @@ suite('slog', function () {
 				props: true,
 				rock: 'nroll will never die',
 				count: -1,
+				nullable: null,
 				fn: () => undefined,
 			},
 			expected: {
@@ -125,6 +126,7 @@ suite('slog', function () {
 				props: true,
 				rock: 'nroll will never die',
 				count: -1,
+				nullable: null,
 			},
 		},
 		{
@@ -155,6 +157,33 @@ suite('slog', function () {
 						isPresent: true,
 					},
 				},
+			},
+		},
+		{
+			name: 'for attributes with properties on its prototype, which should be ignored',
+			message: undefined,
+			attrs: Object.assign(
+				{ value: 54 },
+				Object.create({ parent: true }),
+			),
+			expected: {
+				level,
+				time,
+				value: 54,
+			},
+		},
+		{
+			name: 'for attributes with NaN as prop',
+			message: undefined,
+			attrs: {
+				number1: NaN,
+				number2: 2,
+			},
+			expected: {
+				level,
+				time,
+				number1: null,
+				number2: 2,
 			},
 		},
 	];
@@ -198,6 +227,92 @@ suite('slog', function () {
 
 		logger.info(message, attrs);
 
+		const json: string[] = await once(destination, 'data');
+		const data = JSON.parse(json[0]);
+
+		assert.deepEqual(data, expected);
+	});
+
+	test('can write an object without a message', async function () {
+		const destination = new PassThrough();
+		const time = 9_000;
+		const t: Timestamp = () => time.toString();
+		const logger = slog({ time: t }, destination);
+
+		logger.info({ chord: 'C#' });
+
+		const json = await once(destination, 'data');
+		const data = JSON.parse(json[0]);
+
+		assert.deepEqual(data, {
+			level: DefaultLogLevel.info,
+			time,
+			chord: 'C#',
+		});
+	});
+
+	test('uses epoch time as default', async function (t) {
+		const destination = new PassThrough();
+		const time = 1_000_000;
+		const dateNow = t.mock.method(Date, 'now', () => time);
+		const logger = slog(undefined, destination);
+
+		logger.info('epic epoch');
+
+		const json = await once(destination, 'data');
+		const data = JSON.parse(json[0]);
+
+		assert.equal(dateNow.mock.callCount(), 1);
+		assert.deepEqual(data, {
+			level: DefaultLogLevel.info,
+			time,
+			msg: 'epic epoch',
+		});
+	});
+});
+
+suite('child', function () {
+	test('bindings are contained in the log', async function () {
+		const destination = new PassThrough();
+		const time = 1989;
+		const t: Timestamp = () => time.toString();
+		const base = slog({ time: t }, destination);
+		const logger = base.child({ foofoo: 'dragon' });
+
+		const msg = 'Through fire and flames we carry on!';
+		const attrs = { value: -254 };
+		const expected = {
+			level: DefaultLogLevel.info,
+			msg,
+			time,
+			foofoo: 'dragon',
+			value: attrs.value,
+		};
+
+		logger.info(msg, attrs);
+		const json: string[] = await once(destination, 'data');
+		const data = JSON.parse(json[0]);
+
+		assert.deepEqual(data, expected);
+	});
+	test('bindings are in the log', async function () {
+		const destination = new PassThrough();
+		const time = 1989;
+		const t: Timestamp = () => time.toString();
+		const base = slog({ time: t }, destination);
+		const logger = base.child({ foofoo: 'dragon' });
+
+		const msg = 'Through fire and flames we carry on!';
+		const attrs = { value: -254 };
+		const expected = {
+			level: DefaultLogLevel.info,
+			msg,
+			time,
+			foofoo: 'dragon',
+			value: attrs.value,
+		};
+
+		logger.info(msg, attrs);
 		const json: string[] = await once(destination, 'data');
 		const data = JSON.parse(json[0]);
 

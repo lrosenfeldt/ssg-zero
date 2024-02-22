@@ -8,12 +8,41 @@ export class SlogBackend {
 	private prefixCache: Record<number, string> = {};
 	private maxDepth: number = 5;
 
+	private destination: Writable;
+	private childBindings: string;
+	private time: Timestamp;
+
 	constructor(
 		levels: LogLevels,
-		private destination: Writable,
-		private time: Timestamp,
+		destination: Writable,
+		bindings: Record<string, any> | undefined,
+		time: Timestamp,
 	) {
+		this.destination = destination;
+		this.childBindings =
+			bindings === undefined
+				? ''
+				: ',' + this.asJson(bindings).slice(1, -1);
+		this.time = time;
+
 		this.initPrefixCache(levels);
+	}
+
+	child(
+		levels: LogLevels,
+		bindings: Record<string, any> | undefined,
+	): SlogBackend {
+		const child = new SlogBackend(
+			levels,
+			this.destination,
+			bindings,
+			this.time,
+		);
+		// parent bindings should come first, so JSON.parse will use value from child in case of
+		// conflict
+		child.childBindings = this.childBindings + child.childBindings;
+		console.log('child', child.childBindings);
+		return child;
 	}
 
 	write(
@@ -21,7 +50,8 @@ export class SlogBackend {
 		message: string | undefined,
 		attrs: object | undefined,
 	): void {
-		let data = this.prefixCache[level] + this.time();
+		let data = this.prefixCache[level] + this.time() + this.childBindings;
+		console.log('current data', data, this.childBindings);
 		if (message) {
 			data += `,"msg":${JSON.stringify(message)}`;
 		}
@@ -33,7 +63,49 @@ export class SlogBackend {
 		this.destination.write(data);
 	}
 
-	initPrefixCache(levels: LogLevels) {
+	private asJson(obj: object): string {
+		let json = '';
+
+		for (const key in obj) {
+			if (!Object.hasOwn(obj, key)) {
+				continue;
+			}
+
+			const value = (obj as any)[key];
+			let strValue: string;
+
+			switch (typeof value) {
+				case 'bigint':
+				case 'function':
+				case 'symbol':
+				case 'undefined':
+					continue;
+				case 'number':
+					if (!Number.isFinite(value)) {
+						strValue = 'null';
+						break;
+					}
+				// fallthrough
+				case 'boolean':
+					strValue = value.toString();
+					break;
+				case 'string':
+					strValue = JSON.stringify(value);
+				case 'object':
+					if (value === null) {
+						strValue = 'null';
+						break;
+					}
+					strValue = this.stringify(value);
+					break;
+			}
+
+			json += `,"${key}":${strValue}`;
+		}
+		return '{' + json.slice(1) + '}';
+	}
+
+	private initPrefixCache(levels: LogLevels) {
 		for (const label in levels) {
 			const value = levels[label];
 
@@ -41,11 +113,11 @@ export class SlogBackend {
 		}
 	}
 
-	private asJson(obj: object): string {
+	private stringify(obj: object): string {
 		try {
 			return JSON.stringify(obj);
 		} catch {
-			return stringifySafe(obj, 2, this.maxDepth);
+			return stringifySafe(obj, 3, this.maxDepth);
 		}
 	}
 }
