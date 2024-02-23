@@ -6,24 +6,29 @@ export const backendSym = Symbol('slog.backend');
 
 export class SlogBackend {
 	private prefixCache: Record<number, string> = {};
-	private maxDepth: number = 5;
 
-	private destination: Writable;
 	private childBindings: string;
+	private destination: Writable;
+	private maxDepth: number;
 	private time: Timestamp;
+  private eol: string;
 
 	constructor(
 		levels: LogLevels,
 		destination: Writable,
 		bindings: Record<string, any> | undefined,
 		time: Timestamp,
+		maxDepth: number,
+    eol: string,
 	) {
 		this.destination = destination;
 		this.childBindings =
 			bindings === undefined
 				? ''
-				: ',' + this.asJson(bindings).slice(1, -1);
+				: ',' + stringifySafe(bindings, 0, Infinity).slice(1, -1);
 		this.time = time;
+		this.maxDepth = maxDepth;
+    this.eol = eol;
 
 		this.initPrefixCache(levels);
 	}
@@ -37,11 +42,12 @@ export class SlogBackend {
 			this.destination,
 			bindings,
 			this.time,
+      this.maxDepth,
+      this.eol,
 		);
 		// parent bindings should come first, so JSON.parse will use value from child in case of
 		// conflict
 		child.childBindings = this.childBindings + child.childBindings;
-		console.log('child', child.childBindings);
 		return child;
 	}
 
@@ -51,15 +57,16 @@ export class SlogBackend {
 		attrs: object | undefined,
 	): void {
 		let data = this.prefixCache[level] + this.time() + this.childBindings;
-		console.log('current data', data, this.childBindings);
 		if (message) {
 			data += `,"msg":${JSON.stringify(message)}`;
 		}
 		if (attrs) {
-			data += ',' + this.asJson(attrs).slice(1);
-		} else {
-			data += '}';
+			const json = this.asJson(attrs).slice(1, -1);
+			if (json.length > 0) {
+				data += ',' + json;
+			}
 		}
+		data += '}' + this.eol;
 		this.destination.write(data);
 	}
 
@@ -117,7 +124,7 @@ export class SlogBackend {
 		try {
 			return JSON.stringify(obj);
 		} catch {
-			return stringifySafe(obj, 3, this.maxDepth);
+			return stringifySafe(obj, 2, this.maxDepth);
 		}
 	}
 }
@@ -139,13 +146,11 @@ export function stringifySafe(obj: object, depth = 1, maxDepth = 5): string {
 		let strValue: string;
 
 		switch (typeof value) {
-			case 'undefined':
-			case 'function':
-				continue loop;
-			case 'symbol':
-				throw new Error('unimplemented. symbol what???');
 			case 'bigint':
-				throw new Error('unimplemented. bigint what???');
+			case 'function':
+			case 'symbol':
+			case 'undefined':
+				continue loop;
 			case 'string':
 				// escape strings
 				strValue = JSON.stringify(value);

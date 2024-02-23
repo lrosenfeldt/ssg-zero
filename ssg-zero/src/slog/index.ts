@@ -21,17 +21,20 @@ export type DefaultLogLevelLabel = keyof typeof DefaultLogLevel;
 
 export type SlogOptions<CustomLevels extends LogLevels> =
 	| {
+			maxDepth?: number;
+			time?: Timestamp;
+      eol?: '\n' | '\r\n';
 			useOnlyCustomLevels?: false;
 			level?: DefaultLogLevelLabel | keyof CustomLevels;
 			customLevels?: CustomLevels;
-			time?: Timestamp;
-			maxDepth?: number;
 	  }
 	| {
+			maxDepth?: number;
+			time?: Timestamp;
+      eol?: '\n' | '\r\n';
 			useOnlyCustomLevels: true;
 			level: keyof CustomLevels;
 			customLevels: CustomLevels;
-			time?: Timestamp;
 	  };
 
 type Join<Obj, Base> = Obj & Omit<Base, keyof Obj>;
@@ -58,6 +61,8 @@ export function slog<CustomLevels extends LogLevels>(
 		destination ?? process.stdout,
 		undefined,
 		time,
+		options.maxDepth ?? 5,
+    options.eol ?? '\n',
 	);
 	const slog = Object.assign<
 		{

@@ -2,10 +2,18 @@ import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 
 import { once } from 'node:events';
-import { PassThrough } from 'node:stream';
+import { PassThrough, type Transform } from 'node:stream';
 
 import { DefaultLogLevel, slog } from './index.js';
 import { type Timestamp } from './interface.js';
+
+function createTestStream(): Transform {
+	// make logs more readable
+	return new PassThrough({
+		readableObjectMode: true,
+		writableObjectMode: true,
+	});
+}
 
 suite('slog creation', function () {
 	test('default log levels are used', function () {
@@ -62,12 +70,12 @@ suite('slog creation', function () {
 	});
 });
 
-suite('slog', function () {
+suite.only('slog', function () {
 	const label = 'info';
 	const level = DefaultLogLevel[label];
 	const time = 1989;
 	const timestamp: Timestamp = () => time.toString();
-	const destination = new PassThrough();
+	const destination = createTestStream();
 
 	const table = [
 		{
@@ -160,6 +168,16 @@ suite('slog', function () {
 			},
 		},
 		{
+			name: 'for a nice message and empty attributes',
+			message: 'noice',
+			attrs: {},
+			expected: {
+				level,
+				time,
+				msg: 'noice',
+			},
+		},
+		{
 			name: 'for attributes with properties on its prototype, which should be ignored',
 			message: undefined,
 			attrs: Object.assign(
@@ -219,7 +237,10 @@ suite('slog', function () {
 				letsgo: {
 					foo: 'bar',
 					baz: {
-						letsgo: '[deep object]',
+						letsgo: {
+							foo: 'bar',
+							baz: '[deep object]',
+						},
 					},
 				},
 			},
@@ -234,11 +255,6 @@ suite('slog', function () {
 	});
 
 	test('can write an object without a message', async function () {
-		const destination = new PassThrough();
-		const time = 9_000;
-		const t: Timestamp = () => time.toString();
-		const logger = slog({ time: t }, destination);
-
 		logger.info({ chord: 'C#' });
 
 		const json = await once(destination, 'data');
@@ -252,7 +268,7 @@ suite('slog', function () {
 	});
 
 	test('uses epoch time as default', async function (t) {
-		const destination = new PassThrough();
+		const destination = createTestStream();
 		const time = 1_000_000;
 		const dateNow = t.mock.method(Date, 'now', () => time);
 		const logger = slog(undefined, destination);
@@ -269,11 +285,47 @@ suite('slog', function () {
 			msg: 'epic epoch',
 		});
 	});
+
+	test('circular dependencies can be limited in depth', async function () {
+		const destination = createTestStream();
+		const time = 42_000_000;
+		const t: Timestamp = () => time.toString();
+		const logger = slog({ time: t, maxDepth: 2 }, destination);
+		const message = 'this is fine';
+		const attrs: any = { value: null };
+		attrs.value = attrs;
+		const expected = {
+			level,
+			time,
+			msg: message,
+			value: {
+				value: '[deep object]',
+			},
+		};
+
+		logger.info('this is fine', attrs);
+
+		const json = await once(destination, 'data');
+		const data = JSON.parse(json[0]);
+
+		assert.deepEqual(data, expected);
+	});
+	test('appends eol to each log', async function () {
+		const destination = createTestStream();
+		const time = 301;
+		const t: Timestamp = () => time.toString();
+		const logger = slog({ time: t, eol: '\r\n' }, destination);
+
+		logger.info('but in the end it doesnt really matter');
+
+		const json: string[] = await once(destination, 'data');
+    assert.ok(json[0].endsWith('\r\n' ));
+	});
 });
 
 suite('child', function () {
 	test('bindings are contained in the log', async function () {
-		const destination = new PassThrough();
+		const destination = createTestStream();
 		const time = 1989;
 		const t: Timestamp = () => time.toString();
 		const base = slog({ time: t }, destination);
@@ -296,7 +348,7 @@ suite('child', function () {
 		assert.deepEqual(data, expected);
 	});
 	test('bindings are in the log', async function () {
-		const destination = new PassThrough();
+		const destination = createTestStream();
 		const time = 1989;
 		const t: Timestamp = () => time.toString();
 		const base = slog({ time: t }, destination);
