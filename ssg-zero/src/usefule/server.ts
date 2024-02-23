@@ -1,22 +1,16 @@
-import { Stats } from 'node:fs';
-import { type FileHandle, constants, open, stat } from 'node:fs/promises';
-import {
-	type IncomingMessage,
-	type Server,
-	type ServerResponse,
-	createServer,
-} from 'node:http';
+import { constants, createReadStream } from 'node:fs';
+import { type IncomingMessage, type ServerResponse, Server } from 'node:http';
 import { extname, join } from 'node:path';
 
 import { anyToError } from './core.js';
-import { ConsoleLogger, LogLevel, Logger } from '../logger.js';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 type MimeTypeInfo = {
 	mimeType: string;
 	encoding: BufferEncoding;
 };
 
-export class UsefuleServer {
+export class UsefuleServer extends Server {
 	public static readonly mime: Record<string, MimeTypeInfo> = {
 		'': { mimeType: 'text/plain', encoding: 'utf-8' },
 		'.aac': { mimeType: 'audio/aac', encoding: 'base64' },
@@ -120,8 +114,11 @@ export class UsefuleServer {
 		'.xls': { mimeType: 'application/vnd.ms-excel', encoding: 'base64' },
 	};
 
-	private server: Server | null = null;
-	private logger: Logger;
+	private context: AsyncLocalStorage<{ id: number; requestPath: string }> =
+		new AsyncLocalStorage();
+	private nextId: number = 0;
+	private running: boolean = false;
+
 	public get baseUrl(): string {
 		return `http://localhost${this.port === 80 ? '' : `:${this.port}`}/`;
 	}
@@ -129,122 +126,72 @@ export class UsefuleServer {
 	constructor(
 		public readonly filesRoot: string,
 		public readonly port: number,
-		maxLogLevel: LogLevel = LogLevel.Debug,
 	) {
-		this.logger = new ConsoleLogger(maxLogLevel);
+		super();
 	}
 
 	serve(): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
-			if (this.server !== null) {
-				throw new Error('Cannot restart running server');
+			if (this.running) {
+				resolve();
 			}
 
-			try {
-				this.server = createServer((req, res) => {
-					const relativePath = new URL(req.url ?? '', this.baseUrl)
-						.pathname;
-					this.logger.info(`UsefuleServer GET ${relativePath}`);
-					this.handleRequest(req, res).catch(error =>
-						this.logger.error(`UsefuleServer ${error}`),
-					);
-					req.once('close', () =>
-						this.logger.info(
-							`UsefuleServer GET ${relativePath} req closed`,
-						),
-					);
-					res.once('close', () =>
-						this.logger.info(
-							`UsefuleServer GET ${relativePath} res closed`,
-						),
-					);
-				});
-				this.server.on('error', error =>
-					this.logger.error(`UsefuleServer ${error}`),
-				);
-				this.server.listen(this.port, () => {
-					console.log(
-						`Serving files from ${this.filesRoot} at ${this.baseUrl}`,
-					);
-					resolve();
-				});
-			} catch (reason) {
+			this.once('error', reason => {
 				const error = anyToError(reason);
 				reject(error);
-			}
-		});
-	}
+			});
 
-	stop(): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			if (this.server === null) {
-				resolve();
-				return;
-			}
+			this.addListener('request', (req, res) => {
+				const requestPath = new URL(req.url ?? '', this.baseUrl)
+					.pathname;
+				const store = { id: this.nextId++, requestPath };
+				this.context.run(store, () => {
+					res.once('finish', () => this.emit('file:done', store));
+					this.emit('file:get', store);
+					this.handleRequest(req, res);
+				});
+			});
 
-			this.server.closeIdleConnections();
-			this.logger.debug('UsefuleServer closed idle connections');
-			this.server.closeAllConnections();
-			this.server.close(error => {
-				this.logger.debug(
-					`UsefuleServer is being closed with error: ${error}`,
+			this.listen(this.port, () => {
+				this.running = true;
+				console.log(
+					`Serving files from ${this.filesRoot} at ${this.baseUrl}`,
 				);
-				if (error !== undefined) {
-					reject(error);
-					return;
-				}
-
-				this.server!.unref();
-				this.server = null;
 				resolve();
 			});
 		});
 	}
 
-	private async handleRequest(
-		req: IncomingMessage,
-		res: ServerResponse & { req: IncomingMessage },
-	): Promise<void> {
-		const relativePath = new URL(req.url ?? '', this.baseUrl).pathname;
-		const targetPath = join(this.filesRoot, relativePath);
-
-		let stats: Stats;
-		try {
-			stats = await stat(targetPath);
-		} catch (reason) {
-			const error = anyToError(reason);
-			if (error.code === 'ENOENT') {
-				res.statusCode = 404;
-				res.end();
-			} else {
-				res.statusCode = 500;
-				res.end();
-				this.logger.error(`UsefuleServerError: ${error}`);
+	stop(): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			if (!this.running) {
+				resolve();
+				return;
 			}
-			return;
-		}
 
-		if (stats.isFile()) {
-			await this.serveFile(req, res, targetPath);
-		} else {
-			const type = stats.mode & constants.S_IFMT;
-			this.logger.error(
-				`UsefuleServerError: Tried to access ${targetPath} of type ${type}`,
-			);
-			res.statusCode = 403;
-		}
+			this.closeIdleConnections();
+			this.closeAllConnections();
+			this.close(error => {
+				if (error !== undefined) {
+					reject(error);
+					return;
+				}
 
-		if (!res.closed) {
-			res.end();
-		}
+				this.running = false;
+				this.unref();
+				resolve();
+			});
+		});
 	}
 
-	private async serveFile(
-		_: IncomingMessage,
+	private handleRequest(
+		_req: IncomingMessage,
 		res: ServerResponse & { req: IncomingMessage },
-		filePath: string,
-	): Promise<void> {
-		const extension = extname(filePath);
+	): void {
+		const store = this.context.getStore()!;
+		const targetPath = join(this.filesRoot, store.requestPath);
+
+		const extension = extname(targetPath);
 		if (Object.hasOwn(UsefuleServer.mime, extension)) {
 			res.setHeader(
 				'Content-Type',
@@ -252,31 +199,55 @@ export class UsefuleServer {
 			);
 			res.statusCode = 200;
 		} else {
+			this.emit('file:unsupported_type', {
+				...store,
+				targetPath,
+				extension,
+			});
 			res.statusCode = 415;
 			res.end();
 			return;
 		}
 
-		let fd: FileHandle | undefined = undefined;
-		try {
-			fd = await open(filePath);
+		const r = createReadStream(targetPath, {
+			flags: 'r',
+			mode: constants.O_RDONLY,
+		});
 
-			for await (const chunk of fd.createReadStream()) {
-				res.write(chunk);
-			}
-		} catch (reason) {
+		r.on('error', reason => {
+			r.close();
+
 			const error = anyToError(reason);
-			if (error.code === 'ENOENT') {
-				res.statusCode = 404;
-			} else {
-				res.statusCode = 500;
-			}
-		} finally {
-			res.end();
 
-			if (fd !== undefined) {
-				await fd.close();
+			if (error.code === 'ENOENT') {
+				if (!res.closed) {
+					res.statusCode = 404;
+					res.end();
+				}
+				this.emit('file:enoent', { ...store, targetPath });
+				return;
 			}
-		}
+
+			if (!res.closed) {
+				res.statusCode = 500;
+				res.end();
+			}
+			this.emit('error', {
+				...store,
+				targetPath,
+				bytes: r.bytesRead,
+				error,
+			});
+		});
+
+		// res may end ungracefully, also check file stream
+		r.once('end', () =>
+			this.emit('file:sent', {
+				...store,
+				targetPath,
+				bytes: r.bytesRead,
+			}),
+		);
+		r.pipe(res);
 	}
 }
