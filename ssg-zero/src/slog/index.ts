@@ -12,8 +12,11 @@ import {
 } from './interface.js';
 
 export const DefaultLogLevel = {
-	info: 4,
-	error: 16,
+  trace: 2,
+  debug: 4,
+	info: 8,
+	warn: 16,
+	error: 32,
 };
 
 export type DefaultLogLevels = typeof DefaultLogLevel;
