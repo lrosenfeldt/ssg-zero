@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
@@ -14,6 +13,7 @@ import { UsefuleServer } from './usefule/server.js';
 import { SSG, SSGBuilder } from './ssg.js';
 import { type DefaultLogLevels } from './slog/index.js';
 import { type Slog } from './slog/interface.js';
+import { TextTransform } from './slog/text_transform.js';
 import { slog } from './slog/index.js';
 
 type Logger = Slog<DefaultLogLevels>;
@@ -113,12 +113,15 @@ if (ssgZero.version) {
 const ssg = await ssgZero.loadSsg();
 
 if (ssgZero.command instanceof Serve) {
-	const logger = slog();
+  const destination = process.stdout.pipe(new TextTransform());
+	const logger = slog(undefined, destination);
 	const server = await ssgZero.command.setupServer(ssg, logger);
 
 	process.once('SIGINT', () => {
-		server.stop().catch(error => logger.error('failed to stop server', error));
-    process.exit(1);
+		server
+			.stop()
+			.catch(error => logger.error('failed to stop server', error));
+		process.exit(1);
 	});
 } else if (ssgZero.command instanceof Build) {
 	await ssg.setup();
