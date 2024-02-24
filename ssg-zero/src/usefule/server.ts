@@ -154,9 +154,6 @@ export class UsefuleServer extends Server {
 
 			this.listen(this.port, () => {
 				this.running = true;
-				console.log(
-					`Serving files from ${this.filesRoot} at ${this.baseUrl}`,
-				);
 				resolve();
 			});
 		});
