@@ -11,10 +11,12 @@ import {
 } from './parse_args.js';
 import { UsefuleServer } from './usefule/server.js';
 import { SSG, SSGBuilder } from './ssg.js';
-import { type DefaultLogLevels } from './slog/index.js';
-import { type Slog } from './slog/interface.js';
-import { TextTransform } from './slog/text_transform.js';
-import { slog } from './slog/index.js';
+import {
+	TextTransform,
+	slog,
+	type DefaultLogLevels,
+	type Slog,
+} from './slog/index.js';
 
 type Logger = Slog<DefaultLogLevels>;
 
@@ -113,7 +115,7 @@ if (ssgZero.version) {
 const ssg = await ssgZero.loadSsg();
 
 if (ssgZero.command instanceof Serve) {
-  const destination = process.stdout.pipe(new TextTransform());
+	const destination = process.stdout.pipe(new TextTransform());
 	const logger = slog(undefined, destination);
 	const server = await ssgZero.command.setupServer(ssg, logger);
 

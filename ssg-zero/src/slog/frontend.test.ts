@@ -34,8 +34,7 @@ suite('slog creation', function () {
 			},
 		});
 		const expectedLevels = {
-			info: DefaultLogLevel.info,
-			error: DefaultLogLevel.error,
+			...DefaultLogLevel,
 			'hell yeah': 9000,
 			'hell no': 12,
 		};
@@ -70,7 +69,7 @@ suite('slog creation', function () {
 	});
 });
 
-suite.only('slog', function () {
+suite('slog', function () {
 	const label = 'info';
 	const level = DefaultLogLevel[label];
 	const time = 1989;
@@ -319,7 +318,7 @@ suite.only('slog', function () {
 		logger.info('but in the end it doesnt really matter');
 
 		const json: string[] = await once(destination, 'data');
-    assert.ok(json[0].endsWith('\r\n' ));
+		assert.ok(json[0].endsWith('\r\n'));
 	});
 });
 

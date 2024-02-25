@@ -13,6 +13,23 @@ function includesWhitespace(str: string): boolean {
 	);
 }
 
+function formatDatetime(datetime: number): string {
+	const date = new Date(datetime);
+	return (
+		date.getFullYear() +
+		'/' +
+		(date.getMonth() + 1).toString().padStart(2, '0') +
+		'/' +
+		date.getDate().toString().padStart(2, '0') +
+		' ' +
+		date.getHours().toString().padStart(2, '0') +
+		':' +
+		date.getMinutes().toString().padStart(2, '0') +
+		':' +
+		date.getSeconds().toString().padStart(2, '0')
+	);
+}
+
 export class TextTransform extends Transform {
 	private labels: Record<number, string> = {};
 	private buffer: string = '';
@@ -28,73 +45,104 @@ export class TextTransform extends Transform {
 		}
 	}
 
-  _transform(chunk: any, _encoding: BufferEncoding, callback: TransformCallback): void {
-    this.buffer += chunk;
-    if (!this.buffer.includes(this.eol)) {
-      callback();
-      return;
-    }
+	_transform(
+		chunk: any,
+		_encoding: BufferEncoding,
+		callback: TransformCallback,
+	): void {
+		this.buffer += chunk;
+		if (!this.buffer.includes(this.eol)) {
+			callback();
+			return;
+		}
 
-    const logs = this.buffer.split(this.eol);
-    if (logs.length > 1) {
-      // last part may be incomplete
-      this.buffer = logs.pop()!;
-    } else {
-      this.buffer = '';
-    }
+		const logs = this.buffer
+			.split(this.eol)
+			.filter(log => log.trim() !== '');
 
-    for (const logEntry of logs) {
-      let data: any;
-      try {
-        data = JSON.parse(logEntry);
-      } catch (reason) {
-        const error = anyToError(reason);
-        callback(error);
-        return;
-      }
+		if (logs.length < 1) {
+			callback();
+			return;
+		} else if (logs.at(-1)?.trimEnd().endsWith('}')) {
+			this.buffer = '';
+		} else {
+			this.buffer = logs.pop() ?? '';
+		}
 
-      let log = ''
-      for (const key in data) {
-        const value = data[key];
-        if (key === 'level') {
-          log += ' ' + 'LEVEL=' + this.labels[value];
-          continue;
-        } else if (key === 'time' && typeof value === 'number') {
-          log += ' ' + 'TIME=' + new Date(value).toISOString();
-          continue;
-        }
+		for (const log of logs) {
+			let data: any;
+			try {
+				data = JSON.parse(log);
+			} catch (reason) {
+				const error = anyToError(reason);
+				callback(error);
+				return;
+			}
 
-        let strValue: string;
-        switch (typeof value) {
-          case 'bigint':
-          case 'function':
-          case 'symbol':
-          case 'undefined':
-            // cannot happen because of JSON.parse()
-            continue;
-          case 'string':
-            strValue = includesWhitespace(value) ? '"' + value + '"' : value;
-            break;
-          // never infinite because of JSON.parse
-          case 'number':
-          case 'boolean':
-            strValue = value.toString();
-            break;
-          case 'object':
-            if (value === null) {
-              strValue = 'null';
-              break;
-            }
-            strValue = JSON.stringify(value);
-            break;
-        }
+			let text = '';
+			let time = '';
+			let level = '';
+			let message = '';
+			for (const key in data) {
+				const value = data[key];
+				if (key === 'time' && typeof value === 'number') {
+					time = formatDatetime(value);
+					continue;
+				} else if (key === 'level') {
+					level = this.labels[value].toLocaleUpperCase();
+					continue;
+				} else if (key === 'msg') {
+					message = value;
+					continue;
+				}
 
-        log += ' ' + key.toLocaleUpperCase() + '=' + strValue;
-      }
-      log = log.slice(1) + this.eol;
-      console.log(log);
-      this.push(log);
-    }
-    callback();
-  }
+				const strValue = this.asString(value);
+				if (strValue === undefined) continue;
+
+				text += ' ' + key + '=' + strValue;
+			}
+
+			let output = time + ' ' + level;
+			if (message) {
+				output += ' ' + message;
+			}
+			if (text) {
+				output += text;
+			}
+			output += this.eol;
+
+			this.push(output);
+		}
+		callback();
+	}
+
+	private asString(value: any): string | undefined {
+		let strValue: string;
+		switch (typeof value) {
+			case 'bigint':
+			case 'function':
+			case 'symbol':
+			case 'undefined':
+				// cannot happen because of JSON.parse()
+				return undefined;
+			case 'string':
+				strValue = includesWhitespace(value)
+					? '"' + value + '"'
+					: value;
+				break;
+			// never infinite because of JSON.parse
+			case 'number':
+			case 'boolean':
+				strValue = value.toString();
+				break;
+			case 'object':
+				if (value === null) {
+					strValue = 'null';
+					break;
+				}
+				strValue = JSON.stringify(value);
+				break;
+		}
+		return strValue;
+	}
 }
