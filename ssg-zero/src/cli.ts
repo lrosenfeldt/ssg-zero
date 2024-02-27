@@ -12,10 +12,11 @@ import {
 import { UsefuleServer } from './usefule/server.js';
 import { SSG, SSGBuilder } from './ssg.js';
 import {
-	TextTransform,
 	slog,
+	TextHandler,
 	type DefaultLogLevels,
 	type Slog,
+	DefaultLogLevel,
 } from './slog/index.js';
 
 type Logger = Slog<DefaultLogLevels>;
@@ -115,8 +116,12 @@ if (ssgZero.version) {
 const ssg = await ssgZero.loadSsg();
 
 if (ssgZero.command instanceof Serve) {
-	const destination = process.stdout.pipe(new TextTransform());
-	const logger = slog(undefined, destination);
+	const logger = slog(
+		{
+			handler: new TextHandler(DefaultLogLevel),
+		},
+		process.stdout,
+	);
 	const server = await ssgZero.command.setupServer(ssg, logger);
 
 	process.once('SIGINT', () => {

@@ -73,14 +73,24 @@ suite('watch events', async function () {
 	await test('emits the correct events', async function () {
 		await watcher.init();
 		const timeout = 5_000;
-    const expected: WatchEvent[] = [
-      { type: "create", filePath: files.create.filePath, content: files.create.content },
-      { type: "change", filePath: files.change.filePath, content: files.change.contentAfter },
-      { type: "delete", filePath: files.delete.filePath },
-    ];
+		const expected: WatchEvent[] = [
+			{
+				type: 'create',
+				filePath: files.create.filePath,
+				content: files.create.content,
+			},
+			{
+				type: 'change',
+				filePath: files.change.filePath,
+				content: files.change.contentAfter,
+			},
+			{ type: 'delete', filePath: files.delete.filePath },
+		];
 		let events: Set<WatchEvent> = new Set();
 
-    changeFs().catch(() => assert.fail(`couldn\'t make changes to base dir ${baseDir}`))
+		changeFs().catch(() =>
+			assert.fail(`couldn\'t make changes to base dir ${baseDir}`),
+		);
 
 		let start = performance.now();
 		for await (const event of watcher.watch()) {
@@ -92,7 +102,7 @@ suite('watch events', async function () {
 			}
 		}
 
-    assert.equal(events.size, 3);
-    assert.deepEqual(events, new Set(expected));
+		assert.equal(events.size, 3);
+		assert.deepEqual(events, new Set(expected));
 	});
 });

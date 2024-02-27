@@ -1,15 +1,20 @@
 export {
-	DefaultLogLevel,
-	slog,
-	type DefaultLogLevels,
-	type SlogOptions,
-} from './frontend.js';
-export {
 	epochTime,
+	type Bindings,
+	type EOL,
+	type Handler,
+	type LogFn,
 	type LogLevels,
 	type Slog,
 	type Timestamp,
-} from './interface.js';
+} from './base.js';
+
 export {
-  TextTransform,
-} from './text_transform.js';
+	DefaultLogLevel,
+	slog,
+	type DefaultLogLevels,
+	type DefaultLogLevelLabel,
+	type SlogOptions,
+} from './frontend.js';
+
+export { JsonHandler, TextHandler } from './handler.js';

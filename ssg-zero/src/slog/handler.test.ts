@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 
-import { stringifySafe } from './backend.js';
+import { stringify } from './handler.js';
 
-suite('stringifySafe', function () {
+suite('stringify', function () {
 	test('a plain object can be deserialized', function () {
 		const input = {
 			number: 42,
@@ -19,7 +19,7 @@ suite('stringifySafe', function () {
 			nullable: null,
 		};
 
-		const json = stringifySafe(input, 1, 5);
+		const json = stringify(input, 4);
 		const data = JSON.parse(json);
 
 		assert.deepEqual(data, expected);
@@ -41,27 +41,23 @@ suite('stringifySafe', function () {
 				tag: 'nice',
 			},
 		};
-		const json = stringifySafe(input, 1, 5);
+		const json = stringify(input, 4);
 		const data = JSON.parse(json);
 
 		assert.deepEqual(data, expected);
 	});
 
-	test('a depth limited object can be deserialized', function () {
+	test('depth limit is ignored if no circular dependencies are included', function () {
 		const input = {
 			inner: {
 				value: 69,
 			},
 		};
 
-		const expected = {
-			inner: '[deep object]',
-		};
-
-		const json = stringifySafe(input, 1, 1);
+		const json = stringify(input, 1);
 		const data = JSON.parse(json);
 
-		assert.deepEqual(data, expected);
+		assert.deepEqual(data, input);
 	});
 
 	test('a circular object is analyzed until a certain depth', function () {
@@ -88,7 +84,7 @@ suite('stringifySafe', function () {
 			},
 		};
 
-		const json = stringifySafe(input, 1, 4);
+		const json = stringify(input, 4);
 		const data = JSON.parse(json);
 
 		assert.deepEqual(data, expected);
@@ -122,7 +118,7 @@ suite('stringifySafe', function () {
 			},
 		};
 
-		const json = stringifySafe(input, 1, 5);
+		const json = stringify(input, 5);
 		const data = JSON.parse(json);
 
 		assert.deepEqual(data, expected);
@@ -141,7 +137,7 @@ suite('stringifySafe', function () {
 			foo: 'bar',
 		};
 
-		const json = stringifySafe(input, 1, 5);
+		const json = stringify(input, 5);
 		const data = JSON.parse(json);
 
 		assert.deepEqual(data, expected);

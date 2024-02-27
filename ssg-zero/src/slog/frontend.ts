@@ -1,84 +1,92 @@
-import { Writable } from 'node:stream';
-
-import { backendSym, SlogBackend } from './backend.js';
+import { type Writable } from 'stream';
 import {
-	child,
 	createLogFn,
 	epochTime,
+	noop,
+	SlogBase,
+	type EOL,
+	type Handler,
 	type LogFn,
 	type LogLevels,
 	type Slog,
 	type Timestamp,
-} from './interface.js';
+} from './base.js';
+import { JsonHandler } from './handler.js';
 
 export const DefaultLogLevel = {
-  trace: 2,
-  debug: 4,
-	info: 8,
-	warn: 16,
-	error: 32,
+	trace: 1 << 1,
+	debug: 1 << 2,
+	info: 1 << 3,
+	warn: 1 << 4,
+	error: 1 << 5,
 };
 
 export type DefaultLogLevels = typeof DefaultLogLevel;
-export type DefaultLogLevelLabel = keyof typeof DefaultLogLevel;
+export type DefaultLogLevelLabel = keyof DefaultLogLevels;
 
 export type SlogOptions<CustomLevels extends LogLevels> =
 	| {
-			maxDepth?: number;
-			time?: Timestamp;
-      eol?: '\n' | '\r\n';
 			useOnlyCustomLevels?: false;
-			level?: DefaultLogLevelLabel | keyof CustomLevels;
 			customLevels?: CustomLevels;
+			level?: DefaultLogLevelLabel | keyof CustomLevels;
+			handler?: Handler;
+			time?: Timestamp;
+			eol?: EOL;
 	  }
 	| {
-			maxDepth?: number;
-			time?: Timestamp;
-      eol?: '\n' | '\r\n';
 			useOnlyCustomLevels: true;
-			level: keyof CustomLevels;
 			customLevels: CustomLevels;
+			level: keyof CustomLevels;
+			handler?: Handler;
+			time?: Timestamp;
+			eol?: EOL;
 	  };
 
 type Join<Obj, Base> = Obj & Omit<Base, keyof Obj>;
 
-export function slog<CustomLevels extends LogLevels>(
+export function slog<CustomLevels extends LogLevels = {}>(
 	options: SlogOptions<CustomLevels> & { useOnlyCustomLevels: true },
 	destination?: Writable,
 ): Slog<CustomLevels>;
-export function slog<CustomLevels extends LogLevels>(
+export function slog<CustomLevels extends LogLevels = {}>(
 	options?: SlogOptions<CustomLevels> & { useOnlyCustomLevels?: false },
 	destination?: Writable,
 ): Slog<Join<DefaultLogLevels, CustomLevels>>;
-export function slog<CustomLevels extends LogLevels>(
-	options: SlogOptions<CustomLevels> | undefined = {},
-	destination?: Writable,
+export function slog<CustomLevels extends LogLevels = {}>(
+	options: SlogOptions<CustomLevels> = {},
+	destination: Writable = process.stdout,
 ): Slog<LogLevels> {
-	const levels: LogLevels = options.useOnlyCustomLevels
-		? Object.assign({}, options.customLevels)
-		: Object.assign({}, options.customLevels, DefaultLogLevel);
+	const levels: LogLevels = {};
+	if (options.useOnlyCustomLevels) {
+		Object.assign(levels, options.customLevels);
+	} else {
+		Object.assign(levels, options.customLevels, DefaultLogLevel);
+	}
 
 	const time = options.time ?? epochTime;
-	const backend = new SlogBackend(
-		levels,
-		destination ?? process.stdout,
-		undefined,
-		time,
-		options.maxDepth ?? 5,
-    options.eol ?? '\n',
-	);
+	const eol = options.eol ?? '\n';
+	const handler = options.handler ?? new JsonHandler(levels);
+	const label = options.level ?? 'info';
+	const level: number = levels[label as string];
+	if (level === undefined) {
+		throw new Error(
+			`Level '${label.toString()}' is not included in levels ${JSON.stringify(levels)}`,
+		);
+	}
+
+	const slogBase = new SlogBase(levels, destination, handler, time, eol);
 	const slog = Object.assign<
-		{
-			levels: LogLevels;
-			[backendSym]: SlogBackend;
-			child: Slog<LogLevels>['child'];
-		},
-		Record<string, LogFn>
+		SlogBase<LogLevels>,
+		{ [Label in keyof LogLevels]: LogFn }
 	>(
-		{ levels, [backendSym]: backend, child },
+		slogBase,
 		Object.entries(levels).reduce(
 			(o, [k, v]) => {
-				o[k] = createLogFn(v);
+				if (v < level) {
+					o[k] = noop;
+				} else {
+					o[k] = createLogFn(v);
+				}
 				return o;
 			},
 			{} as Record<string, LogFn>,
