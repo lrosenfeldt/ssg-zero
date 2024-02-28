@@ -2,7 +2,7 @@ import { extname, join } from 'node:path';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 
 import { walkFiles } from './usefule/core.js';
-import { ConsoleLogger, LogLevel, type Logger } from './logger.js';
+import { logger, type Logger } from './logger.js';
 import { parse } from './frontmatter.js';
 
 const passthroughMarker = Symbol('passthrough');
@@ -102,7 +102,7 @@ export class SSGBuilder {
 	private inputDir: string = '';
 	private outputDir: string = '';
 	private fileHandlers: Map<string, FileHandler> = new Map();
-	private logger: Logger = new ConsoleLogger(LogLevel.Debug);
+	private logger: Logger = logger;
 
 	build(): SSG {
 		// TODO: validation, optional properties
@@ -151,8 +151,8 @@ export class SSGBuilder {
 		return this;
 	}
 
-	useDefaultLogger(maxLogLevel: LogLevel): this {
-		this.logger = new ConsoleLogger(maxLogLevel);
+	// TODO: refactor this, not really compatible with new logger
+	useDefaultLogger(_maxLogLevel: any): this {
 		return this;
 	}
 }

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { after, before, describe as suite, test, mock } from 'node:test';
+
 import { join } from 'node:path';
 import { mkdir, readFile, rm } from 'node:fs/promises';
 
-import { LogLevel } from './logger.js';
 import { SSG, Renderer, SSGBuilder } from './ssg.js';
 import { exists } from './usefule/core.js';
 
@@ -24,7 +24,7 @@ suite('SSGBuilder', function () {
 					generates: '.txt',
 				})
 				.passthrough('.css')
-				.useDefaultLogger(LogLevel.Error);
+				.useDefaultLogger(4);
 
 			const ssg = builder.build();
 
@@ -62,7 +62,7 @@ suite('SSG', function () {
 		const ssg = new SSGBuilder()
 			.setInputDir(inputDir)
 			.setOutputDir(outputDir)
-			.useDefaultLogger(LogLevel.Error)
+			.useDefaultLogger(4)
 			.build();
 
 		before(async function () {
@@ -112,7 +112,7 @@ suite('SSG', function () {
 			.setOutputDir(outputDir)
 			.passthrough('.css')
 			.template('.html', renderHtmlDummy)
-			.useDefaultLogger(LogLevel.Error)
+			.useDefaultLogger(4)
 			.build();
 
 		before(async function () {
