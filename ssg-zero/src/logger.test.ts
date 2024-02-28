@@ -1,54 +1,44 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe as suite, test, mock, beforeEach } from 'node:test';
 
-import { ConsoleLogger, LogLevel } from './logger.js';
+import { time } from './logger.js';
 
-suite('ConsoleLogger', function () {
-	const debugMessage = 'What is love?';
-	const infoMessage = "Baby, don't hurt me";
-	const warnMessage = "Don't hurt me";
-	const errorMessage = 'No more';
+suite('logger time function', function () {
+	const performanceNow = mock.method(performance, 'now', () => 0);
+	time(0);
 
-	const table = [
-		{
-			level: LogLevel.Debug,
-			messages: [debugMessage, infoMessage, warnMessage, errorMessage],
-		},
-		{
-			level: LogLevel.Info,
-			messages: [infoMessage, warnMessage, errorMessage],
-		},
-		{ level: LogLevel.Warn, messages: [warnMessage, errorMessage] },
-		{ level: LogLevel.Error, messages: [errorMessage] },
-	];
+	beforeEach(function () {
+		performanceNow.mock.resetCalls();
+	});
 
-	for (const { level, messages } of table) {
-		test(`only runs for logs on ${level} and below`, function (t) {
-			const logger = new ConsoleLogger(level);
-			const consoleLog = t.mock.method(console, 'log', () => void 0);
+	test('formats correctly in milliseconds range', function () {
+		performanceNow.mock.mockImplementationOnce(() => 127, 0);
 
-			logger.debug(debugMessage);
-			logger.info(infoMessage);
-			logger.warn(warnMessage);
-			logger.error(errorMessage);
+		assert.equal(time(0), '00:00.127');
+	});
+	test('formats correctly in seconds range', function () {
+		performanceNow.mock.mockImplementationOnce(() => 12_340, 0);
+		const result = time(0);
 
-			assert.equal(consoleLog.mock.callCount(), messages.length);
-		});
-	}
-	test('has a sane log format', function (t) {
-		const referenceDate = new Date('2020-04-20T06:09:11');
-
-		const consoleLog = t.mock.method(console, 'log', () => void 0);
-		t.mock.method(global, 'Date', function () {
-			return referenceDate;
-		});
-
-		const logger = new ConsoleLogger(LogLevel.Error);
-		logger.error('unicorn');
-
-		assert.equal(
-			consoleLog.mock.calls[0].arguments[0],
-			'2020/04/20 06:09:11 ERROR unicorn',
+		assert.equal(result, '00:12.340');
+	});
+	test('formats correctly in minutes range', function () {
+		performanceNow.mock.mockImplementationOnce(
+			() => 34 * 60 * 1_000 + 49_912,
+			0,
 		);
+		const result = time(0);
+
+		assert.equal(result, '34:49.912');
+	});
+	test('resets when reaching hours range', function () {
+		performanceNow.mock.mockImplementationOnce(
+			() => 62 * 60 * 1_000 + 31_345,
+			0,
+		);
+		performanceNow.mock.mockImplementationOnce(() => 420, 1);
+
+		assert.equal(time(0), '62:31.345');
+		assert.equal(performanceNow.mock.callCount(), 2);
 	});
 });

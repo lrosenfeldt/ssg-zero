@@ -1,68 +1,33 @@
-export interface Logger {
-	debug(message: string): void;
-	error(message: string): void;
-	info(message: string): void;
-	warn(message: string): void;
+import {
+	DefaultLogLevel,
+	slog,
+	TextHandler,
+	type DefaultLogLevels,
+	type Slog,
+} from './slog/index.js';
+
+export type Logger = Slog<DefaultLogLevels>;
+
+let startOfLogger = performance.now();
+
+export function time(start: number = startOfLogger): string {
+	const runtime = performance.now() - start; // ms;
+	const ms = Math.trunc(runtime % 1000);
+
+	let seconds = Math.floor(runtime / 1000);
+
+	let minutes = Math.floor(seconds / 60);
+	seconds = seconds % 60;
+
+	if (minutes >= 60) {
+		startOfLogger = performance.now();
+	}
+	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
 }
 
-export enum LogLevel {
-	Debug = 'DEBUG',
-	Error = 'ERROR',
-	Info = 'INFO',
-	Warn = 'WARN',
-}
-
-export class ConsoleLogger implements Logger {
-	private static noop = () => void 0;
-
-	constructor(maxLogLevel: LogLevel) {
-		switch (maxLogLevel) {
-			case LogLevel.Debug:
-				break;
-			case LogLevel.Info:
-				this.debug = ConsoleLogger.noop;
-				break;
-			case LogLevel.Warn:
-				this.debug = ConsoleLogger.noop;
-				this.info = ConsoleLogger.noop;
-				break;
-			case LogLevel.Error:
-				this.debug = ConsoleLogger.noop;
-				this.info = ConsoleLogger.noop;
-				this.warn = ConsoleLogger.noop;
-				break;
-		}
-	}
-
-	debug(message: string): void {
-		this.log(LogLevel.Debug, message);
-	}
-	error(message: string): void {
-		this.log(LogLevel.Error, message);
-	}
-	info(message: string): void {
-		this.log(LogLevel.Info, message);
-	}
-	warn(message: string): void {
-		this.log(LogLevel.Warn, message);
-	}
-
-	private log(logLevel: LogLevel, message: string): void {
-		const date = new Date();
-		const formattedDate = [
-			date.getFullYear().toString(),
-			// javascript getMonth is starting a zero
-			// why tho?
-			(date.getMonth() + 1).toString().padStart(2, '0'),
-			date.getDate().toString().padStart(2, '0'),
-		].join('/');
-
-		const time = [
-			date.getHours().toString().padStart(2, '0'),
-			date.getMinutes().toString().padStart(2, '0'),
-			date.getSeconds().toString().padStart(2, '0'),
-		].join(':');
-
-		console.log(`${formattedDate} ${time} ${logLevel} ${message}`);
-	}
-}
+export const logger = slog({
+	handler: new TextHandler(DefaultLogLevel),
+	level: 'trace',
+	time,
+	eol: '\n',
+});
