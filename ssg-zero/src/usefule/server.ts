@@ -10,6 +10,14 @@ type MimeTypeInfo = {
 	encoding: BufferEncoding;
 };
 
+export type ServerEvent = {
+	id: number;
+	route: string;
+	status: number;
+	filePath?: string;
+	bytes?: number;
+};
+
 export class UsefuleServer extends Server {
 	public static readonly mime: Record<string, MimeTypeInfo> = {
 		'': { mimeType: 'text/plain', encoding: 'utf-8' },
@@ -114,8 +122,7 @@ export class UsefuleServer extends Server {
 		'.xls': { mimeType: 'application/vnd.ms-excel', encoding: 'base64' },
 	};
 
-	private context: AsyncLocalStorage<{ id: number; requestPath: string }> =
-		new AsyncLocalStorage();
+	private context: AsyncLocalStorage<ServerEvent> = new AsyncLocalStorage();
 	private nextId: number = 0;
 	private running: boolean = false;
 
@@ -144,10 +151,12 @@ export class UsefuleServer extends Server {
 			this.addListener('request', (req, res) => {
 				const requestPath = new URL(req.url ?? '', this.baseUrl)
 					.pathname;
-				const store = { id: this.nextId++, requestPath };
+				const store: ServerEvent = {
+					id: this.nextId++,
+					route: requestPath,
+					status: NaN,
+				};
 				this.context.run(store, () => {
-					res.once('finish', () => this.emit('file:done', store));
-					this.emit('file:get', store);
 					this.handleRequest(req, res);
 				});
 			});
@@ -185,8 +194,16 @@ export class UsefuleServer extends Server {
 		_req: IncomingMessage,
 		res: ServerResponse & { req: IncomingMessage },
 	): void {
+		res.on('finish', () => {
+			const store = this.context.getStore()!;
+			store.status = res.statusCode;
+
+			this.emit('file:done', store);
+		});
+
 		const store = this.context.getStore()!;
-		const targetPath = join(this.filesRoot, store.requestPath);
+		const targetPath = join(this.filesRoot, store.route);
+		store.filePath = targetPath;
 
 		const extension = extname(targetPath);
 		if (Object.hasOwn(UsefuleServer.mime, extension)) {
@@ -196,11 +213,6 @@ export class UsefuleServer extends Server {
 			);
 			res.statusCode = 200;
 		} else {
-			this.emit('file:unsupported_type', {
-				...store,
-				targetPath,
-				extension,
-			});
 			res.statusCode = 415;
 			res.end();
 			return;
@@ -221,7 +233,6 @@ export class UsefuleServer extends Server {
 					res.statusCode = 404;
 					res.end();
 				}
-				this.emit('file:enoent', { ...store, targetPath });
 				return;
 			}
 
@@ -229,22 +240,20 @@ export class UsefuleServer extends Server {
 				res.statusCode = 500;
 				res.end();
 			}
-			this.emit('error', {
-				...store,
-				targetPath,
-				bytes: r.bytesRead,
-				error,
-			});
+
+			const store = this.context.getStore()!;
+			const errorWithMeta = Object.assign<
+				NodeJS.ErrnoException,
+				{ meta: { event: ServerEvent } }
+			>(error, { meta: { event: store } });
+			this.emit('error', errorWithMeta);
+		});
+		// res may end ungracefully, also check file stream
+		r.once('end', () => {
+			const store = this.context.getStore()!;
+			store.bytes = r.bytesRead;
 		});
 
-		// res may end ungracefully, also check file stream
-		r.once('end', () =>
-			this.emit('file:sent', {
-				...store,
-				targetPath,
-				bytes: r.bytesRead,
-			}),
-		);
 		r.pipe(res);
 	}
 }

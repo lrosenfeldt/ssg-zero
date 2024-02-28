@@ -1,5 +1,5 @@
 import * as pug from 'pug';
-import { SSGBuilder, LogLevel } from 'ssg-zero';
+import { SSGBuilder } from 'ssg-zero';
 
 const builder = new SSGBuilder();
 
@@ -17,7 +17,6 @@ const pugRenderer = {
 export default builder
 	.setInputDir('pages')
 	.setOutputDir('www')
-	.useDefaultLogger(LogLevel.Debug)
 	.template('.pug', pugRenderer)
 	.passthrough('.html')
 	.build();
