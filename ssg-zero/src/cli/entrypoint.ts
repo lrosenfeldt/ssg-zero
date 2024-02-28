@@ -2,7 +2,7 @@ import { pathToFileURL } from 'node:url';
 
 import { parse } from '../parse_args.js';
 import { SSG, SSGBuilder } from '../ssg.js';
-import { SsgZero } from './cli.js';
+import { SsgZero } from './ssg_zero.js';
 import { Build } from './build_command.js';
 import { Serve } from './serve_command.js';
 import { logger } from '../logger.js';
