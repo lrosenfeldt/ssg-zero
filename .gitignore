@@ -3,8 +3,8 @@ node_modules
 dist/
 *.tsbuildinfo
 
-fixtures/pages_dump/
-fixtures/dist_dump/
-fixtures/watch
+ssg-zero/fixtures/pages_dump/
+ssg-zero/fixtures/dist_dump/
+ssg-zero/fixtures/watch
 
 coverage.txt
