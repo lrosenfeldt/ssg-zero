@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { before, describe as suite, test } from 'node:test';
-import { join } from 'node:path';
 
 import { anyToError, exists, walkFiles } from './core.js';
 import { mkdir } from 'node:fs/promises';
@@ -81,7 +80,7 @@ suite('walkFiles', function () {
 		const walkedFiles: string[] = [];
 
 		for await (const file of walkFiles('fixtures/empty')) {
-			walkedFiles.push(join(file.dir, file.base));
+			walkedFiles.push(file.filePath);
 		}
 
 		assert.deepEqual(walkedFiles, []);
@@ -96,7 +95,7 @@ suite('walkFiles', function () {
 		const walkedFiles = new Set<string>([]);
 
 		for await (const file of walkFiles('fixtures/simple')) {
-			walkedFiles.add(join(file.dir, file.base));
+			walkedFiles.add(file.filePath);
 		}
 
 		assert.deepEqual(walkedFiles, expectedFiles);
@@ -110,7 +109,7 @@ suite('walkFiles', function () {
 		const walkedFiles = new Set<string>([]);
 
 		for await (const file of walkFiles('fixtures/pages')) {
-			walkedFiles.add(join(file.dir, file.base));
+			walkedFiles.add(file.filePath);
 		}
 
 		assert.deepEqual(walkedFiles, expectedFiles);

@@ -1,7 +1,8 @@
-import { extname, join } from 'node:path';
+import { basename, dirname, extname, join } from 'node:path';
+
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 
-import { walkFiles } from './usefule/core.js';
+import { FileEntriesReader, walkFiles } from './usefule/core.js';
 import { logger, type Logger } from './logger.js';
 import { parse } from './frontmatter.js';
 
@@ -29,9 +30,11 @@ export class SSG {
 		await mkdir(this.outputDir, { recursive: true });
 	}
 
-	async build(): Promise<void> {
-		for await (const file of walkFiles(this.inputDir)) {
-			const inputFilePath = join(file.dir, file.base);
+	async build(
+		reader: FileEntriesReader = walkFiles(this.inputDir),
+	): Promise<void> {
+		for await (const file of reader) {
+			const inputFilePath = file.filePath;
 			const fileType = extname(inputFilePath);
 			this.logger.debug(
 				`Found file ${inputFilePath} with extension ${fileType}.`,
@@ -51,7 +54,10 @@ export class SSG {
 			}
 
 			// render
-			const targetDir = file.dir.replace(this.inputDir, this.outputDir);
+			const targetDir = dirname(file.filePath).replace(
+				this.inputDir,
+				this.outputDir,
+			);
 			this.logger.debug(
 				`Prepare rendering of ${inputFilePath}, creating directory ${targetDir}.`,
 			);
@@ -59,7 +65,7 @@ export class SSG {
 
 			const targetFile = join(
 				targetDir,
-				file.base.replace(fileType, renderer.generates),
+				basename(file.filePath).replace(fileType, renderer.generates),
 			);
 			this.logger.info(`Rendering ${inputFilePath} to ${targetFile}.`);
 

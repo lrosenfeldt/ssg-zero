@@ -7,7 +7,7 @@ import { WatchEvent, Watcher, watch } from './watcher.js';
 
 suite('watcher initialization', function () {
 	test('fails if not initialized', async function () {
-		const watcher = new Watcher('fixtures/watch_static', 0);
+		const watcher = new Watcher('fixtures/watch_static', 0, false);
 		await assert.rejects(async () => {
 			for await (const _ of watcher.watch()) {
 				break;
@@ -18,7 +18,7 @@ suite('watcher initialization', function () {
 
 suite('watch events', async function () {
 	const baseDir = 'fixtures/watch';
-	const watcher = new Watcher(baseDir, 50);
+	const watcher = new Watcher(baseDir, 50, false);
 
 	const files = {
 		create: {
@@ -84,7 +84,7 @@ suite('watch events', async function () {
 				filePath: files.change.filePath,
 				content: files.change.contentAfter,
 			},
-			{ type: 'delete', filePath: files.delete.filePath },
+			{ type: 'delete', filePath: files.delete.filePath, content: '' },
 		];
 		let events: Set<WatchEvent> = new Set();
 

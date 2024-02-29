@@ -26,28 +26,29 @@ suite('UsefuleServer', async function () {
 
 	await test('responds with 415 for unsupported file types', async function () {
 		let event: any;
-		server.once('file:unsupported_type', data => (event = data));
+		server.once('file:done', data => (event = data));
 		const res = await requestFile('bad_files/audio.aiff');
 
 		assert.equal(res.status, 415);
 		assert.deepEqual(event, {
 			id: event.id,
-			requestPath: '/bad_files/audio.aiff',
-			targetPath: 'fixtures/bad_files/audio.aiff',
-			extension: '.aiff',
+			status: 415,
+			route: '/bad_files/audio.aiff',
+			filePath: 'fixtures/bad_files/audio.aiff',
 		});
 	});
 	await test('responds with 404 for unexisting files', async function () {
 		const [res, event] = await Promise.all([
 			requestFile('empty/does_not_exists.txt'),
-			once(server, 'file:enoent').then(a => a[0]),
+			once(server, 'file:done').then(a => a[0]),
 		]);
 
 		assert.equal(res.status, 404);
 		assert.deepEqual(event, {
 			id: event.id,
-			targetPath: 'fixtures/empty/does_not_exists.txt',
-			requestPath: '/empty/does_not_exists.txt',
+			status: 404,
+			filePath: 'fixtures/empty/does_not_exists.txt',
+			route: '/empty/does_not_exists.txt',
 		});
 	});
 	await test('responds with the actual file', async function (t) {
@@ -57,15 +58,16 @@ suite('UsefuleServer', async function () {
 		);
 		const [res, event] = await Promise.all([
 			requestFile('pages/index.html'),
-			once(server, 'file:sent').then(a => a[0]),
+			once(server, 'file:done').then(a => a[0]),
 		]);
 
 		assert.equal(res.status, 200);
 		assert.deepEqual(event, {
-			id: event?.id,
-			targetPath: 'fixtures/pages/index.html',
+			id: event.id,
+			status: 200,
+			filePath: 'fixtures/pages/index.html',
 			bytes: Buffer.from(actualContent).byteLength,
-			requestPath: '/pages/index.html',
+			route: '/pages/index.html',
 		});
 		await t.test('has the correct mime type', function () {
 			assert.equal(res.headers.get('Content-Type'), 'text/html');
@@ -75,18 +77,17 @@ suite('UsefuleServer', async function () {
 		});
 	});
 	await test('responds with 500 for a locked file', async function () {
-		const [res, event] = await Promise.all([
+		const [res, error] = await Promise.all([
 			requestFile('bad_files/unreadable.json'),
 			once(server, 'error').then(a => a[0]),
 		]);
 
 		assert.equal(res.status, 500);
-		assert.deepEqual(event, {
-			id: event.id,
-			bytes: event.bytes,
-			error: event.error,
-			requestPath: '/bad_files/unreadable.json',
-			targetPath: 'fixtures/bad_files/unreadable.json',
+		assert.deepEqual(error.meta.event, {
+			id: error.meta.event.id,
+			status: 500,
+			route: '/bad_files/unreadable.json',
+			filePath: 'fixtures/bad_files/unreadable.json',
 		});
 	});
 });

@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { readdir, stat } from 'node:fs/promises';
+import { opendir, readFile, readdir, stat } from 'node:fs/promises';
 
 export function anyToError(reason: unknown): NodeJS.ErrnoException {
 	let errorMessage: string;
@@ -48,19 +48,21 @@ export async function exists(path: string): Promise<boolean> {
 	}
 }
 
-export type UsefulePath = { dir: string; base: string };
-export async function* walkFiles(root: string): AsyncGenerator<UsefulePath> {
-	const dirs = [root];
-	for (const dir of dirs) {
-		const entries = await readdir(dir, { withFileTypes: true });
-		for (const entry of entries) {
-			if (entry.isDirectory()) {
-				dirs.push(join(dir, entry.name));
-				continue;
-			}
-			if (entry.isFile()) {
-				yield { dir, base: entry.name };
-			}
-		}
+export type FileEntry = {
+	filePath: string;
+	content: string;
+};
+export type FileEntriesReader = AsyncIterable<FileEntry>;
+
+export async function* walkFiles(root: string): FileEntriesReader {
+	const dir = await opendir(root, { recursive: true });
+	for await (const entry of dir) {
+		if (!entry.isFile()) continue;
+
+		// @ts-expect-error parentPath is node v21, to new for @types/node
+		const filePath = join(entry.parentPath, entry.name);
+		const content = await readFile(filePath, 'utf-8');
+
+		yield { filePath, content };
 	}
 }

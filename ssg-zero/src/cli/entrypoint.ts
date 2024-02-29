@@ -7,6 +7,8 @@ import { Build } from './build_command.js';
 import { Serve } from './serve_command.js';
 import { logger } from '../logger.js';
 import { anyToError } from '../usefule/core.js';
+import { Dev } from './dev_command.js';
+import { watch } from '../usefule/watcher.js';
 
 async function loadSsg(configPath: string): Promise<SSG> {
 	const configModule = await import(pathToFileURL(configPath).toString());
@@ -57,5 +59,25 @@ export async function run(): Promise<void> {
 				);
 			process.exit(1);
 		});
+	} else if (ssgZero.command instanceof Dev) {
+		const serve = new Serve();
+		serve.port = ssgZero.command.port;
+
+		const fileServer = await serve.setupServer(ssg, logger);
+
+		process.once('SIGINT', () => {
+			fileServer
+				.stop()
+				.catch((reason: any) =>
+					logger.error('failed to stop server', anyToError(reason)),
+				);
+			process.exit(1);
+		});
+
+		const reader = watch(ssg.inputDir, {
+			maxInterval: 100,
+			disableDelete: true,
+		});
+		await ssg.build(reader);
 	}
 }

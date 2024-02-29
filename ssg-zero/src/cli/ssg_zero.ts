@@ -1,5 +1,6 @@
 import { boolean, cli, string, subcommand } from '../parse_args.js';
 import { Build } from './build_command.js';
+import { Dev } from './dev_command.js';
 import { Serve } from './serve_command.js';
 
 const NPM_VERSION = '0.5.0';
@@ -17,6 +18,6 @@ export class SsgZero {
 	@string({ short: 'c' })
 	config: string = 'zero.config.js';
 
-	@subcommand([Build, Serve])
-	command?: Build | Serve;
+	@subcommand([Build, Serve, Dev])
+	command?: Build | Serve | Dev;
 }

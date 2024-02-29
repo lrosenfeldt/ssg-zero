@@ -19,6 +19,7 @@ export type WatchCreateEvent = {
 export type WatchDeleteEvent = {
 	type: 'delete';
 	filePath: string;
+	content: '';
 };
 
 export type WatchEvent = WatchChangeEvent | WatchCreateEvent | WatchDeleteEvent;
@@ -27,6 +28,7 @@ export type Hash = string;
 
 export type WatcherOptions = {
 	maxInterval?: number;
+	disableDelete?: boolean;
 };
 
 export class Watcher {
@@ -36,6 +38,7 @@ export class Watcher {
 	constructor(
 		private target: string,
 		private maxInterval: number,
+		private disableDelete: boolean,
 	) {}
 
 	async init(): Promise<void> {
@@ -98,9 +101,13 @@ export class Watcher {
 			this.cache.set(filePath, content);
 		}
 
+		if (this.disableDelete) {
+			return;
+		}
+
 		for (const [filePath, _] of snapshot) {
 			if (!this.cache.has(filePath)) {
-				yield { type: 'delete', filePath };
+				yield { type: 'delete', filePath, content: '' };
 			}
 		}
 	}
@@ -122,7 +129,11 @@ export async function* watch(
 	target: string,
 	options: WatcherOptions = {},
 ): AsyncGenerator<WatchEvent> {
-	const watcher = new Watcher(target, options.maxInterval ?? 500);
+	const watcher = new Watcher(
+		target,
+		options.maxInterval ?? 500,
+		options.disableDelete ?? false,
+	);
 
 	await watcher.init();
 	yield* watcher.watch();

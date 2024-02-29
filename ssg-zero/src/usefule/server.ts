@@ -194,14 +194,14 @@ export class UsefuleServer extends Server {
 		_req: IncomingMessage,
 		res: ServerResponse & { req: IncomingMessage },
 	): void {
+		const store = this.context.getStore()!;
+		console.log('store', store);
 		res.on('finish', () => {
-			const store = this.context.getStore()!;
 			store.status = res.statusCode;
 
 			this.emit('file:done', store);
 		});
 
-		const store = this.context.getStore()!;
 		const targetPath = join(this.filesRoot, store.route);
 		store.filePath = targetPath;
 
@@ -250,7 +250,6 @@ export class UsefuleServer extends Server {
 		});
 		// res may end ungracefully, also check file stream
 		r.once('end', () => {
-			const store = this.context.getStore()!;
 			store.bytes = r.bytesRead;
 		});
 
