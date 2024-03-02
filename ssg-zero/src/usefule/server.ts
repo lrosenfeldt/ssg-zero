@@ -9,7 +9,6 @@ import {
 } from 'node:http';
 import { extname, join } from 'node:path';
 
-import { logger } from '../logger.js';
 import { anyToError } from './core.js';
 import { mime } from './mime.js';
 import { toHttpDate } from './http_date.js';
@@ -106,7 +105,6 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 		};
 		res.once('close', () => {
 			context.status = res.statusCode;
-			logger.debug('done', context);
 			this.emit('file:done', context);
 		});
 
@@ -114,14 +112,12 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 			res.statusCode = 405;
 			res.setHeader('Allow', 'GET, HEAD');
 			res.end();
-			logger.debug('method not allowed', context);
 			return;
 		}
 
 		const { pathname } = new URL(req.url ?? '', this.baseUrl);
 		let extension = extname(pathname);
 		if (extension === '' && !pathname.endsWith('/')) {
-			logger.debug('redirect to index.html');
 			res.statusCode = 301;
 			res.setHeader('Location', pathname + '/');
 			res.end();
@@ -134,17 +130,9 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 		} else {
 			context.filePath = join(this.filesRoot, pathname);
 		}
-		logger.debug('will use filepath', {
-			filePath: context.filePath,
-			extension,
-		});
 
 		const mimeType: string | undefined = mime[extension]?.mimeType;
-		logger.debug('checking mime type', {
-			hasIt: Object.hasOwn(mime, extension),
-		});
 		if (mimeType === undefined) {
-			logger.debug('type unsupported', { extension });
 			res.statusCode = 415;
 			res.end();
 			return;
@@ -153,7 +141,6 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 		if (accept === '*/*') {
 			res.setHeader('Content-Type', mimeType);
 		} else if (accept !== mimeType) {
-			logger.debug('mime mismatch', { accept, mimeType });
 			res.setHeader('Accept', mimeType);
 			res.statusCode = 406;
 			res.end();
@@ -162,7 +149,6 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 			res.setHeader('Content-Type', accept);
 		}
 
-		logger.debug('going into preserve');
 		this.store.run(context, () => this.preServeFile(req, res));
 	}
 
@@ -171,7 +157,6 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 		res: ServerResponse & { req: IncomingMessage },
 	): void {
 		const context = this.store.getStore()!;
-		logger.debug('looking for stats', context);
 		stat(context.filePath!, (reason, stats) => {
 			if (reason !== null) {
 				const error = anyToError(reason);
@@ -191,13 +176,30 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 
 			const date = new Date(stats.mtime);
 			res.setHeader('Last-Modified', toHttpDate(date));
+
+			if (req.headers['if-modified-since']) {
+				// TODO: this is probably super unsafe, but the alternative is Date parsing and handling all the crazy js date api stuff
+				const clientDate = new Date(req.headers['if-modified-since']);
+				if (clientDate.toString() === 'Invalid Date') {
+					res.statusCode = 400;
+					res.end();
+					return;
+				}
+
+				if (date < clientDate) {
+					res.statusCode = 304;
+					res.end();
+					return;
+				}
+			}
+
 			if (req.method === 'GET') {
 				this.serveFile(req, res);
 			}
 		});
 	}
 	private serveFile(
-		req: IncomingMessage,
+		_req: IncomingMessage,
 		res: ServerResponse<IncomingMessage> & { req: IncomingMessage },
 	): void {
 		const context = this.store.getStore()!;

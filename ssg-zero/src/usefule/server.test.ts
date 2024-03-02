@@ -5,6 +5,7 @@ import { once } from 'node:events';
 import { chmod, readFile } from 'node:fs/promises';
 
 import { UsefuleServer } from './server.js';
+import { toHttpDate } from './http_date.js';
 
 suite('UsefuleServer', async function () {
 	const server = new UsefuleServer('fixtures', { port: 4269 });
@@ -148,5 +149,24 @@ suite('UsefuleServer', async function () {
 
 		assert.equal(res.status, 406);
 		assert.equal(res.headers.get('accept'), 'text/css');
+	});
+	await test('responds with 304 if the file is unmodified', async function () {
+		const date = new Date(Date.UTC(2049, 11, 24, 0, 23, 5));
+		const res = await requestFile('pages/assets/style.css', {
+			headers: {
+				'If-Modified-Since': toHttpDate(new Date(date)),
+			},
+		});
+
+		assert.equal(res.status, 304);
+	});
+	await test("responds with 400 if a bad date is send for  'If-Modified-Since' header", async function () {
+		const res = await requestFile('pages/assets/style.css', {
+			headers: {
+				'If-Modified-Since': 'Im blue dabedi dabedei',
+			},
+		});
+
+		assert.equal(res.status, 400);
 	});
 });
