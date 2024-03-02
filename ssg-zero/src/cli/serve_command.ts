@@ -1,7 +1,7 @@
 import { type Logger } from '../logger.js';
 import { command, number } from '../parse_args.js';
 import { type SSG } from '../ssg.js';
-import { UsefuleServer, ServerEvent } from '../usefule/server.js';
+import { UsefuleServer, UsefuleServerContext } from '../usefule/server.js';
 
 @command({ desc: 'Serve files on localhost' })
 export class Serve {
@@ -10,20 +10,17 @@ export class Serve {
 
 	async setupServer(ssg: SSG, logger: Logger): Promise<UsefuleServer> {
 		const serverLogger = logger.child({ src: 'UsefuleServer' });
-		const server = new UsefuleServer(ssg.outputDir, this.port);
+		const server = new UsefuleServer(ssg.outputDir, { port: this.port });
 
 		server.on('error', error => serverLogger.error(error));
-		server.on('file:done', (payload: ServerEvent) =>
+		server.on('file:done', (payload: UsefuleServerContext) =>
 			serverLogger.info(payload),
 		);
 
-		server.once('listening', () =>
-			serverLogger.info(
-				`Serving files from ${server.filesRoot} on: ${server.baseUrl}`,
-			),
-		);
-
 		await server.serve();
+		serverLogger.info(
+			`Serving files from ${server.filesRoot} on: ${server.baseUrl}`,
+		);
 		return server;
 	}
 }

@@ -1,39 +1,60 @@
-import { constants, createReadStream } from 'node:fs';
-import { type IncomingMessage, type ServerResponse, Server } from 'node:http';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import EventEmitter from 'node:events';
+import { createReadStream, stat } from 'node:fs';
+import {
+	type IncomingMessage,
+	type ServerResponse,
+	Server,
+	createServer,
+} from 'node:http';
 import { extname, join } from 'node:path';
 
+import { logger } from '../logger.js';
 import { anyToError } from './core.js';
-import { AsyncLocalStorage } from 'node:async_hooks';
 import { mime } from './mime.js';
+import { toHttpDate } from './http_date.js';
 
-export type ServerEvent = {
+export type UsefuleServerContext = {
 	id: number;
-	route: string;
 	status: number;
+	accept: string;
 	filePath?: string;
 	bytes?: number;
 };
 
-export class UsefuleServer extends Server {
-	private context: AsyncLocalStorage<ServerEvent> = new AsyncLocalStorage();
-	private nextId: number = 0;
-	private running: boolean = false;
+export type ServerOptions = {
+	port?: number;
+};
 
-	public get baseUrl(): string {
+type ServerEventMap = {
+	error: [NodeJS.ErrnoException & { meta?: UsefuleServerContext }];
+	'file:done': [UsefuleServerContext];
+};
+
+export class UsefuleServer extends EventEmitter<ServerEventMap> {
+	private store: AsyncLocalStorage<UsefuleServerContext> =
+		new AsyncLocalStorage();
+	private nextId: number = 0;
+	private server: Server | null = null;
+
+	readonly filesRoot: string;
+	readonly port: number;
+	get baseUrl(): string {
 		return `http://localhost${this.port === 80 ? '' : `:${this.port}`}/`;
 	}
 
-	constructor(
-		public readonly filesRoot: string,
-		public readonly port: number,
-	) {
+	constructor(filesRoot: string, options: ServerOptions = {}) {
 		super();
+
+		this.filesRoot = filesRoot;
+		this.port = options.port ?? 6942;
 	}
 
 	serve(): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
-			if (this.running) {
+			if (this.server !== null) {
 				resolve();
+				return;
 			}
 
 			this.once('error', reason => {
@@ -41,111 +62,170 @@ export class UsefuleServer extends Server {
 				reject(error);
 			});
 
-			this.addListener('request', (req, res) => {
-				const requestPath = new URL(req.url ?? '', this.baseUrl)
-					.pathname;
-				const store: ServerEvent = {
-					id: this.nextId++,
-					route: requestPath,
-					status: NaN,
-				};
-				this.context.run(store, () => {
-					this.handleRequest(req, res);
-				});
-			});
+			this.server = createServer((req, res) =>
+				this.handleRequest(req, res),
+			);
 
-			this.listen(this.port, () => {
-				this.running = true;
-				resolve();
-			});
+			this.server.listen(this.port, resolve);
 		});
 	}
 
 	stop(): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			if (!this.running) {
+		return new Promise<void>((resolve, _reject) => {
+			const server = this.server;
+			if (server === null) {
 				resolve();
 				return;
 			}
 
-			this.closeIdleConnections();
-			this.closeAllConnections();
-			this.close(error => {
+			server.closeIdleConnections();
+			server.closeAllConnections();
+			server.close(error => {
 				if (error !== undefined) {
-					reject(error);
+					// error is only provided if server already stopped
+					resolve();
 					return;
 				}
-
-				this.running = false;
-				this.unref();
+				server.unref();
+				this.server = null;
 				resolve();
 			});
 		});
 	}
 
 	private handleRequest(
-		_req: IncomingMessage,
+		req: IncomingMessage,
 		res: ServerResponse & { req: IncomingMessage },
 	): void {
-		const store = this.context.getStore()!;
-		console.log('store', store);
-		res.on('finish', () => {
-			store.status = res.statusCode;
-
-			this.emit('file:done', store);
+		const accept = req.headers.accept ?? '*/*';
+		const context: UsefuleServerContext = {
+			id: this.nextId++,
+			status: NaN,
+			accept,
+			filePath: undefined,
+		};
+		res.once('close', () => {
+			context.status = res.statusCode;
+			logger.debug('done', context);
+			this.emit('file:done', context);
 		});
 
-		const targetPath = join(this.filesRoot, store.route);
-		store.filePath = targetPath;
+		if (req.method !== 'GET' && req.method !== 'HEAD') {
+			res.statusCode = 405;
+			res.setHeader('Allow', 'GET, HEAD');
+			res.end();
+			logger.debug('method not allowed', context);
+			return;
+		}
 
-		const extension = extname(targetPath);
-		if (Object.hasOwn(mime, extension)) {
-			res.setHeader(
-				'Content-Type',
-				mime[extension].mimeType,
-			);
-			res.statusCode = 200;
+		const { pathname } = new URL(req.url ?? '', this.baseUrl);
+		let extension = extname(pathname);
+		if (extension === '' && !pathname.endsWith('/')) {
+			logger.debug('redirect to index.html');
+			res.statusCode = 301;
+			res.setHeader('Location', pathname + '/');
+			res.end();
+			return;
+		}
+
+		if (pathname.endsWith('/')) {
+			context.filePath = join(this.filesRoot, pathname, 'index.html');
+			extension = '.html';
 		} else {
+			context.filePath = join(this.filesRoot, pathname);
+		}
+		logger.debug('will use filepath', {
+			filePath: context.filePath,
+			extension,
+		});
+
+		const mimeType: string | undefined = mime[extension]?.mimeType;
+		logger.debug('checking mime type', {
+			hasIt: Object.hasOwn(mime, extension),
+		});
+		if (mimeType === undefined) {
+			logger.debug('type unsupported', { extension });
 			res.statusCode = 415;
 			res.end();
 			return;
 		}
 
-		const r = createReadStream(targetPath, {
-			flags: 'r',
-			mode: constants.O_RDONLY,
-		});
+		if (accept === '*/*') {
+			res.setHeader('Content-Type', mimeType);
+		} else if (accept !== mimeType) {
+			logger.debug('mime mismatch', { accept, mimeType });
+			res.setHeader('Accept', mimeType);
+			res.statusCode = 406;
+			res.end();
+			return;
+		} else {
+			res.setHeader('Content-Type', accept);
+		}
 
-		r.on('error', reason => {
-			r.close();
+		logger.debug('going into preserve');
+		this.store.run(context, () => this.preServeFile(req, res));
+	}
 
-			const error = anyToError(reason);
-
-			if (error.code === 'ENOENT') {
-				if (!res.closed) {
+	private preServeFile(
+		req: IncomingMessage,
+		res: ServerResponse & { req: IncomingMessage },
+	): void {
+		const context = this.store.getStore()!;
+		logger.debug('looking for stats', context);
+		stat(context.filePath!, (reason, stats) => {
+			if (reason !== null) {
+				const error = anyToError(reason);
+				if (error.code === 'ENOENT') {
 					res.statusCode = 404;
 					res.end();
+					return;
 				}
+
+				res.statusCode = 500;
+				res.end();
+
+				const errorWithMeta = Object.assign(error, { meta: context });
+				this.emit('error', errorWithMeta);
 				return;
 			}
 
-			if (!res.closed) {
-				res.statusCode = 500;
+			const date = new Date(stats.mtime);
+			res.setHeader('Last-Modified', toHttpDate(date));
+			if (req.method === 'GET') {
+				this.serveFile(req, res);
+			}
+		});
+	}
+	private serveFile(
+		req: IncomingMessage,
+		res: ServerResponse<IncomingMessage> & { req: IncomingMessage },
+	): void {
+		const context = this.store.getStore()!;
+		const fileStream = createReadStream(context.filePath!, {
+			flags: 'r',
+		});
+
+		fileStream.once('error', reason => {
+			fileStream.close();
+
+			const error = anyToError(reason);
+			if (error.code === 'ENOENT') {
+				res.statusCode = 404;
 				res.end();
+				return;
 			}
 
-			const store = this.context.getStore()!;
-			const errorWithMeta = Object.assign<
-				NodeJS.ErrnoException,
-				{ meta: { event: ServerEvent } }
-			>(error, { meta: { event: store } });
+			res.statusCode = 500;
+			res.end();
+
+			const errorWithMeta = Object.assign(error, { meta: context });
 			this.emit('error', errorWithMeta);
 		});
-		// res may end ungracefully, also check file stream
-		r.once('end', () => {
-			store.bytes = r.bytesRead;
+
+		fileStream.once('end', () => {
+			context.bytes = fileStream.bytesRead;
 		});
 
-		r.pipe(res);
+		fileStream.pipe(res);
 	}
 }

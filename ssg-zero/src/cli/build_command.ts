@@ -1,4 +1,4 @@
-import { UsefuleServer, ServerEvent } from '../usefule/server.js';
+import { UsefuleServer } from '../usefule/server.js';
 import { command, number } from '../parse_args.js';
 import { type Logger } from '../logger.js';
 
