@@ -27,10 +27,10 @@ export class Injector extends Transform {
 	): void {
 		// @ts-expect-error @types/node doesnt know about this special value
 		if (encoding !== 'buffer') {
-      let typeName: string = typeof chunk;
-      if (typeName === 'object') {
-        typeName = chunk.constructor.name || 'object';
-      }
+			let typeName: string = typeof chunk;
+			if (typeName === 'object') {
+				typeName = chunk.constructor.name || 'object';
+			}
 			callback(
 				new Error(
 					`Invalid encoding ${encoding}, Injector only works on buffers not on chunk of type '${typeName}'.`,
@@ -45,36 +45,46 @@ export class Injector extends Transform {
 			return;
 		}
 
-		let i = 0;
-		while (i < chunk.length && this.cursor < this.injectAfter.length) {
+		let start = -1;
+		for (
+			let i = 0;
+			i < chunk.length && this.cursor < this.injectAfter.length;
+			++i
+		) {
 			if (chunk[i] === this.injectAfter[this.cursor]) {
-				this.isInPattern = true;
+				if (this.cursor === 0) {
+					start = i;
+				}
 				this.cursor++;
+				this.isInPattern = true;
 			} else {
-				this.isInPattern = false;
 				this.cursor = 0;
+				this.isInPattern = false;
+				start = -1;
 			}
-			++i;
 		}
 
 		if (this.cursor >= this.injectAfter.length) {
-			const before = chunk.subarray(0, i);
-			const after = chunk.subarray(i + this.injectAfter.length);
-
-			this.push(before);
+			if (start > 0) {
+				this.push(chunk.subarray(0, start));
+			}
+			this.push(this.injectAfter);
 			this.push(this.injection);
-			this.push(after);
-			this.injectionDone = true;
+			if (start + this.injectAfter.length < chunk.length - 1) {
+				this.push(chunk.subarray(start + this.injectAfter.length));
+			}
 			callback();
 
+			this.injectionDone = true;
 			this.cursor = 0;
 			this.isInPattern = false;
 			return;
 		}
 
 		if (this.isInPattern) {
-			const before = chunk.subarray(0, i);
-			this.push(before);
+			if (start > 0) {
+				this.push(chunk.subarray(0, start));
+			}
 			callback();
 			return;
 		}

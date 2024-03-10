@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 
-import { type Readable } from 'node:stream';
-
 import { Injector } from './injector.js';
-import { finished } from 'node:stream/promises';
 
 suite('Injector', function () {
 	test('passes through chunks that do not contain the pattern', async function () {
@@ -49,5 +46,27 @@ suite('Injector', function () {
 		const [str] = await injector.toArray();
 
 		assert.deepEqual(str, expected);
+	});
+	test('replaces the pattern only once', async function () {
+		const injector = new Injector(
+			'</p>',
+			'<script>alert("Hello");</script>',
+		);
+		const chunks = [
+			'<!DOCTYPE html>\n<html><body>',
+			'<nav>The navigation</nav>\n<main><p>Some content</p></main><p>Some more content</p></body>',
+			'</html>',
+		];
+		const expected =
+			'<!DOCTYPE html>\n<html><body><nav>The navigation</nav>\n<main><p>Some content</p><script>alert("Hello");</script></main><p>Some more content</p></body></html>';
+
+		for (const chunk of chunks) {
+			injector.write(Buffer.from(chunk));
+		}
+		injector.end();
+
+		const [str] = await injector.toArray();
+
+		assert.equal(str, expected);
 	});
 });
