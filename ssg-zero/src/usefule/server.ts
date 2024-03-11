@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { Buffer } from 'node:buffer';
 import EventEmitter from 'node:events';
 import { createReadStream, stat } from 'node:fs';
 import {
@@ -12,17 +13,19 @@ import { extname, join } from 'node:path';
 import { anyToError } from './core.js';
 import { mime } from './mime.js';
 import { toHttpDate } from './http_date.js';
+import { Injector } from './injector.js';
 
 export type UsefuleServerContext = {
 	id: number;
 	status: number;
-	accept: string;
+	accept: string[];
 	filePath?: string;
 	bytes?: number;
 };
 
 export type ServerOptions = {
 	port?: number;
+	injectScript?: string;
 };
 
 type ServerEventMap = {
@@ -35,6 +38,7 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 		new AsyncLocalStorage();
 	private nextId: number = 0;
 	private server: Server | null = null;
+	private injectScript: string | undefined;
 
 	readonly filesRoot: string;
 	readonly port: number;
@@ -47,6 +51,7 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 
 		this.filesRoot = filesRoot;
 		this.port = options.port ?? 6942;
+		this.injectScript = options.injectScript;
 	}
 
 	serve(): Promise<void> {
@@ -96,7 +101,7 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 		req: IncomingMessage,
 		res: ServerResponse & { req: IncomingMessage },
 	): void {
-		const accept = req.headers.accept ?? '*/*';
+		const accept = req.headers.accept?.split(',') ?? ['*/*'];
 		const context: UsefuleServerContext = {
 			id: this.nextId++,
 			status: NaN,
@@ -138,15 +143,15 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 			return;
 		}
 
-		if (accept === '*/*') {
+		if (accept.includes('*/*')) {
 			res.setHeader('Content-Type', mimeType);
-		} else if (accept !== mimeType) {
+		} else if (accept.includes(mimeType)) {
+			res.setHeader('Content-Type', mimeType);
+		} else {
 			res.setHeader('Accept', mimeType);
 			res.statusCode = 406;
 			res.end();
 			return;
-		} else {
-			res.setHeader('Content-Type', accept);
 		}
 
 		this.store.run(context, () => this.preServeFile(req, res));
@@ -207,6 +212,16 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 			flags: 'r',
 		});
 
+		let injector: Injector | undefined;
+		if (this.injectScript) {
+			injector = new Injector('</body>', this.injectScript);
+			injector.on('error', reason => {
+				const error = anyToError(reason);
+				this.emit('error', error);
+				res.destroy(error);
+			});
+		}
+
 		fileStream.once('error', reason => {
 			fileStream.close();
 
@@ -228,6 +243,10 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 			context.bytes = fileStream.bytesRead;
 		});
 
-		fileStream.pipe(res);
+		if (injector) {
+			fileStream.pipe(injector).pipe(res);
+		} else {
+			fileStream.pipe(res);
+		}
 	}
 }

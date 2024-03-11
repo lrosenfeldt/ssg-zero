@@ -38,7 +38,7 @@ suite('UsefuleServer', async function () {
 		assert.deepEqual(event, {
 			id: event.id,
 			status: 405,
-			accept: '*/*',
+			accept: ['*/*'],
 			filePath: undefined,
 		});
 	});
@@ -52,7 +52,7 @@ suite('UsefuleServer', async function () {
 		assert.deepEqual(event, {
 			id: event.id,
 			status: 301,
-			accept: '*/*',
+			accept: ['*/*'],
 			filePath: undefined,
 		});
 	});
@@ -66,7 +66,7 @@ suite('UsefuleServer', async function () {
 		assert.deepEqual(event, {
 			id: event.id,
 			status: 415,
-			accept: '*/*',
+			accept: ['*/*'],
 			filePath: 'fixtures/bad_files/audio.aiff',
 		});
 	});
@@ -80,7 +80,7 @@ suite('UsefuleServer', async function () {
 		assert.deepEqual(event, {
 			id: event.id,
 			status: 404,
-			accept: '*/*',
+			accept: ['*/*'],
 			filePath: 'fixtures/empty/does_not_exists.txt',
 		});
 	});
@@ -98,7 +98,7 @@ suite('UsefuleServer', async function () {
 		assert.deepEqual(event, {
 			id: event.id,
 			status: 200,
-			accept: '*/*',
+			accept: ['*/*'],
 			filePath: 'fixtures/pages/index.html',
 			bytes: Buffer.from(actualContent).byteLength,
 		});
@@ -138,7 +138,7 @@ suite('UsefuleServer', async function () {
 		assert.deepEqual(error.meta, {
 			id: error.meta.id,
 			status: 500,
-			accept: '*/*',
+			accept: ['*/*'],
 			filePath: 'fixtures/bad_files/unreadable.json',
 		});
 	});
