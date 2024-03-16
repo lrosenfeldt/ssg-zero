@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { opendir, readFile, readdir, stat } from 'node:fs/promises';
+import { opendir, readFile, stat } from 'node:fs/promises';
 
 export function anyToError(reason: unknown): NodeJS.ErrnoException {
 	let errorMessage: string;
@@ -10,7 +10,10 @@ export function anyToError(reason: unknown): NodeJS.ErrnoException {
 			} else if (reason === null) {
 				errorMessage = `Failed with value null.`;
 				break;
-			}
+			} else if (Object.getPrototypeOf(reason) === null) {
+        errorMessage = `Failed with object literal.`;
+        break;
+      }
 			errorMessage = `Failed with object of type ${reason.constructor.name}.`;
 			break;
 		case 'undefined':
@@ -31,7 +34,7 @@ export function anyToError(reason: unknown): NodeJS.ErrnoException {
 			errorMessage = `Failed with ${reason} of unhandled {typeof reason}. This is an implementation error '${__filename}'.`;
 			break;
 	}
-	return new Error(errorMessage, { cause: reason });
+	return new Error(errorMessage);
 }
 
 export async function exists(path: string): Promise<boolean> {

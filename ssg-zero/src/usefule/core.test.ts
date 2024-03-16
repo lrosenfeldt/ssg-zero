@@ -13,50 +13,39 @@ describe('anyToError', function () {
 		assert.equal(originalError, error);
 	});
 
-	describe('converts values & functions', function () {
-		const table = [
-			{ name: 'bigint', value: 69n, pattern: /69/ },
-			{ name: 'boolean', value: false, pattern: /false/ },
-			{ name: 'function', value: () => void 0, pattern: /function/ },
-			{ name: 'null', value: null, pattern: /null/ },
-			{ name: 'number', value: 42, pattern: /42/ },
-			{ name: 'string', value: 'foo', pattern: /foo/ },
-			{ name: 'symbol', value: Symbol(), pattern: /symbol/ },
-			{ name: 'undefined', value: undefined, pattern: /undefined/ },
-		];
+	const table = [
+		{ name: 'bigint', value: 69n, pattern: /69/ },
+		{ name: 'boolean', value: false, pattern: /false/ },
+		{ name: 'function', value: () => void 0, pattern: /function/ },
+		{ name: 'null', value: null, pattern: /null/ },
+		{ name: 'number', value: 42, pattern: /42/ },
+		{ name: 'string', value: 'foo', pattern: /foo/ },
+		{ name: 'symbol', value: Symbol(), pattern: /symbol/ },
+		{ name: 'undefined', value: undefined, pattern: /undefined/ },
+		{
+			name: 'object literal',
+			value: Object.create(null),
+			pattern: /object literal/,
+		},
+		{ name: 'object', value: { awesome: 'unicorn' }, pattern: /object/ },
+	];
 
-		for (const { name, value, pattern } of table) {
+	for (const { name, value, pattern } of table) {
+		test(`reports the value of ${name} in the error `, function () {
 			const error = anyToError(value);
-
-			test(`has ${name} as a cause`, function () {
-				assert.equal(error.cause, value);
-			});
-
-			test(`reports the value for a ${name}`, function () {
-				assert.match(error.message, pattern);
-			});
-		}
-	});
-
-	describe('converts an object', function () {
-		test('has the object as cause', function () {
-			const obj = { awesome: 'unicorn' };
-
-			const error = anyToError(obj);
-
-			assert.equal(error.cause, obj);
+			assert.match(error.message, pattern);
 		});
+	}
 
-		test('reports tests constructor', function () {
-			const TestClass = class {
-				constructor(public useless: number) {}
-			};
-			const testThing = new TestClass(-3);
+	test('for an instance the class name is reported', function () {
+		const TestClass = class {
+			constructor(public useless: number) {}
+		};
+		const testThing = new TestClass(-3);
 
-			const error = anyToError(testThing);
+		const error = anyToError(testThing);
 
-			assert.match(error.message, /TestClass/i);
-		});
+		assert.match(error.message, /TestClass/i);
 	});
 });
 
