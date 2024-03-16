@@ -3,7 +3,7 @@ import { beforeEach, describe, test } from 'node:test';
 
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 
-  import { WatchEvent, Watcher } from '../../lib/usefule/watcher.js';
+import { WatchEvent, Watcher } from '../../lib/usefule/watcher.js';
 
 describe('watcher initialization', function () {
 	test('fails if not initialized', async function () {

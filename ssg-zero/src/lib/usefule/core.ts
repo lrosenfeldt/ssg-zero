@@ -11,9 +11,9 @@ export function anyToError(reason: unknown): NodeJS.ErrnoException {
 				errorMessage = `Failed with value null.`;
 				break;
 			} else if (Object.getPrototypeOf(reason) === null) {
-			  errorMessage = `Failed with object literal.`;
-        break;
-      }
+				errorMessage = `Failed with object literal.`;
+				break;
+			}
 			errorMessage = `Failed with object of type ${reason.constructor.name}.`;
 			break;
 		case 'undefined':
