@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { after, before, describe as suite, test, mock } from 'node:test';
+import { after, before, describe, test, mock } from 'node:test';
 
 import { join } from 'node:path';
 import { mkdir, readFile, rm } from 'node:fs/promises';
@@ -7,14 +7,14 @@ import { mkdir, readFile, rm } from 'node:fs/promises';
 import { SSG, Renderer, SSGBuilder } from '../lib/ssg.js';
 import { exists } from '../lib/usefule/core.js';
 
-suite('SSGBuilder', function () {
+describe('SSGBuilder', function () {
 	const inputDir = 'fixtures/pages';
 	const outputDir = 'fixtures/dist';
 
 	const builder = new SSGBuilder();
 	const reverseRenderer = mock.fn<Renderer['render']>();
 
-	suite('build', function () {
+	describe('build', function () {
 		test('builds the corresponding ssg', async function (t) {
 			builder
 				.setInputDir(inputDir)
@@ -55,8 +55,8 @@ suite('SSGBuilder', function () {
 		});
 	});
 });
-suite('SSG', function () {
-	suite('setup', function () {
+describe('SSG', function () {
+	describe('setup', function () {
 		const inputDir = 'fixtures/pages_dump';
 		const outputDir = 'fixtures/dist_dump';
 		const ssg = new SSGBuilder()
@@ -99,7 +99,7 @@ suite('SSG', function () {
 			});
 		});
 	});
-	suite('build', function () {
+	describe('build', function () {
 		const inputDir = 'fixtures/pages';
 		const outputDir = 'fixtures/dist';
 

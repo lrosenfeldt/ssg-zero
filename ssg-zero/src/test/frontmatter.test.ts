@@ -1,16 +1,16 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe, test } from 'node:test';
 
 import {
 	type ParserResult,
 	UnexpectedEndOfJsonError,
 	parse,
-  } from '../lib/frontmatter.js';
+} from '../lib/frontmatter.js';
 
-  suite('parseFrontmatter', function () {
-    suite('given en empty text', function () {
-      const text = '';
-      const result = parse(text);
+describe('parseFrontmatter', function () {
+	describe('given en empty text', function () {
+		const text = '';
+		const result = parse(text);
 
 		test('returns an empty string as content when given an empty text', function () {
 			assert.equal(result.content, text);
@@ -19,7 +19,7 @@ import {
 			assert.equal(result.data, undefined);
 		});
 	});
-	suite('given no frontmatter', function () {
+	describe('given no frontmatter', function () {
 		const text = `\
 Roses are red
 Violets are blue
@@ -74,7 +74,7 @@ at line 32
 	});
 });
 
-suite('given valid frontmatter', function () {
+describe('given valid frontmatter', function () {
 	test('parses content and fronmatter', async function (t) {
 		const text = `\
 {

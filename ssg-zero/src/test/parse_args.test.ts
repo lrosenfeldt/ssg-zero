@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test, mock } from 'node:test';
+import { describe, test, mock } from 'node:test';
 
 import {
 	boolean,
@@ -12,7 +12,7 @@ import {
 	parse,
 } from '../lib/parse_args.js';
 
-suite('parse_args.ts: decorators', function () {
+describe('parse_args.ts: decorators', function () {
 	test('fails if @cli is used twice', function () {
 		assert.throws(() => {
 			@cli({ desc: 'foo' })
@@ -116,7 +116,7 @@ suite('parse_args.ts: decorators', function () {
 	});
 });
 
-suite('parse_args.ts: parse', function () {
+describe('parse_args.ts: parse', function () {
 	test('disallows arbitrary class to be passed in', function () {
 		class Foo {
 			foo: string = 'foo';
