@@ -15,6 +15,7 @@
 	"main": "./dist/main.js",
 	"scripts": {
 		"compile": "tsc --build",
+		"compile:watch": "tsc --build --watch",
 		"format": "prettier --check --no-error-on-unmatched-pattern './{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}'",
 		"format:write": "prettier --write --no-error-on-unmatched-pattern './{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}'"
 	},
