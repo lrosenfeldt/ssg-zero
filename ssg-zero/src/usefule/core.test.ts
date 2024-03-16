@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { before, describe as suite, test } from 'node:test';
+import { before, describe, test } from 'node:test';
 
 import { anyToError, exists, walkFiles } from './core.js';
 import { mkdir } from 'node:fs/promises';
 
-suite('anyToError', function () {
+describe('anyToError', function () {
 	test('returns the same error', function () {
 		const originalError = new Error('Something is wrong, I can feel test.');
 
@@ -13,7 +13,7 @@ suite('anyToError', function () {
 		assert.equal(originalError, error);
 	});
 
-	suite('converts values & functions', function () {
+	describe('converts values & functions', function () {
 		const table = [
 			{ name: 'bigint', value: 69n, pattern: /69/ },
 			{ name: 'boolean', value: false, pattern: /false/ },
@@ -38,7 +38,7 @@ suite('anyToError', function () {
 		}
 	});
 
-	suite('converts an object', function () {
+	describe('converts an object', function () {
 		test('has the object as cause', function () {
 			const obj = { awesome: 'unicorn' };
 
@@ -60,7 +60,7 @@ suite('anyToError', function () {
 	});
 });
 
-suite('exists', function () {
+describe('exists', function () {
 	test('resolves to false if a file does not exists', async function () {
 		const doesItExist = await exists('fixtures/does/not/exist');
 		assert.equal(doesItExist, false);
@@ -70,7 +70,7 @@ suite('exists', function () {
 		assert.equal(doesItExist, true);
 	});
 });
-suite('walkFiles', function () {
+describe('walkFiles', function () {
 	before(async () => {
 		// directory is not tracked by git and we cant use gitkeep here
 		await mkdir('fixtures/empty', { recursive: true });

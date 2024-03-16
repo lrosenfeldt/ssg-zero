@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { Injector } from './injector.js';
 
-suite('Injector', function () {
+describe('Injector', function () {
 	test('passes through chunks that do not contain the pattern', async function () {
 		const chunks = [
 			'Never',

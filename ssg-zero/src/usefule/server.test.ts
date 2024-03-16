@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { after, before, describe as suite, test } from 'node:test';
+import { after, before, describe, test } from 'node:test';
 
 import { once } from 'node:events';
 import { chmod, readFile } from 'node:fs/promises';
@@ -7,7 +7,7 @@ import { chmod, readFile } from 'node:fs/promises';
 import { UsefuleServer } from './server.js';
 import { toHttpDate } from './http_date.js';
 
-suite('UsefuleServer', async function () {
+describe('UsefuleServer', async function () {
 	const server = new UsefuleServer('fixtures', { port: 4269 });
 	async function requestFile(
 		path: string,

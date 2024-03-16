@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { PassThrough, type Writable } from 'node:stream';
 
@@ -15,7 +15,7 @@ function createTestStream(): Writable {
 	});
 }
 
-suite('slog creation', function () {
+describe('slog creation', function () {
 	const handler: Handler = {
 		child(_levels, _bindings) {
 			return this;
@@ -142,7 +142,7 @@ suite('slog creation', function () {
 	});
 });
 
-suite('slog with text handler', async function () {
+describe('slog with text handler', async function () {
 	const time = '2024/02/04 16:44:17';
 	const t: Timestamp = () => time;
 	const eol: EOL = '\r\n';
@@ -211,7 +211,7 @@ suite('slog with text handler', async function () {
 	}
 });
 
-suite('slog with json text handler', async function () {
+describe('slog with json text handler', async function () {
 	const level = DefaultLogLevel.warn;
 	const time = 4_200_600_900;
 	const t: Timestamp = () => time.toString();

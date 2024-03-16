@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test, mock, beforeEach } from 'node:test';
+import { describe, test, mock, beforeEach } from 'node:test';
 
 import { time } from './logger.js';
 
-suite('logger time function', function () {
+describe('logger time function', function () {
 	const performanceNow = mock.method(performance, 'now', () => 0);
 	time(0);
 

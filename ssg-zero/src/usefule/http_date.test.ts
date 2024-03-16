@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { toHttpDate } from './http_date.js';
 
-suite('http date', function () {
+describe('http date', function () {
 	const table = [
 		{
 			time: Date.UTC(2022, 1, 11, 9, 17, 12),

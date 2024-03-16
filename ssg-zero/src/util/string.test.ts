@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe, test } from 'node:test';
 import { capitalize, toKebabCase, toPascalCase } from './string.js';
 
-suite('capitalize', function () {
+describe('capitalize', function () {
 	test('leaves an empty string untouched', function () {
 		assert.equal(capitalize(''), '');
 	});
@@ -11,7 +11,7 @@ suite('capitalize', function () {
 	});
 });
 
-suite('toPascalCase', function () {
+describe('toPascalCase', function () {
 	test('leaves an empty string untouched', function () {
 		assert.equal(toPascalCase(''), '');
 	});
@@ -32,7 +32,7 @@ suite('toPascalCase', function () {
 	});
 });
 
-suite('toKebabCase', function () {
+describe('toKebabCase', function () {
 	test('leaves an empty string untouched', function () {
 		assert.equal(toKebabCase(''), '');
 	});

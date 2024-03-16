@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { describe as suite, test } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { stringify } from './handler.js';
 
-suite('stringify', function () {
+describe('stringify', function () {
 	test('a plain object can be deserialized', function () {
 		const input = {
 			number: 42,

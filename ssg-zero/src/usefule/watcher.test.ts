@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { beforeEach, describe as suite, test } from 'node:test';
+import { beforeEach, describe, test } from 'node:test';
 
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 
 import { WatchEvent, Watcher, watch } from './watcher.js';
 
-suite('watcher initialization', function () {
+describe('watcher initialization', function () {
 	test('fails if not initialized', async function () {
 		const watcher = new Watcher('fixtures/watch_static', 0, false);
 		await assert.rejects(async () => {
@@ -16,7 +16,7 @@ suite('watcher initialization', function () {
 	});
 });
 
-suite('watch events', async function () {
+describe('watch events', async function () {
 	const baseDir = 'fixtures/watch';
 	const watcher = new Watcher(baseDir, 50, false);
 
