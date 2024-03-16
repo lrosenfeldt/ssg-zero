@@ -5,12 +5,12 @@ import {
 	type ParserResult,
 	UnexpectedEndOfJsonError,
 	parse,
-} from './frontmatter.js';
+  } from '../lib/frontmatter.js';
 
-suite('parseFrontmatter', function () {
-	suite('given en empty text', function () {
-		const text = '';
-		const result = parse(text);
+  suite('parseFrontmatter', function () {
+    suite('given en empty text', function () {
+      const text = '';
+      const result = parse(text);
 
 		test('returns an empty string as content when given an empty text', function () {
 			assert.equal(result.content, text);

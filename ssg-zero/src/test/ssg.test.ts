@@ -4,8 +4,8 @@ import { after, before, describe as suite, test, mock } from 'node:test';
 import { join } from 'node:path';
 import { mkdir, readFile, rm } from 'node:fs/promises';
 
-import { SSG, Renderer, SSGBuilder } from './ssg.js';
-import { exists } from './usefule/core.js';
+import { SSG, Renderer, SSGBuilder } from '../lib/ssg.js';
+import { exists } from '../lib/usefule/core.js';
 
 suite('SSGBuilder', function () {
 	const inputDir = 'fixtures/pages';

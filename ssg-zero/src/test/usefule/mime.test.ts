@@ -3,8 +3,8 @@ import { describe as suite, test } from 'node:test';
 
 import { MIMEType } from 'node:util';
 
-import { anyToError } from './core.js';
-import { mime } from './mime.js';
+import { anyToError } from '../../lib/usefule/core.js';
+import { mime } from '../../lib/usefule/mime.js';
 
 suite('mime', function () {
 	for (const extension in mime) {

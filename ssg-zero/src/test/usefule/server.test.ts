@@ -4,8 +4,8 @@ import { after, before, describe as suite, test } from 'node:test';
 import { once } from 'node:events';
 import { chmod, readFile } from 'node:fs/promises';
 
-import { UsefuleServer } from './server.js';
-import { toHttpDate } from './http_date.js';
+import { UsefuleServer } from '../../lib/usefule/server.js';
+import { toHttpDate } from '../../lib/usefule/http_date.js';
 
 suite('UsefuleServer', async function () {
 	const server = new UsefuleServer('fixtures', { port: 4269 });

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 
-import { stringify } from './handler.js';
+import { stringify } from '../../lib/slog/handler.js';
 
 suite('stringify', function () {
 	test('a plain object can be deserialized', function () {

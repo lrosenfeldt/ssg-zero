@@ -10,7 +10,7 @@ import {
 	subcommand,
 	positionals,
 	parse,
-} from './parse_args.js';
+} from '../lib/parse_args.js';
 
 suite('parse_args.ts: decorators', function () {
 	test('fails if @cli is used twice', function () {

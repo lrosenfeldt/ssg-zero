@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { before, describe as suite, test } from 'node:test';
 
-import { anyToError, exists, walkFiles } from './core.js';
+import { anyToError, exists, walkFiles } from '../../lib/usefule/core.js';
 import { mkdir } from 'node:fs/promises';
 
 suite('anyToError', function () {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
 
-import { toHttpDate } from './http_date.js';
+import { toHttpDate } from '../../lib/usefule/http_date.js';
 
 suite('http date', function () {
 	const table = [

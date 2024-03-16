@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe as suite, test } from 'node:test';
-import { capitalize, toKebabCase, toPascalCase } from './string.js';
+import {
+	capitalize,
+	toKebabCase,
+	toPascalCase,
+} from '../../lib/util/string.js';
 
 suite('capitalize', function () {
 	test('leaves an empty string untouched', function () {

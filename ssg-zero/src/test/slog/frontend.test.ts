@@ -3,9 +3,9 @@ import { describe as suite, test } from 'node:test';
 
 import { PassThrough, type Writable } from 'node:stream';
 
-import { Timestamp, type Handler, EOL } from './base.js';
-import { DefaultLogLevel, slog } from './frontend.js';
-import { JsonHandler, TextHandler } from './handler.js';
+import { Timestamp, type Handler, EOL } from '../../lib/slog/base.js';
+import { DefaultLogLevel, slog } from '../../lib/slog/frontend.js';
+import { JsonHandler, TextHandler } from '../../lib/slog/handler.js';
 import { once } from 'node:events';
 
 function createTestStream(): Writable {
