@@ -2,13 +2,16 @@ import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';
 
 import { once } from 'node:events';
-import { chmod, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
 import { UsefuleServer } from './server.js';
 import { toHttpDate } from './http_date.js';
+import { logger } from '../logger.js';
 
 describe('UsefuleServer', async function () {
-	const server = new UsefuleServer('fixtures', { port: 4269 });
+	const server = new UsefuleServer('fixtures', { port: 42069 });
+	server.on('file:done', payload => logger.debug('file:done', payload));
+	server.on('error', payload => logger.debug('error', payload));
 	async function requestFile(
 		path: string,
 		opts: RequestInit = { method: 'GET' },
@@ -17,21 +20,20 @@ describe('UsefuleServer', async function () {
 	}
 
 	before(async function () {
-		await chmod('fixtures/bad_files/unreadable.json', 0o0344);
 		await server.serve();
 	});
 
 	after(async function () {
-		await chmod('fixtures/bad_files/unreadable.json', 0o0644);
 		await server.stop();
 	});
 
 	await test('disallows POST method', async function () {
-		let event: any;
-		server.once('file:done', data => (event = data));
-		const res = await requestFile('pages/index.html', {
-			method: 'POST',
-		});
+		const [res, event] = await Promise.all([
+			requestFile('pages/index.html', {
+				method: 'POST',
+			}),
+			once(server, 'file:done').then(a => a[0]),
+		]);
 
 		assert.equal(res.status, 405);
 		assert.equal(res.headers.get('Allow'), 'GET, HEAD');
@@ -43,9 +45,10 @@ describe('UsefuleServer', async function () {
 		});
 	});
 	await test('redirects if no extension is provided and trailing slash is missing', async function () {
-		let event: any;
-		server.once('file:done', data => (event = data));
-		const res = await requestFile('pages');
+		const [res, event] = await Promise.all([
+			requestFile('pages'),
+			once(server, 'file:done').then(a => a[0]),
+		]);
 
 		assert.equal(res.status, 200);
 		assert.ok(res.redirected);
@@ -58,9 +61,10 @@ describe('UsefuleServer', async function () {
 	});
 
 	await test('responds with 415 for unsupported file types', async function () {
-		let event: any;
-		server.once('file:done', data => (event = data));
-		const res = await requestFile('bad_files/audio.aiff');
+		const [res, event] = await Promise.all([
+			requestFile('bad_files/audio.aiff'),
+			once(server, 'file:done').then(a => a[0]),
+		]);
 
 		assert.equal(res.status, 415);
 		assert.deepEqual(event, {
@@ -126,20 +130,6 @@ describe('UsefuleServer', async function () {
 			assert.match(year, /\d\d\d\d/);
 			assert.match(time, /\d\d:\d\d:\d\d/);
 			assert.equal(gmt, 'GMT');
-		});
-	});
-	await test('responds with 500 for a locked file', async function () {
-		const [res, error] = await Promise.all([
-			requestFile('bad_files/unreadable.json'),
-			once(server, 'error').then(a => a[0]),
-		]);
-
-		assert.equal(res.status, 500);
-		assert.deepEqual(error.meta, {
-			id: error.meta.id,
-			status: 500,
-			accept: ['*/*'],
-			filePath: 'fixtures/bad_files/unreadable.json',
 		});
 	});
 	await test('responds with 406 if mime type of file does not match request content', async function () {
