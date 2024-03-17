@@ -11,7 +11,7 @@ import { extname, join } from 'node:path';
 
 import { anyToError } from './core.js';
 import { mime } from './mime.js';
-import { toHttpDate } from './http_date.js';
+import { toHttpDate } from './hotreload.js';
 import { Injector } from './injector.js';
 
 export type UsefuleServerContext = {

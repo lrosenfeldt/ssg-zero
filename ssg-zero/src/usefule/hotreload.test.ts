@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { toHttpDate } from './http_date.js';
+import { toHttpDate } from './hotreload.js';
 
 describe('http date', function () {
 	const table = [

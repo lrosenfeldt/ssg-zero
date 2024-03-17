@@ -5,7 +5,7 @@ import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
 
 import { UsefuleServer } from './server.js';
-import { toHttpDate } from './http_date.js';
+import { toHttpDate } from './hotreload.js';
 import { logger } from '../logger.js';
 
 describe('UsefuleServer', async function () {

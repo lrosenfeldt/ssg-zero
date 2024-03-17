@@ -33,3 +33,31 @@ export function toHttpDate(date: Date): string {
 		' GMT'
 	);
 }
+
+let startDate = new Date();
+function hotreload() {
+	fetch(new URL(window.location.href), {
+		method: 'GET',
+		headers: {
+			accept: 'text/html',
+			'If-Modified-Since': toHttpDate(startDate),
+		},
+	})
+		.then(response => {
+			if (response.status === 200) {
+				window.location.reload();
+			} else if (response.status === 304) {
+				setTimeout(hotreload, 100);
+			} else {
+				console.error(
+					`unexpected status code ${response.status}`,
+					response,
+				);
+			}
+		})
+		.catch(error => console.error(error));
+}
+
+if (typeof window !== 'undefined') {
+	hotreload();
+}

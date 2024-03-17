@@ -1,4 +1,4 @@
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { cli } from './parse.js';
 import { SSG, SSGBuilder } from '../ssg.js';
@@ -6,6 +6,7 @@ import { logger } from '../logger.js';
 import { anyToError } from '../usefule/core.js';
 import { watch } from '../usefule/watcher.js';
 import { UsefuleServer } from '../usefule/server.js';
+import { readFileSync } from 'node:fs';
 
 const VERSION = '0.5.0';
 
@@ -70,8 +71,10 @@ export async function run(): Promise<void> {
 		});
 	} else if (options.command === 'dev') {
 		const serverLogger = logger.child({ src: 'UsefuleServer' });
+		const hotreloadUrl = import.meta.resolve('../usefule/hotreload.js');
 		const server = new UsefuleServer(ssg.outputDir, {
 			port: options.values.port,
+			injectScript: `<script type="module">${readFileSync(fileURLToPath(hotreloadUrl), 'utf-8')}</script>`,
 		});
 		server.on('error', error => serverLogger.error(error));
 		server.on('file:done', payload => serverLogger.info(payload));
