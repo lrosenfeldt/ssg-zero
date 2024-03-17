@@ -1,6 +1,7 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { cli } from './parse.js';
+import { parse } from './better_parse_args.js';
+import { cli } from './options.js';
 import { SSG, SSGBuilder } from '../ssg.js';
 import { logger } from '../logger.js';
 import { anyToError } from '../usefule/core.js';
@@ -32,7 +33,7 @@ async function loadSsg(configPath: string): Promise<SSG> {
 }
 
 export async function run(): Promise<void> {
-	const options = cli(process.argv.slice(2));
+	const options = parse(cli, process.argv.slice(2));
 
 	if (options.values.help) {
 		console.log('Usage: ssg-zero [OPTIONS]');
