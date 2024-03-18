@@ -1,7 +1,5 @@
 import * as pug from 'pug';
-import { SSGBuilder } from 'ssg-zero';
-
-const builder = new SSGBuilder();
+import { config } from 'ssg-zero';
 
 /**
  * @type {import('ssg-zero').Renderer}
@@ -14,9 +12,11 @@ const pugRenderer = {
 	},
 };
 
-export default builder
-	.setInputDir('pages')
-	.setOutputDir('www')
-	.template('.pug', pugRenderer)
-	.passthrough('.html')
-	.build();
+export default config({
+	inputDir: 'pages',
+	outputDir: 'www',
+	passthrough: ['.html'],
+	templates: {
+		'.pug': pugRenderer,
+	},
+});

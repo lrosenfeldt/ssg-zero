@@ -1,1 +1,1 @@
-export { SSG, SSGBuilder, type Renderer } from './ssg.js';
+export { SSG, config, type Renderer, type RenderFn } from './ssg.js';

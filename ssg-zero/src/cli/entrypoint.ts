@@ -2,7 +2,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { helpdoc, parse } from './better_parse_args.js';
 import { cli } from './options.js';
-import { SSG, SSGBuilder } from '../ssg.js';
+import { SSG } from '../ssg.js';
 import { logger } from '../logger.js';
 import { anyToError } from '../usefule/core.js';
 import { watch } from '../usefule/watcher.js';
@@ -19,13 +19,11 @@ async function loadSsg(configPath: string): Promise<SSG> {
 		);
 	}
 	let ssg: SSG;
-	if (configModule.default instanceof SSGBuilder) {
-		ssg = configModule.build();
-	} else if (configModule.default instanceof SSG) {
+	if (configModule.default instanceof SSG) {
 		ssg = configModule.default;
 	} else {
 		throw new Error(
-			`Config file ${configPath} is unusable. Add a SSG or SSGBuilder as default export`,
+			`Config file ${configPath} is unusable. Use config() to creata a SSG as default export`,
 		);
 	}
 

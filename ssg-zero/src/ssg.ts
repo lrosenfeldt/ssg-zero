@@ -9,9 +9,13 @@ import { parse } from './frontmatter.js';
 const passthroughMarker = Symbol('passthrough');
 export type PassthroughMarker = typeof passthroughMarker;
 
+export type RenderFn = (
+	content: string,
+	data?: any,
+) => string | Promise<string>;
 export type Renderer = {
 	generates: string;
-	render: (content: string, data?: any) => string | Promise<string>;
+	render: RenderFn;
 };
 
 export type FileHandler = PassthroughMarker | Renderer;
@@ -104,61 +108,32 @@ export class SSG {
 	}
 }
 
-export class SSGBuilder {
-	private inputDir: string = '';
-	private outputDir: string = '';
-	private fileHandlers: Map<string, FileHandler> = new Map();
-	private logger: Logger = logger;
+export type SSGConfig = {
+	inputDir: string;
+	outputDir: string;
+	passthrough: string[];
+	templates: {
+		[input: string]: Renderer | RenderFn;
+	};
+};
 
-	build(): SSG {
-		// TODO: validation, optional properties
-		const fileHandlers: Record<string, FileHandler> = {};
-		this.fileHandlers.forEach((handler, format) => {
-			fileHandlers[format] = handler;
-		});
-
-		return new SSG(
-			this.inputDir,
-			this.outputDir,
-			fileHandlers,
-			this.logger,
-		);
+export function config(cfg: SSGConfig): SSG {
+	const fileHandlers: Record<string, FileHandler> = Object.create(null);
+	for (const extension of cfg.passthrough) {
+		fileHandlers[extension] = passthroughMarker;
 	}
-
-	passthrough(...formats: string[]): this {
-		formats.forEach(format =>
-			this.fileHandlers.set(format, SSG.passthroughMarker),
-		);
-		return this;
-	}
-
-	template(
-		format: string,
-		renderOrRenderer: Renderer['render'] | Renderer,
-	): this {
-		let renderer: Renderer;
-		if (typeof renderOrRenderer === 'function') {
-			renderer = { render: renderOrRenderer, generates: format };
+	for (const extension in cfg.templates) {
+		const renderer = cfg.templates[extension];
+		if (typeof renderer === 'function') {
+			fileHandlers[extension] = {
+				generates: extension,
+				render: renderer,
+			};
 		} else {
-			renderer = renderOrRenderer;
+			fileHandlers[extension] = renderer;
 		}
-
-		this.fileHandlers.set(format, renderer);
-		return this;
 	}
 
-	setInputDir(inputDir: string): this {
-		this.inputDir = inputDir;
-		return this;
-	}
-
-	setOutputDir(outputDir: string): this {
-		this.outputDir = outputDir;
-		return this;
-	}
-
-	// TODO: refactor this, not really compatible with new logger
-	useDefaultLogger(_maxLogLevel: any): this {
-		return this;
-	}
+	const ssg = new SSG(cfg.inputDir, cfg.outputDir, fileHandlers, logger);
+	return ssg;
 }
