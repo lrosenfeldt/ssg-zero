@@ -104,6 +104,7 @@ type ParsedArgs<Config extends Record<string, OptionConfig>> = {
 };
 
 export type CliConfig = {
+	name: string;
 	help?: string;
 	options: Record<string, OptionConfig>;
 	commands: {
@@ -185,4 +186,76 @@ export function parse<Cli extends CliConfig>(
 		command,
 		values: values,
 	} as any;
+}
+
+export function helpdoc<Cli extends CliConfig>(
+	cli: Cli,
+	command?: undefined | keyof Cli['commands'],
+): string {
+	if (command === undefined) {
+		const lines = [
+			`${cli.name} [Global options] <Command>`,
+			cli.help ?? '',
+			'',
+			'Commands:',
+			helpdocCommands(cli.commands),
+			'',
+			'Global Options:',
+			helpdocOptions(cli.options),
+		];
+		return lines.join('\n');
+	}
+
+	const cmd = command as string;
+	const lines = [
+		`${cli.name} [Global options] ${cmd} [Options]`,
+		cli.commands[cmd].help ?? '',
+		'',
+		'Options:',
+		helpdocOptions(cli.commands[cmd].options),
+	];
+
+	return lines.join('\n');
+}
+
+function helpdocCommands(commands: CliConfig['commands']): string {
+	const lines: Array<[id: string, desc: string]> = [];
+	let longestId = 0;
+
+	for (const command in commands) {
+		const config = commands[command];
+
+		longestId = Math.max(command.length, longestId);
+		lines.push([command, config.help ?? '']);
+	}
+
+	return lines
+		.map(line => line[0].padEnd(longestId, ' ') + '  ' + line[1])
+		.join('\n');
+}
+
+function helpdocOptions(options: Record<string, OptionConfig>): string {
+	const lines: Array<[id: string, desc: string]> = [];
+	let longestId = 0;
+
+	for (const option in options) {
+		const config = options[option];
+
+		let id = `--${option}`;
+		if (config.short) {
+			id = `-${config.short}, ${id}`;
+		}
+		if (config.type === 'string' && 'parse' in config) {
+			id += ' ' + config?.parse?.name;
+		} else if (config.type === 'string') {
+			id += ' string';
+		}
+
+		longestId = Math.max(id.length, longestId);
+		lines.push([id, config.help ?? '']);
+	}
+
+	return lines
+		.map(line => line[0].padEnd(longestId, ' ') + '  ' + line[1])
+		.join('\n');
 }

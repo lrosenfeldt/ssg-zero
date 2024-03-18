@@ -43,10 +43,12 @@ const serve = {
 const dev = { ...build, ...serve };
 
 export const cli = {
+	name: 'ssg-zero',
 	options: globals,
+	help: 'Work on your static site',
 	commands: {
-		build: { options: build },
-		dev: { options: dev },
-		serve: { options: serve },
+		build: { options: build, help: 'Build your site' },
+		dev: { options: dev, help: 'Serve & reactively build your site' },
+		serve: { options: serve, help: 'Serve your site on localhost' },
 	},
 } satisfies CliConfig;

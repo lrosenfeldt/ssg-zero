@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { parse, number } from './better_parse_args.js';
+import { parse, number, helpdoc } from './better_parse_args.js';
 import { cli as options } from './options.js';
 
 describe('parse number argument', function () {
@@ -88,5 +88,39 @@ describe('parse cli', function () {
 
 		assert.equal(command, 'serve');
 		assert.deepEqual(values, expected);
+	});
+});
+
+describe('generate helpdocs', function () {
+	test('formats help for default command', function () {
+		const help = helpdoc(options);
+		const expected = `\
+ssg-zero [Global options] <Command>
+Work on your static site
+
+Commands:
+build  Build your site
+dev    Serve & reactively build your site
+serve  Serve your site on localhost
+
+Global Options:
+-v, --version        
+-h, --help           
+-c, --config string  \
+`;
+
+		assert.equal(help, expected);
+	});
+	test('formats help for the serve', function () {
+		const help = helpdoc(options, 'serve');
+		const expected = `\
+ssg-zero [Global options] serve [Options]
+Serve your site on localhost
+
+Options:
+-p, --port number  \
+`;
+
+		assert.equal(help, expected);
 	});
 });
