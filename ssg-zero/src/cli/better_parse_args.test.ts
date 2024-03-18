@@ -123,4 +123,29 @@ Options:
 
 		assert.equal(help, expected);
 	});
+	test('formats help for the dev', function () {
+		const help = helpdoc(options, 'dev');
+		const expected = `\
+ssg-zero [Global options] dev [Options]
+Serve & reactively build your site
+
+Options:
+-f, --parallel-fs number  
+-p, --port number         \
+`;
+
+		assert.equal(help, expected);
+	});
+	test('formats help for the build', function () {
+		const help = helpdoc(options, 'build');
+		const expected = `\
+ssg-zero [Global options] build [Options]
+Build your site
+
+Options:
+-f, --parallel-fs number  \
+`;
+
+		assert.equal(help, expected);
+	});
 });

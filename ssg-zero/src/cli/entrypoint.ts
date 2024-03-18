@@ -1,6 +1,6 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { parse } from './better_parse_args.js';
+import { helpdoc, parse } from './better_parse_args.js';
 import { cli } from './options.js';
 import { SSG, SSGBuilder } from '../ssg.js';
 import { logger } from '../logger.js';
@@ -36,7 +36,7 @@ export async function run(): Promise<void> {
 	const options = parse(cli, process.argv.slice(2));
 
 	if (options.values.help) {
-		console.log('Usage: ssg-zero [OPTIONS]');
+		console.log(helpdoc(cli, options.command));
 		process.exit(0);
 	}
 
