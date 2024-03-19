@@ -37,7 +37,7 @@ export function toHttpDate(date: Date): string {
 let startDate = new Date();
 function hotreload() {
 	fetch(new URL(window.location.href), {
-		method: 'GET',
+		method: 'HEAD',
 		headers: {
 			accept: 'text/html',
 			'If-Modified-Since': toHttpDate(startDate),
