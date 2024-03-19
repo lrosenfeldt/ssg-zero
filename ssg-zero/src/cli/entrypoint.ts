@@ -5,7 +5,7 @@ import { cli } from './options.js';
 import { SSG } from '../ssg.js';
 import { logger } from '../logger.js';
 import { anyToError } from '../usefule/core.js';
-import { watch } from '../usefule/watcher.js';
+import { watchAsReader } from '../usefule/watcher.js';
 import { UsefuleServer } from '../usefule/server.js';
 import { readFileSync } from 'node:fs';
 
@@ -92,7 +92,7 @@ export async function run(): Promise<void> {
 			process.exit(1);
 		});
 
-		const reader = watch(ssg.inputDir, {
+		const reader = watchAsReader(ssg.inputDir, {
 			maxInterval: 100,
 			disableDelete: true,
 		});

@@ -2,7 +2,7 @@ import { opendir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
-import { anyToError } from './core.js';
+import { anyToError, type FileReader } from './core.js';
 
 export type WatchChangeEvent = {
 	type: 'change';
@@ -123,10 +123,10 @@ export class Watcher {
 	}
 }
 
-export async function* watch(
+export async function* watchAsReader(
 	target: string,
 	options: WatcherOptions = {},
-): AsyncGenerator<WatchEvent> {
+): FileReader {
 	const watcher = new Watcher(
 		target,
 		options.maxInterval ?? 500,
@@ -134,5 +134,8 @@ export async function* watch(
 	);
 
 	await watcher.init();
-	yield* watcher.watch();
+	for await (const { type, filePath } of watcher.watch()) {
+		if (type === 'delete') continue;
+		yield filePath;
+	}
 }

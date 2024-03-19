@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { UnexpectedEndOfJsonError, parse } from './frontmatter.js';
+import { UnexpectedEndOfJsonError, parseFrontmatter } from './frontmatter.js';
 
 describe('parseFrontmatter', function () {
 	test('returns an empty text and data for empty text', function () {
 		const text = '';
-		const result = parse(text);
+		const result = parseFrontmatter(text);
 		assert.equal(result.content, text);
 		assert.equal(result.data, undefined);
 	});
@@ -19,7 +19,7 @@ describe('parseFrontmatter', function () {
       Unexpected '{'
         at line 32
         `;
-		const result = parse(text);
+		const result = parseFrontmatter(text);
 		assert.equal(result.content, text);
 		assert.equal(result?.data, undefined);
 	});
@@ -33,7 +33,7 @@ describe('parseFrontmatter', function () {
 }
 <main>Look at me!</main>
 `;
-		const result = parse(text);
+		const result = parseFrontmatter(text);
 		assert.equal(result?.data, undefined);
 	});
 
@@ -45,7 +45,7 @@ describe('parseFrontmatter', function () {
 }
 <p>Oh no!</p>
 `;
-		assert.throws(parse.bind(null, text), SyntaxError);
+		assert.throws(parseFrontmatter.bind(null, text), SyntaxError);
 	});
 
 	test('throws on unexpected end of json for invalid frontmatter', function () {
@@ -56,7 +56,7 @@ describe('parseFrontmatter', function () {
 <p>Oh no!</p>
 `;
 		assert.throws(
-			parse.bind(null, text),
+			parseFrontmatter.bind(null, text),
 			new UnexpectedEndOfJsonError(text, 0),
 		);
 	});
@@ -74,7 +74,7 @@ describe('parseFrontmatter', function () {
 }
 Actual content`;
 
-		const { data, content } = parse(text);
+		const { data, content } = parseFrontmatter(text);
 
 		assert.equal(content, 'Actual content');
 		assert.deepEqual(data, {
@@ -93,7 +93,7 @@ Actual content`;
 }
 <p>Someday everything will be alright</p>
 `;
-			const { content, data } = parse(text);
+			const { content, data } = parseFrontmatter(text);
 
 			assert.equal(
 				content,

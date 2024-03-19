@@ -16,7 +16,7 @@ export type ParserResult = {
 	content: string;
 	data?: object;
 };
-export function parse(input: string): ParserResult {
+export function parseFrontmatter(input: string): ParserResult {
 	if (!input.startsWith('{' + EOL)) {
 		return { content: input };
 	}

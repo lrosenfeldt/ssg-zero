@@ -4,7 +4,7 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 
 import { FileReader, walkFiles } from './usefule/core.js';
 import { logger, type Logger } from './logger.js';
-import { parse } from './frontmatter.js';
+import { parseFrontmatter } from './frontmatter.js';
 
 const passthroughMarker = Symbol('passthrough');
 export type PassthroughMarker = typeof passthroughMarker;
@@ -27,6 +27,7 @@ export class SSG {
 	constructor(
 		public readonly inputDir: string,
 		public readonly outputDir: string,
+		public readonly includesDir: string,
 		public readonly fileHandlers: Readonly<Record<string, FileHandler>>,
 		private logger: Logger,
 	) {}
@@ -58,38 +59,40 @@ export class SSG {
 			}
 
 			// render
-			const targetDir = dirname(inputFilePath).replace(
-				this.inputDir,
-				this.outputDir,
-			);
-			this.logger.debug('Creating directory', {
-				file: inputFilePath,
-				dir: targetDir,
-			});
-			await mkdir(targetDir, { recursive: true });
-
-			const targetFile = join(
-				targetDir,
-				basename(inputFilePath).replace(fileType, renderer.generates),
-			);
-			this.logger.info('Rendering', {
-				file: inputFilePath,
-				to: targetFile,
-			});
-
-			const content = await readFile(inputFilePath, 'utf-8');
-			const parsedContent = parse(content);
-			const outputContent = await renderer.render(
-				parsedContent.content,
-				parsedContent.data ?? {},
-				{ input: inputFilePath, output: targetFile },
-			);
-			this.logger.debug('Rendering done', {
-				file: inputFilePath,
-				to: targetFile,
-			});
-			await writeFile(targetFile, outputContent, 'utf-8');
+			await this.renderTemplate(inputFilePath, fileType, renderer);
 		}
+	}
+
+	private getLayoutRendererOrFail(
+		filePath: string,
+		data: {
+			layout: any;
+		},
+	): Renderer {
+		if (typeof data.layout !== 'string') {
+			const error = new Error(
+				`Invalid layout used in ${filePath}, expected a string got '${typeof data.layout}'`,
+			);
+			this.logger.error(error.message, {
+				template: filePath,
+				layout: data.layout,
+			});
+			throw error;
+		}
+
+		const layoutExtension = extname(data.layout);
+		const handler = this.getFileHandler(layoutExtension);
+		if (handler === undefined || handler === passthroughMarker) {
+			const error = new Error(
+				`Invalid layout used in ${filePath}, render is ${handler === undefined ? 'missing' : 'can only copy'}`,
+			);
+			this.logger.error(error.message, {
+				template: filePath,
+				layoutExtension,
+			});
+			throw error;
+		}
+		return handler;
 	}
 
 	private getFileHandler(extension: string): FileHandler | undefined {
@@ -112,11 +115,82 @@ export class SSG {
 		});
 		return;
 	}
+
+	private async renderTemplate(
+		filePath: string,
+		fileType: string,
+		renderer: Renderer,
+	): Promise<void> {
+		// setup dir
+		const targetDir = dirname(filePath).replace(
+			this.inputDir,
+			this.outputDir,
+		);
+		this.logger.debug('Creating directory', {
+			file: filePath,
+			dir: targetDir,
+		});
+		await mkdir(targetDir, { recursive: true });
+
+		const targetFile = join(
+			targetDir,
+			basename(filePath).replace(fileType, renderer.generates),
+		);
+		this.logger.info('Rendering', {
+			file: filePath,
+			to: targetFile,
+		});
+		const fullContent = await readFile(filePath, 'utf-8');
+		const parsedContent = parseFrontmatter(fullContent);
+
+		let output: string;
+		if (
+			parsedContent.data !== undefined &&
+			'layout' in parsedContent.data
+		) {
+			const layoutRenderer = this.getLayoutRendererOrFail(
+				filePath,
+				parsedContent.data,
+			);
+			const layoutFilePath = join(
+				this.includesDir,
+				parsedContent.data.layout as string,
+			);
+			const layoutContent = await readFile(layoutFilePath, 'utf-8');
+			const renderedContent = await renderer.render(
+				parsedContent.content,
+				parsedContent.data,
+				{ input: filePath, output: targetFile },
+			);
+			output = await layoutRenderer.render(
+				layoutContent,
+				{
+					...parsedContent.data,
+					layout: undefined,
+					content: renderedContent,
+				},
+				{ input: layoutFilePath, output: targetFile },
+			);
+		} else {
+			output = await renderer.render(
+				parsedContent.content,
+				parsedContent.data,
+				{ input: filePath, output: targetFile },
+			);
+		}
+
+		await writeFile(targetFile, output, 'utf-8');
+		this.logger.debug('Rendering done', {
+			file: filePath,
+			to: targetFile,
+		});
+	}
 }
 
 export type SSGConfig = {
 	inputDir: string;
 	outputDir: string;
+	includesDir: string;
 	passthrough: string[];
 	templates: {
 		[input: string]: Renderer | RenderFn;
@@ -140,6 +214,12 @@ export function config(cfg: SSGConfig): SSG {
 		}
 	}
 
-	const ssg = new SSG(cfg.inputDir, cfg.outputDir, fileHandlers, logger);
+	const ssg = new SSG(
+		cfg.inputDir,
+		cfg.outputDir,
+		cfg.includesDir,
+		fileHandlers,
+		logger,
+	);
 	return ssg;
 }

@@ -68,8 +68,8 @@ describe('walkFiles', function () {
 	test('yields nothing for an empty directory', async function () {
 		const walkedFiles: string[] = [];
 
-		for await (const file of walkFiles('fixtures/empty')) {
-			walkedFiles.push(file.filePath);
+		for await (const filePath of walkFiles('fixtures/empty')) {
+			walkedFiles.push(filePath);
 		}
 
 		assert.deepEqual(walkedFiles, []);
@@ -83,8 +83,8 @@ describe('walkFiles', function () {
 		]);
 		const walkedFiles = new Set<string>([]);
 
-		for await (const file of walkFiles('fixtures/simple')) {
-			walkedFiles.add(file.filePath);
+		for await (const filePath of walkFiles('fixtures/simple')) {
+			walkedFiles.add(filePath);
 		}
 
 		assert.deepEqual(walkedFiles, expectedFiles);
@@ -97,8 +97,8 @@ describe('walkFiles', function () {
 		]);
 		const walkedFiles = new Set<string>([]);
 
-		for await (const file of walkFiles('fixtures/pages')) {
-			walkedFiles.add(file.filePath);
+		for await (const filePath of walkFiles('fixtures/pages')) {
+			walkedFiles.add(filePath);
 		}
 
 		assert.deepEqual(walkedFiles, expectedFiles);

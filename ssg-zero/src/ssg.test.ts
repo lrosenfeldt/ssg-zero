@@ -11,9 +11,11 @@ describe('SSG', function () {
 	test('setup initializes the directories', async function (t) {
 		const inputDir = 'fixtures/pages_dump';
 		const outputDir = 'fixtures/dist_dump';
+		const includesDir = 'fixtures/pages_includes';
 		const ssg = config({
 			inputDir,
 			outputDir,
+			includesDir,
 			passthrough: [],
 			templates: {},
 		});
@@ -53,16 +55,27 @@ describe('SSG', function () {
 	test('builds a website', async function (t) {
 		const inputDir = 'fixtures/pages';
 		const outputDir = 'fixtures/dist';
+		const includesDir = 'fixtures/pages_includes';
 
 		const renderHtmlDummy = mock.fn<RenderFn>(
 			(content, data: { some: string }) =>
 				content.replace(/\{\{\s*[^}\s]+\s*\}\}/g, data.some),
 		);
+		const layoutRenderer: Renderer = {
+			render(content, data) {
+				if ('content' in data) {
+					return content.replace(/\{\{ content }\}/g, data.content);
+				}
+				return content;
+			},
+			generates: '.txt',
+		};
 		const ssg = config({
 			inputDir,
 			outputDir,
+			includesDir,
 			passthrough: ['.css'],
-			templates: { '.html': renderHtmlDummy },
+			templates: { '.html': renderHtmlDummy, '.txt': layoutRenderer },
 		});
 
 		before(async function () {
@@ -108,17 +121,37 @@ describe('SSG', function () {
 				assert.match(renderedHtml, /<p>ZONK!<\/p>/);
 			},
 		);
+		await t.test(
+			'used layout renderer with the given layout index.html',
+			async function () {
+				const renderedHtmlPath = join(outputDir, 'index.html');
+				const renderedHtml = await readFile(renderedHtmlPath, 'utf-8');
+
+				const layoutBegin = 'SQUEEZE';
+				const layoutEnd = 'IN';
+				assert.ok(
+					renderedHtml.startsWith(layoutBegin),
+					`Rendered HTML should start with '${layoutBegin}', but started with ${renderedHtml.slice(0, layoutBegin.length)}`,
+				);
+				assert.ok(
+					renderedHtml.startsWith(layoutBegin),
+					`Rendered HTML should end with '${layoutEnd}', but started with ${renderedHtml.slice(0, layoutEnd.length)}`,
+				);
+			},
+		);
 	});
 });
 describe('ssg config', function () {
 	const inputDir = 'fixtures/pages';
 	const outputDir = 'fixtures/dist';
+	const includesDir = 'fixtures/pages_includes';
 
 	const renderer = mock.fn<Renderer['render']>();
 	test('configures the corresponding ssg', function () {
 		const ssg = config({
 			inputDir,
 			outputDir,
+			includesDir,
 			passthrough: ['.css'],
 			templates: {
 				'.html': {
