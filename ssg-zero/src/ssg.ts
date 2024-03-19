@@ -1,8 +1,8 @@
 import { basename, dirname, extname, join } from 'node:path';
 
-import { cp, mkdir, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 
-import { FileEntriesReader, walkFiles } from './usefule/core.js';
+import { FileReader, walkFiles } from './usefule/core.js';
 import { logger, type Logger } from './logger.js';
 import { parse } from './frontmatter.js';
 
@@ -35,11 +35,8 @@ export class SSG {
 		await mkdir(this.outputDir, { recursive: true });
 	}
 
-	async build(
-		reader: FileEntriesReader = walkFiles(this.inputDir),
-	): Promise<void> {
-		for await (const file of reader) {
-			const inputFilePath = file.filePath;
+	async build(reader: FileReader = walkFiles(this.inputDir)): Promise<void> {
+		for await (const inputFilePath of reader) {
 			const fileType = extname(inputFilePath);
 			this.logger.trace('Found file', {
 				file: inputFilePath,
@@ -61,7 +58,7 @@ export class SSG {
 			}
 
 			// render
-			const targetDir = dirname(file.filePath).replace(
+			const targetDir = dirname(inputFilePath).replace(
 				this.inputDir,
 				this.outputDir,
 			);
@@ -73,14 +70,15 @@ export class SSG {
 
 			const targetFile = join(
 				targetDir,
-				basename(file.filePath).replace(fileType, renderer.generates),
+				basename(inputFilePath).replace(fileType, renderer.generates),
 			);
 			this.logger.info('Rendering', {
 				file: inputFilePath,
 				to: targetFile,
 			});
 
-			const parsedContent = parse(file.content);
+			const content = await readFile(inputFilePath, 'utf-8');
+			const parsedContent = parse(content);
 			const outputContent = await renderer.render(
 				parsedContent.content,
 				parsedContent.data ?? {},

@@ -3,7 +3,7 @@ import { beforeEach, describe, test } from 'node:test';
 
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 
-import { WatchEvent, Watcher, watch } from './watcher.js';
+import { WatchEvent, Watcher } from './watcher.js';
 
 describe('watcher initialization', function () {
 	test('fails if not initialized', async function () {
@@ -77,14 +77,12 @@ describe('watch events', async function () {
 			{
 				type: 'create',
 				filePath: files.create.filePath,
-				content: files.create.content,
 			},
 			{
 				type: 'change',
 				filePath: files.change.filePath,
-				content: files.change.contentAfter,
 			},
-			{ type: 'delete', filePath: files.delete.filePath, content: '' },
+			{ type: 'delete', filePath: files.delete.filePath },
 		];
 		let events: Set<WatchEvent> = new Set();
 

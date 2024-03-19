@@ -1,4 +1,4 @@
-import { opendir, readFile } from 'node:fs/promises';
+import { opendir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
@@ -7,24 +7,21 @@ import { anyToError } from './core.js';
 export type WatchChangeEvent = {
 	type: 'change';
 	filePath: string;
-	content: string;
 };
 
 export type WatchCreateEvent = {
 	type: 'create';
 	filePath: string;
-	content: string;
 };
 
 export type WatchDeleteEvent = {
 	type: 'delete';
 	filePath: string;
-	content: '';
 };
 
 export type WatchEvent = WatchChangeEvent | WatchCreateEvent | WatchDeleteEvent;
 
-export type Hash = string;
+export type Hash = number;
 
 export type WatcherOptions = {
 	maxInterval?: number;
@@ -49,9 +46,9 @@ export class Watcher {
 			if (!entry.isFile()) continue;
 			// @ts-expect-error parentPath is to new for @types/node
 			const filePath = join(entry.parentPath, entry.name);
-			const content = await this.safeReadFile(filePath);
-			if (content !== undefined) {
-				this.cache.set(filePath, content);
+			const hash = await this.safeFileHash(filePath);
+			if (hash !== undefined) {
+				this.cache.set(filePath, hash);
 			}
 		}
 
@@ -88,17 +85,17 @@ export class Watcher {
 			if (!entry.isFile()) continue;
 			// @ts-expect-error parentPath is to new for @types/node
 			const filePath = join(entry.parentPath, entry.name);
-			const content = await this.safeReadFile(filePath);
+			const currentHash = await this.safeFileHash(filePath);
 			// if file was deleted between discovery and now, just ignore that
-			if (content === undefined) continue;
-			const cachedContent = snapshot.get(filePath);
+			if (currentHash === undefined) continue;
+			const snapshotHash = snapshot.get(filePath);
 
-			if (cachedContent === undefined) {
-				yield { type: 'create', filePath, content };
-			} else if (cachedContent !== content) {
-				yield { type: 'change', filePath, content };
+			if (snapshotHash === undefined) {
+				yield { type: 'create', filePath };
+			} else if (snapshotHash !== currentHash) {
+				yield { type: 'change', filePath };
 			}
-			this.cache.set(filePath, content);
+			this.cache.set(filePath, currentHash);
 		}
 
 		if (this.disableDelete) {
@@ -107,14 +104,15 @@ export class Watcher {
 
 		for (const [filePath, _] of snapshot) {
 			if (!this.cache.has(filePath)) {
-				yield { type: 'delete', filePath, content: '' };
+				yield { type: 'delete', filePath };
 			}
 		}
 	}
 
-	private async safeReadFile(path: string): Promise<string | undefined> {
+	private async safeFileHash(path: string): Promise<number | undefined> {
 		try {
-			return await readFile(path, 'utf-8');
+			const stats = await stat(path);
+			return stats.ctimeMs;
 		} catch (reason) {
 			const error = anyToError(reason);
 			if (error.code === 'ENOENT') {

@@ -51,21 +51,15 @@ export async function exists(path: string): Promise<boolean> {
 	}
 }
 
-export type FileEntry = {
-	filePath: string;
-	content: string;
-};
-export type FileEntriesReader = AsyncIterable<FileEntry>;
+export type FilePath = string;
+export type FileReader = AsyncIterable<FilePath>;
 
-export async function* walkFiles(root: string): FileEntriesReader {
+export async function* walkFiles(root: string): FileReader {
 	const dir = await opendir(root, { recursive: true });
 	for await (const entry of dir) {
 		if (!entry.isFile()) continue;
 
 		// @ts-expect-error parentPath is node v21, to new for @types/node
-		const filePath = join(entry.parentPath, entry.name);
-		const content = await readFile(filePath, 'utf-8');
-
-		yield { filePath, content };
+		yield join(entry.parentPath, entry.name);
 	}
 }
