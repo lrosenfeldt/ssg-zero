@@ -32,6 +32,7 @@ const liquidRenderer = {
 export default config({
 	inputDir: 'pages',
 	outputDir: 'www',
+	includesDir: '_includes',
 	passthrough: ['.html'],
 	templates: {
 		'.liquid': liquidRenderer,
