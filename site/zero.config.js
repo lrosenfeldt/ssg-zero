@@ -1,14 +1,31 @@
-import * as pug from 'pug';
+import { Liquid } from 'liquidjs';
 import { config } from 'ssg-zero';
+import postcss from 'postcss';
+import postcssAtImport from 'postcss-import';
+
+const postcssProcessor = postcss().use(postcssAtImport());
 
 /**
  * @type {import('ssg-zero').Renderer}
  */
-const pugRenderer = {
+const cssRenderer = {
+	generates: '.css',
+	async render(content, _data, meta) {
+		const result = await postcssProcessor.process(content, {
+			from: meta.input,
+		});
+		return result.css;
+	},
+};
+
+const liquid = new Liquid();
+/**
+ * @type {import('ssg-zero').Renderer}
+ */
+const liquidRenderer = {
 	generates: '.html',
 	render(content, data) {
-		const template = pug.compile(content, { pretty: true });
-		return template(data);
+		return liquid.parseAndRender(content, data);
 	},
 };
 
@@ -17,6 +34,7 @@ export default config({
 	outputDir: 'www',
 	passthrough: ['.html'],
 	templates: {
-		'.pug': pugRenderer,
+		'.liquid': liquidRenderer,
+		'.postcss': cssRenderer,
 	},
 });

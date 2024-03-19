@@ -1,0 +1,28 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+img,
+picture,
+svg,
+video {
+	display: block;
+	max-width: 100%;
+}
+
+input,
+textarea,
+button,
+select {
+	font: inherit;
+}
+
+:root {
+	font-size: 18px;
+}
+
+h1 {
+	font-size: 3rem;
+}
