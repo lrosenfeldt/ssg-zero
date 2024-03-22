@@ -16,14 +16,15 @@
 	"scripts": {
 		"compile": "tsc --build",
 		"compile:watch": "tsc --build --watch",
-		"format": "prettier --check --no-error-on-unmatched-pattern './{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}'",
-		"format:write": "prettier --write --no-error-on-unmatched-pattern './{ssg-zero,site,configure}/**/*.{ts,json,js,md,css}'"
+		"format": "prettier --check --no-error-on-unmatched-pattern './{ssg-zero,site,configure,site-benchmark}/**/*.{ts,json,js,md,css}'",
+		"format:write": "prettier --write --no-error-on-unmatched-pattern './{ssg-zero,site,configure,site-benchmark}/**/*.{ts,json,js,md,css}'"
 	},
 	"type": "module",
 	"version": "0.6.1",
 	"workspaces": [
 		"ssg-zero",
-		"site"
+		"site",
+		"site-benchmark"
 	],
 	"devDependencies": {
 		"@types/node": "^20.11.29",

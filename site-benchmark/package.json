@@ -1,0 +1,17 @@
+{
+	"name": "site-benchmark",
+	"version": "0.1.0",
+	"description": "Benchmark ssg-zero on large number of markdown files.",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "MIT",
+	"type": "module",
+	"dependencies": {
+		"@types/markdown-it": "^13.0.7",
+		"markdown-it": "^14.1.0",
+		"ssg-zero": "^0.5.0"
+	}
+}

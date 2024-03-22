@@ -39,7 +39,7 @@ const timeSym = Symbol('slog.time');
 const writeSym = Symbol('slog.write');
 
 export function createLogFn(level: number): LogFn {
-	return function (
+	return function LOG(
 		this: SlogBase<LogLevels>,
 		messageOrAttrs?: string | object | undefined,
 		attrs?: object,

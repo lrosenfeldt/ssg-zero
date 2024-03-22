@@ -8,3 +8,6 @@ ssg-zero/fixtures/dist_dump/
 ssg-zero/fixtures/watch
 
 coverage.txt
+
+site-benchmark/diagnostic
+site-benchmark/www
