@@ -5,6 +5,8 @@ compiles a large amount of markdown files and is originally based on [github.com
 
 ## How to run
 
+Always record with 4000 for comparibility.
+
 For full debugging capbilities run:
 ```sh
 node --inspect --inspect-brk zero.config.js
@@ -13,8 +15,8 @@ node --inspect --inspect-brk zero.config.js
 Generate V8 profiling output:
 ```sh
 node --prof zero.config.js
-# v8_prof_file will be named something like isolate-xxx.log
-node --prof-process v8_prof_file > diagnostic/v8_processed.txt
+# V8_PROF_FILE will be named something like isolate-xxx.log
+node --prof-process V8_PROF_FILE > diagnostic/v8_processed.txt
 ```
 
 Generate heap profile:
