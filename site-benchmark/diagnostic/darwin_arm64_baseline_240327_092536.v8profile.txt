@@ -1,0 +1,242 @@
+Statistical profiling result from isolate-0x128008000-11557-v8.log, (813 ticks, 629 unaccounted, 0 excluded).
+
+ [Shared libraries]:
+   ticks  total  nonlib   name
+
+ [JavaScript]:
+   ticks  total  nonlib   name
+     24    3.0%    3.0%  JS: *StateBlock file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:6:21
+     11    1.4%    1.4%  JS: *text file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/text.mjs:42:30
+     11    1.4%    1.4%  Builtin: StringAdd_CheckNone
+      8    1.0%    1.0%  Builtin: KeyedLoadIC
+      7    0.9%    0.9%  Builtin: LoadIC
+      6    0.7%    0.7%  JS: *parseFrontmatter file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/frontmatter.js:8:33
+      6    0.7%    0.7%  Builtin: GetProperty
+      5    0.6%    0.6%  Builtin: PromisePrototypeThen
+      4    0.5%    0.5%  Builtin: RunMicrotasks
+      4    0.5%    0.5%  Builtin: ResolvePromise
+      4    0.5%    0.5%  Builtin: JSConstructStubGeneric
+      4    0.5%    0.5%  Builtin: BaselineOutOfLinePrologue
+      3    0.4%    0.4%  RegExp: \r\n?|\n
+      3    0.4%    0.4%  JS: *ParserBlock.tokenize file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      3    0.4%    0.4%  Builtin: PromiseConstructor
+      2    0.2%    0.2%  JS: ^skipOrderedListMarker file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/list.mjs:33:32
+      2    0.2%    0.2%  JS: ^mkdir node:internal/fs/promises:848:21
+      2    0.2%    0.2%  JS: ^html_block file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/html_block.mjs:19:36
+      2    0.2%    0.2%  JS: ^hr file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/hr.mjs:5:28
+      2    0.2%    0.2%  JS: *lheading file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/lheading.mjs:3:34
+      2    0.2%    0.2%  Builtin: StringFromCharCode
+      2    0.2%    0.2%  Builtin: PromiseThenFinally
+      2    0.2%    0.2%  Builtin: PromiseGetCapabilitiesExecutor
+      2    0.2%    0.2%  Builtin: PromiseFulfillReactionJob
+      2    0.2%    0.2%  Builtin: JSBuiltinsConstructStub
+      2    0.2%    0.2%  Builtin: Call_ReceiverIsNotNullOrUndefined
+      2    0.2%    0.2%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined
+      2    0.2%    0.2%  Builtin: Add_Baseline
+      1    0.1%    0.1%  JS: ~initSocketHandle node:net:309:26
+      1    0.1%    0.1%  JS: ^writeOrBuffer node:internal/streams/writable:540:23
+      1    0.1%    0.1%  JS: ^table file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/table.mjs:55:31
+      1    0.1%    0.1%  JS: ^reference file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/reference.mjs:3:35
+      1    0.1%    0.1%  JS: ^heading file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/heading.mjs:5:33
+      1    0.1%    0.1%  JS: ^getLines file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:166:51
+      1    0.1%    0.1%  JS: ^build file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1    0.1%    0.1%  JS: ^StateBlock file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:6:21
+      1    0.1%    0.1%  JS: ^LOG file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      1    0.1%    0.1%  JS: ^<anonymous> node:internal/validators:175:40
+      1    0.1%    0.1%  JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1    0.1%    0.1%  JS: *paragraph file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/paragraph.mjs:3:35
+      1    0.1%    0.1%  JS: *inline file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      1    0.1%    0.1%  JS: *fragments_join file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/fragments_join.mjs:10:40
+      1    0.1%    0.1%  JS: *fn node:internal/util:415:14
+      1    0.1%    0.1%  JS: *createWriteWrap node:internal/stream_base_commons:109:25
+      1    0.1%    0.1%  JS: *checkAborted node:internal/fs/promises:469:22
+      1    0.1%    0.1%  JS: *basename node:path:1309:11
+      1    0.1%    0.1%  JS: *StateBlock.push file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:103:38
+      1    0.1%    0.1%  JS: *<anonymous> node:internal/fs/promises:427:5
+      1    0.1%    0.1%  JS: *<anonymous> node:internal/fs/promises:250:9
+      1    0.1%    0.1%  Builtin: TypedArrayPrototypeLength
+      1    0.1%    0.1%  Builtin: SuspendGeneratorBaseline
+      1    0.1%    0.1%  Builtin: Subtract_Baseline
+      1    0.1%    0.1%  Builtin: StringSubstring
+      1    0.1%    0.1%  Builtin: StringIndexOf
+      1    0.1%    0.1%  Builtin: StrictEqual_Baseline
+      1    0.1%    0.1%  Builtin: StoreIC
+      1    0.1%    0.1%  Builtin: ResumeGeneratorBaseline
+      1    0.1%    0.1%  Builtin: PromiseResolveThenableJob
+      1    0.1%    0.1%  Builtin: PromiseResolve
+      1    0.1%    0.1%  Builtin: PromisePrototypeFinally
+      1    0.1%    0.1%  Builtin: PromiseCapabilityDefaultResolve
+      1    0.1%    0.1%  Builtin: NewPromiseCapability
+      1    0.1%    0.1%  Builtin: LoadICBaseline
+      1    0.1%    0.1%  Builtin: LessThan_Baseline
+      1    0.1%    0.1%  Builtin: KeyedLoadICBaseline
+      1    0.1%    0.1%  Builtin: JSRunMicrotasksEntry
+      1    0.1%    0.1%  Builtin: GreaterThanOrEqual_Baseline
+      1    0.1%    0.1%  Builtin: FulfillPromise
+      1    0.1%    0.1%  Builtin: ForInEnumerate
+      1    0.1%    0.1%  Builtin: EnqueueMicrotask
+      1    0.1%    0.1%  Builtin: CreateTypedArray
+      1    0.1%    0.1%  Builtin: CreateEmptyLiteralObject
+      1    0.1%    0.1%  Builtin: CloneObjectIC
+      1    0.1%    0.1%  Builtin: CallFunction_ReceiverIsAny
+      1    0.1%    0.1%  Builtin: CallFunctionTemplate_Generic
+      1    0.1%    0.1%  Builtin: CallBoundFunction
+      1    0.1%    0.1%  Builtin: BitwiseOrSmi_Baseline
+      1    0.1%    0.1%  Builtin: BaselineLeaveFrame
+      1    0.1%    0.1%  Builtin: AsyncFunctionResolve
+      1    0.1%    0.1%  Builtin: ArrayPrototypeJoin
+      1    0.1%    0.1%  Builtin: ArrayMap
+      1    0.1%    0.1%  Builtin: ArrayForEach
+      1    0.1%    0.1%  Builtin: AddSmi_Baseline
+
+ [C++]:
+   ticks  total  nonlib   name
+
+ [Summary]:
+   ticks  total  nonlib   name
+    184   22.6%   22.6%  JavaScript
+      0    0.0%    0.0%  C++
+      5    0.6%    0.6%  GC
+      0    0.0%          Shared libraries
+    629   77.4%          Unaccounted
+
+ [C++ entry points]:
+   ticks    cpp   total   name
+
+ [Bottom up (heavy) profile]:
+  Note: percentage shows a share of a particular caller in the total
+  amount of its parent calls.
+  Callers occupying less than 1.0% are not shown.
+
+   ticks parent  name
+    629   77.4%  UNKNOWN
+     32    5.1%    JS: ^readFileHandle node:internal/fs/promises:509:30
+     22   68.8%      Builtin: AsyncFunctionAwaitResolveClosure
+     10   31.3%      JS: ^readFile node:internal/fs/promises:1237:24
+     10  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+     26    4.1%    JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+     25   96.2%      JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      4   16.0%        JS: ~<anonymous> node:internal/streams/duplex:1:1
+      4  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      4  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      4   16.0%        JS: ~<anonymous> node:internal/fs/promises:1:1
+      4  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      4  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      2    8.0%        JS: ~getSource node:internal/modules/esm/load:40:25
+      2  100.0%          JS: ~defaultLoad node:internal/modules/esm/load:110:27
+      2  100.0%            JS: ~load node:internal/modules/esm/loader:399:13
+      2    8.0%        JS: ~defaultResolve node:internal/modules/esm/loader:380:17
+      2  100.0%          JS: ~resolve node:internal/modules/esm/loader:350:10
+      2  100.0%            JS: ~getModuleJob node:internal/modules/esm/loader:233:21
+      2    8.0%        JS: ~<anonymous> node:tty:1:1
+      2  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      2  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      2    8.0%        JS: ~<anonymous> node:perf_hooks:1:1
+      2  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      2  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    4.0%        JS: ~initCJSParse node:internal/modules/esm/translators:82:28
+      1  100.0%          JS: ~commonjsStrategy node:internal/modules/esm/translators:354:60
+      1  100.0%            JS: ~callTranslator node:internal/modules/esm/loader:272:28
+      1    4.0%        JS: ~getTranslators node:internal/modules/esm/loader:52:24
+      1  100.0%          JS: ~ModuleLoader node:internal/modules/esm/loader:82:20
+      1  100.0%            JS: ~ModuleLoader node:internal/modules/esm/loader:126:14
+      1    4.0%        JS: ~createWritableStdioStream node:internal/bootstrap/switches/is_main_thread:47:35
+      1  100.0%          JS: ~getStdout node:internal/bootstrap/switches/is_main_thread:148:19
+      1  100.0%            JS: ~slog file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/slog/frontend.js:10:21
+      1    4.0%        JS: ~<anonymous> node:stream:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    4.0%        JS: ~<anonymous> node:net:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    4.0%        JS: ~<anonymous> node:internal/streams/pipeline:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    4.0%        JS: ~<anonymous> node:internal/streams/operators:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    4.0%        JS: ~<anonymous> node:internal/perf/timerify:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    4.0%        JS: ~#createModuleJob node:internal/modules/esm/loader:271:19
+      1  100.0%          JS: ~getJobFromResolveResult node:internal/modules/esm/loader:243:26
+      1  100.0%            JS: ~getModuleJob node:internal/modules/esm/loader:233:21
+      1    3.8%      JS: ~compileForPublicLoader node:internal/bootstrap/realm:331:25
+      1  100.0%        JS: ~loadBuiltinModule node:internal/modules/helpers:96:27
+      1  100.0%          JS: ~builtinStrategy node:internal/modules/esm/translators:458:52
+      1  100.0%            JS: ^callTranslator node:internal/modules/esm/loader:272:28
+     24    3.8%    JS: *<anonymous> node:internal/fs/promises:427:5
+     17    2.7%    JS: ^close node:internal/fs/promises:236:11
+     17  100.0%      JS: ^<anonymous> node:internal/fs/promises:427:5
+     17    2.7%    JS: *handleWriteReq node:internal/stream_base_commons:45:24
+     17  100.0%      JS: *_write node:internal/streams/writable:445:16
+     17  100.0%        JS: *LOG file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+     10   58.8%          JS: ^renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      9   90.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1   10.0%            JS: ^build file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      7   41.2%          JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      7  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+     11    1.7%    JS: ^moduleStrategy node:internal/modules/esm/translators:164:56
+     11  100.0%      JS: ^callTranslator node:internal/modules/esm/loader:272:28
+     11  100.0%        JS: ^moduleProvider node:internal/modules/esm/loader:285:7
+     11  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+     10    1.6%    JS: ^open node:internal/fs/promises:633:20
+      8   80.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      8  100.0%        JS: ^renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      8  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2   20.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      2  100.0%        JS: ^renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      8    1.3%    JS: *open node:internal/fs/promises:633:20
+      4   50.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      4  100.0%        JS: ^renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      4  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2   25.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      1   50.0%        JS: ^renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   50.0%        JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   12.5%      JS: *writeFile node:internal/fs/promises:1193:25
+      1  100.0%        JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   12.5%      JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+
+     24    3.0%  JS: *StateBlock file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:6:21
+     24  100.0%    JS: ^ParserBlock.parse file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+     24  100.0%      JS: ^block file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+     16   66.7%        JS: *Core.process file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+     13   81.3%          JS: ^MarkdownIt.parse file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+     13  100.0%            JS: ^MarkdownIt.render file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      3   18.8%          JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      8   33.3%        JS: ^Core.process file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      8  100.0%          JS: ^MarkdownIt.parse file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      8  100.0%            JS: ^MarkdownIt.render file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+
+     11    1.4%  JS: *text file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/text.mjs:42:30
+     11  100.0%    JS: *inline file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      9   81.8%      JS: *Core.process file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      5   55.6%        JS: ^MarkdownIt.parse file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      5  100.0%          JS: ^MarkdownIt.render file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      5  100.0%            JS: ^render file:///Users/l.rosenfeldt/Personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      4   44.4%        JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      4  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2   18.2%      JS: ^Core.process file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      2  100.0%        JS: ^MarkdownIt.parse file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      2  100.0%          JS: ^MarkdownIt.render file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      2  100.0%            JS: ^render file:///Users/l.rosenfeldt/Personal/ssg-zero/site-benchmark/zero.config.js:12:8
+
+     11    1.4%  Builtin: StringAdd_CheckNone
+      7   63.6%    JS: ^renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      6   85.7%      Builtin: AsyncFunctionAwaitResolveClosure
+      1   14.3%      JS: ^build file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      3   27.3%    JS: *renderTemplate file:///Users/l.rosenfeldt/Personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%      Builtin: AsyncFunctionAwaitResolveClosure
+      1    9.1%    Builtin: StringPrototypeReplace
+      1  100.0%      JS: ^normalize file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/rules_core/normalize.mjs:7:35
+      1  100.0%        JS: *Core.process file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%          JS: ^MarkdownIt.parse file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%            JS: ^MarkdownIt.render file:///Users/l.rosenfeldt/Personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+

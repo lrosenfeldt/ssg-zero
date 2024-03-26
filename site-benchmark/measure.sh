@@ -36,8 +36,8 @@ Record heap, cpu and v8 profile for the current ssg-zero setup.
 done
 
 $EXE_NPM run --include-workspace-root --if-present compile
-$EXE_NODE --heap-prof --heap-prof-name="${PREFIX}.heapprofile.txt" --diagnostic-dir=diagnostic zero.config.js
-$EXE_NODE --cpu-prof --cpu-prof-name="${PREFIX}.cpuprofile.txt" --diagnostic-dir=diagnostic zero.config.js
+$EXE_NODE --heap-prof --heap-prof-name="${PREFIX}.heapprofile.json" --diagnostic-dir=diagnostic zero.config.js
+$EXE_NODE --cpu-prof --cpu-prof-name="${PREFIX}.cpuprofile.json" --diagnostic-dir=diagnostic zero.config.js
 $EXE_NODE --prof zero.config.js
 
 V8_FILE=""
