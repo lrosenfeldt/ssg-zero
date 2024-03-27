@@ -38,29 +38,33 @@ export class SSG {
 
 	async build(reader: FileReader = walkFiles(this.inputDir)): Promise<void> {
 		for await (const inputFilePath of reader) {
-			const fileType = extname(inputFilePath);
-			this.logger.trace('Found file', {
+			await this.handleFile(inputFilePath);
+		}
+	}
+
+	private async handleFile(inputFilePath: string): Promise<void> {
+		const fileType = extname(inputFilePath);
+		this.logger.trace('Found file', {
+			file: inputFilePath,
+			ext: fileType,
+		});
+
+		const renderer = this.getFileHandler(fileType);
+		if (renderer === undefined) {
+			this.logger.info('Ignore file', {
 				file: inputFilePath,
 				ext: fileType,
 			});
-
-			const renderer = this.getFileHandler(fileType);
-			if (renderer === undefined) {
-				this.logger.info('Ignore file', {
-					file: inputFilePath,
-					ext: fileType,
-				});
-				continue;
-			}
-
-			if (renderer === SSG.passthroughMarker) {
-				await this.passthroughFile(inputFilePath);
-				continue;
-			}
-
-			// render
-			await this.renderTemplate(inputFilePath, fileType, renderer);
+			return;
 		}
+
+		if (renderer === SSG.passthroughMarker) {
+			await this.passthroughFile(inputFilePath);
+			return;
+		}
+
+		// render
+		await this.renderTemplate(inputFilePath, fileType, renderer);
 	}
 
 	private getLayoutRendererOrFail(
