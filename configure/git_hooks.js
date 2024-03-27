@@ -1,10 +1,11 @@
 import { writeFileSync } from 'node:fs';
+import { parseArgs } from 'node:util';
 
 const HOOK = `\
 #!/bin/sh
 git diff --cached --name-only --diff-filter=d | \
   awk '/\\.ts|js|json/' | \
-  xargs npm exec prettier -- --no-color --check`;
+  xargs npm exec prettier -- --list-different`;
 
 const PRE_COMMIT_PATH = './.git/hooks/pre-commit';
 
@@ -15,24 +16,57 @@ function installHook(config) {
 			flag: config.flag,
 			mode: 0o755,
 		});
-	} catch (err) {
-		console.error(`Failed to install hook:`, err);
+		console.error(`Successfully installed pre-commit hook for formatting.`);
+	} catch (error) {
+		if (error.code === 'EEXIST') {
+			console.error(
+				`Commit hook already exists, use '--allow-update' to overwrite the file`,
+			);
+		} else {
+			console.error(`Failed to install hook:`, error.message);
+		}
+		process.exit(2);
 	}
-	console.log(`Successfully installed pre-commit hook for formatting.`);
 }
 
 function run(args) {
 	const config = { flag: 'wx' };
+	const usage = 'Usage: git_hooks [--allow-update | -u] [--help | -h]';
 
-	for (let arg = args[0]; arg !== undefined; arg = args.shift()) {
-		switch (arg) {
-			case '--allow-update':
-				config.flag = 'w';
-				break;
-			default:
-				console.log('Usage: git_hooks [--allow-update]');
-				process.exit(1);
+	try {
+		const { values } = parseArgs({
+			args,
+			options: {
+				'allow-update': {
+					type: 'boolean',
+					short: 'u',
+				},
+				help: {
+					type: 'boolean',
+					short: 'h',
+				},
+			},
+			allowPositionals: false,
+			strict: true,
+		});
+
+		if (values.help) {
+			config.flag = 'w';
+			console.error(usage);
+			process.exit(0);
 		}
+		if (values['allow-update']) {
+			config.flag = 'w';
+		}
+	} catch (error) {
+		if (
+			error.code === 'ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL' ||
+			error.code === 'ERR_PARSE_ARGS_UNKNOWN_OPTION'
+		) {
+			console.error(usage);
+			process.exit(1);
+		}
+		throw error;
 	}
 
 	installHook(config);
