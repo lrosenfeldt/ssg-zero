@@ -5,6 +5,7 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { FileReader, walkFiles } from './usefule/core.js';
 import { logger, type Logger } from './logger.js';
 import { parseFrontmatter } from './frontmatter.js';
+import { Queue } from './queue.js';
 
 const passthroughMarker = Symbol('passthrough');
 export type PassthroughMarker = typeof passthroughMarker;
@@ -37,30 +38,40 @@ export class SSG {
 	}
 
 	async build(reader: FileReader = walkFiles(this.inputDir)): Promise<void> {
+		const queue = new Queue(
+			async (path: string) => await this.handleFile(path),
+			20,
+		);
 		for await (const inputFilePath of reader) {
-			const fileType = extname(inputFilePath);
-			this.logger.trace('Found file', {
+			queue.push(inputFilePath);
+		}
+
+		await queue.drain();
+	}
+
+	private async handleFile(inputFilePath: string): Promise<void> {
+		const fileType = extname(inputFilePath);
+		this.logger.trace('Found file', {
+			file: inputFilePath,
+			ext: fileType,
+		});
+
+		const renderer = this.getFileHandler(fileType);
+		if (renderer === undefined) {
+			this.logger.info('Ignore file', {
 				file: inputFilePath,
 				ext: fileType,
 			});
-
-			const renderer = this.getFileHandler(fileType);
-			if (renderer === undefined) {
-				this.logger.info('Ignore file', {
-					file: inputFilePath,
-					ext: fileType,
-				});
-				continue;
-			}
-
-			if (renderer === SSG.passthroughMarker) {
-				await this.passthroughFile(inputFilePath);
-				continue;
-			}
-
-			// render
-			await this.renderTemplate(inputFilePath, fileType, renderer);
+			return;
 		}
+
+		if (renderer === SSG.passthroughMarker) {
+			await this.passthroughFile(inputFilePath);
+			return;
+		}
+
+		// render
+		await this.renderTemplate(inputFilePath, fileType, renderer);
 	}
 
 	private getLayoutRendererOrFail(
