@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';
 
 import { once } from 'node:events';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 import { UsefuleServer } from './server.js';
 import { toHttpDate } from './hotreload.js';
@@ -158,5 +158,17 @@ describe('UsefuleServer', async function () {
 		});
 
 		assert.equal(res.status, 400);
+	});
+	await test('responds with 200 if the file is modified', async function () {
+		const date = new Date();
+
+		await writeFile('fixtures/serve/change.txt', 'change me', 'utf-8');
+		const res = await requestFile('serve/change.txt', {
+			headers: {
+				'If-Modified-Since': toHttpDate(new Date(date)),
+			},
+		});
+
+		assert.equal(res.status, 200);
 	});
 });
