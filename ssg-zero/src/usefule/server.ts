@@ -13,6 +13,7 @@ import { anyToError } from './core.js';
 import { mime } from './mime.js';
 import { toHttpDate } from './hotreload.js';
 import { Injector } from './injector.js';
+import { fileURLToPath } from 'node:url';
 
 export type UsefuleServerContext = {
 	id: number;
@@ -199,6 +200,18 @@ export class UsefuleServer extends EventEmitter<ServerEventMap> {
 
 			if (req.method === 'GET') {
 				this.serveFile(req, res);
+			} else if (req.method === 'HEAD') {
+				res.statusCode = 200;
+				res.end();
+			} else {
+				this.emit(
+					'error',
+					new Error(
+						`Unreachable branch in ${fileURLToPath(import.meta.url)}`,
+					),
+				);
+				res.statusCode = 500;
+				res.end();
 			}
 		});
 	}

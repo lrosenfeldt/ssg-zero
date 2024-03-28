@@ -1,0 +1,925 @@
+Statistical profiling result from isolate-0x6b0e230-7124-v8.log, (1483 ticks, 362 unaccounted, 0 excluded).
+
+ [Shared libraries]:
+   ticks  total  nonlib   name
+     60    4.0%          /usr/lib/libc.so.6
+      7    0.5%          /home/luke/.nvm/versions/node/v21.7.1/bin/node
+
+ [JavaScript]:
+   ticks  total  nonlib   name
+     58    3.9%    4.1%  JS: *text file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/text.mjs:42:30
+     29    2.0%    2.0%  JS: *StateBlock file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:6:21
+     22    1.5%    1.6%  Builtin: StringAdd_CheckNone
+     20    1.3%    1.4%  Builtin: LoadIC
+     18    1.2%    1.3%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined
+     15    1.0%    1.1%  Builtin: BaselineOutOfLinePrologue
+      9    0.6%    0.6%  Builtin: CallFunction_ReceiverIsAny
+      7    0.5%    0.5%  RegExp: [&<>"]
+      7    0.5%    0.5%  Builtin: PromisePrototypeThen
+      7    0.5%    0.5%  Builtin: GetProperty
+      7    0.5%    0.5%  Builtin: Call_ReceiverIsNotNullOrUndefined
+      7    0.5%    0.5%  Builtin: CallFunction_ReceiverIsNullOrUndefined
+      6    0.4%    0.4%  Builtin: StringIndexOf
+      6    0.4%    0.4%  Builtin: RunMicrotasks
+      6    0.4%    0.4%  Builtin: KeyedLoadIC
+      6    0.4%    0.4%  Builtin: Call_ReceiverIsNotNullOrUndefined_Baseline_Compact
+      5    0.3%    0.4%  JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5    0.3%    0.4%  Builtin: SuspendGeneratorBaseline
+      5    0.3%    0.4%  Builtin: StoreIC
+      5    0.3%    0.4%  Builtin: ResumeGeneratorTrampoline
+      5    0.3%    0.4%  Builtin: BaselineLeaveFrame
+      4    0.3%    0.3%  JS: *parseFrontmatter file:///home/luke/personal/ssg-zero/ssg-zero/dist/frontmatter.js:8:33
+      4    0.3%    0.3%  JS: *join node:path:1169:7
+      4    0.3%    0.3%  JS: *inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      4    0.3%    0.3%  JS: *extname node:path:1388:10
+      4    0.3%    0.3%  JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      4    0.3%    0.3%  Builtin: PromiseFulfillReactionJob
+      4    0.3%    0.3%  Builtin: LoadGlobalIC
+      4    0.3%    0.3%  Builtin: JSConstructStubGeneric
+      3    0.2%    0.2%  JS: *open node:internal/fs/promises:633:20
+      3    0.2%    0.2%  JS: *Renderer.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/renderer.mjs:303:38
+      3    0.2%    0.2%  JS: *LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      3    0.2%    0.2%  Builtin: StrictEqual_Baseline
+      3    0.2%    0.2%  Builtin: ResumeGeneratorBaseline
+      3    0.2%    0.2%  Builtin: PerformPromiseThen
+      3    0.2%    0.2%  Builtin: ObjectPrototypeHasOwnProperty
+      3    0.2%    0.2%  Builtin: GreaterThanOrEqual_Baseline
+      3    0.2%    0.2%  Builtin: FulfillPromise
+      3    0.2%    0.2%  Builtin: DefineNamedOwnIC
+      3    0.2%    0.2%  Builtin: CreateTypedArray
+      3    0.2%    0.2%  Builtin: Call_ReceiverIsNullOrUndefined
+      3    0.2%    0.2%  Builtin: AsyncFunctionAwaitUncaught
+      3    0.2%    0.2%  Builtin: ArrayPrototypeJoin
+      2    0.1%    0.1%  RegExp: \r\n?|\n
+      2    0.1%    0.1%  JS: ^mkdir node:internal/fs/promises:848:21
+      2    0.1%    0.1%  JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      2    0.1%    0.1%  JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2    0.1%    0.1%  JS: *_write node:internal/streams/writable:445:16
+      2    0.1%    0.1%  JS: *Socket._writeGeneric node:net:921:42
+      2    0.1%    0.1%  JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      2    0.1%    0.1%  JS: *<anonymous> node:internal/validators:175:40
+      2    0.1%    0.1%  JS: *<anonymous> node:internal/fs/utils:719:42
+      2    0.1%    0.1%  JS: *<anonymous> node:internal/fs/promises:427:5
+      2    0.1%    0.1%  Builtin: ToBooleanForBaselineJump
+      2    0.1%    0.1%  Builtin: PromisePrototypeFinally
+      2    0.1%    0.1%  Builtin: LoadIC_StringLength
+      2    0.1%    0.1%  Builtin: KeyedLoadIC_PolymorphicName
+      2    0.1%    0.1%  Builtin: KeyedLoadIC_Megamorphic
+      2    0.1%    0.1%  Builtin: JSRunMicrotasksEntry
+      2    0.1%    0.1%  Builtin: JSBuiltinsConstructStub
+      2    0.1%    0.1%  Builtin: CreateShallowObjectLiteral
+      2    0.1%    0.1%  Builtin: Call_ReceiverIsNullOrUndefined_Baseline_Compact
+      2    0.1%    0.1%  Builtin: Call_ReceiverIsAny
+      2    0.1%    0.1%  Builtin: CallForwardVarargs
+      2    0.1%    0.1%  Builtin: CallApiCallbackGeneric
+      2    0.1%    0.1%  Builtin: AsyncGeneratorResolve
+      1    0.1%    0.1%  JS: ~resolvePackageTargetString node:internal/modules/esm/resolve:366:36
+      1    0.1%    0.1%  JS: ~normalizeEncoding node:internal/util:200:27
+      1    0.1%    0.1%  JS: ~linkify file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/linkify.mjs:6:33
+      1    0.1%    0.1%  JS: ~C node:internal/deps/cjs-module-lexer/dist/lexer:1:1152
+      1    0.1%    0.1%  JS: ^writeFileHandle node:internal/fs/promises:474:31
+      1    0.1%    0.1%  JS: ^writeFile node:internal/fs/promises:1193:25
+      1    0.1%    0.1%  JS: ^write node:internal/fs/promises:718:21
+      1    0.1%    0.1%  JS: ^wrappedFn node:internal/errors:536:21
+      1    0.1%    0.1%  JS: ^walkFiles file:///home/luke/personal/ssg-zero/ssg-zero/dist/usefule/core.js:54:33
+      1    0.1%    0.1%  JS: ^time file:///home/luke/personal/ssg-zero/ssg-zero/dist/logger.js:3:21
+      1    0.1%    0.1%  JS: ^stringToFlags node:internal/fs/utils:563:23
+      1    0.1%    0.1%  JS: ^slice node:buffer:621:12
+      1    0.1%    0.1%  JS: ^skipSpaces file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:129:55
+      1    0.1%    0.1%  JS: ^renderToken file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/renderer.mjs:174:55
+      1    0.1%    0.1%  JS: ^parseFrontmatter file:///home/luke/personal/ssg-zero/ssg-zero/dist/frontmatter.js:8:33
+      1    0.1%    0.1%  JS: ^list file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/list.mjs:90:30
+      1    0.1%    0.1%  JS: ^linkify file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/linkify.mjs:15:33
+      1    0.1%    0.1%  JS: ^isIterable node:internal/streams/utils:112:20
+      1    0.1%    0.1%  JS: ^isFileType node:fs:210:20
+      1    0.1%    0.1%  JS: ^handleWriteReq node:internal/stream_base_commons:45:24
+      1    0.1%    0.1%  JS: ^getEncodingOps node:buffer:706:24
+      1    0.1%    0.1%  JS: ^fence file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/fence.mjs:3:31
+      1    0.1%    0.1%  JS: ^entries node:internal/fs/dir:273:17
+      1    0.1%    0.1%  JS: ^dirname node:path:1278:10
+      1    0.1%    0.1%  JS: ^_write node:internal/streams/writable:445:16
+      1    0.1%    0.1%  JS: ^StateBlock.push file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:103:38
+      1    0.1%    0.1%  JS: ^SafePromise node:internal/per_context/primordials:456:16
+      1    0.1%    0.1%  JS: ^FastBuffer node:internal/buffer:960:14
+      1    0.1%    0.1%  JS: ^<anonymous> node:internal/util:416:24
+      1    0.1%    0.1%  JS: *wrappedFn node:internal/errors:536:21
+      1    0.1%    0.1%  JS: *strikethrough_postProcess file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/strikethrough.mjs:111:36
+      1    0.1%    0.1%  JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1    0.1%    0.1%  JS: *paragraph file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/paragraph.mjs:3:35
+      1    0.1%    0.1%  JS: *handle file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/handler.js:64:11
+      1    0.1%    0.1%  JS: *get node:internal/util:638:17
+      1    0.1%    0.1%  JS: *block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1    0.1%    0.1%  JS: *basename node:path:1309:11
+      1    0.1%    0.1%  JS: *SafePromise node:internal/per_context/primordials:456:16
+      1    0.1%    0.1%  JS: *FastBuffer node:internal/buffer:960:14
+      1    0.1%    0.1%  JS: *<anonymous> node:internal/validators:458:42
+      1    0.1%    0.1%  JS: *<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      1    0.1%    0.1%  Builtin: TypedArrayPrototypeByteOffset
+      1    0.1%    0.1%  Builtin: TypedArrayPrototypeBuffer
+      1    0.1%    0.1%  Builtin: StringSubstring
+      1    0.1%    0.1%  Builtin: StringSlowFlatten
+      1    0.1%    0.1%  Builtin: StringPrototypeTrim
+      1    0.1%    0.1%  Builtin: StringPrototypeSlice
+      1    0.1%    0.1%  Builtin: StringPrototypeReplace
+      1    0.1%    0.1%  Builtin: StringPrototypeIncludes
+      1    0.1%    0.1%  Builtin: StrictEqual
+      1    0.1%    0.1%  Builtin: StoreICBaseline
+      1    0.1%    0.1%  Builtin: StoreFastElementIC_Standard
+      1    0.1%    0.1%  Builtin: RunMicrotasksTrampoline
+      1    0.1%    0.1%  Builtin: RegExpReplace
+      1    0.1%    0.1%  Builtin: PromiseThenFinally
+      1    0.1%    0.1%  Builtin: PromiseConstructor
+      1    0.1%    0.1%  Builtin: NumberPrototypeToString
+      1    0.1%    0.1%  Builtin: NumberIsInteger
+      1    0.1%    0.1%  Builtin: NewPromiseCapability
+      1    0.1%    0.1%  Builtin: MathFloor
+      1    0.1%    0.1%  Builtin: LoadJoinElement_FastSmiOrObjectElements_0
+      1    0.1%    0.1%  Builtin: LoadICBaseline
+      1    0.1%    0.1%  Builtin: LessThan_Baseline
+      1    0.1%    0.1%  Builtin: KeyedStoreIC
+      1    0.1%    0.1%  Builtin: KeyedLoadICTrampoline_Megamorphic
+      1    0.1%    0.1%  Builtin: KeyedLoadICTrampoline
+      1    0.1%    0.1%  Builtin: KeyedLoadICBaseline
+      1    0.1%    0.1%  Builtin: KeyedHasIC_PolymorphicName
+      1    0.1%    0.1%  Builtin: KeyedHasIC
+      1    0.1%    0.1%  Builtin: InterpreterEntryTrampoline
+      1    0.1%    0.1%  Builtin: GrowFastSmiOrObjectElements
+      1    0.1%    0.1%  Builtin: GreaterThan_Baseline
+      1    0.1%    0.1%  Builtin: FindNonDefaultConstructorOrConstruct
+      1    0.1%    0.1%  Builtin: FastNewObject
+      1    0.1%    0.1%  Builtin: EnqueueMicrotask
+      1    0.1%    0.1%  Builtin: DoubleToI
+      1    0.1%    0.1%  Builtin: Decrement_Baseline
+      1    0.1%    0.1%  Builtin: ConstructFunction
+      1    0.1%    0.1%  Builtin: Construct
+      1    0.1%    0.1%  Builtin: CompileLazy
+      1    0.1%    0.1%  Builtin: CloneObjectIC
+      1    0.1%    0.1%  Builtin: CallFunctionTemplate_Generic
+      1    0.1%    0.1%  Builtin: AsyncFunctionResolve
+      1    0.1%    0.1%  Builtin: AsyncFunctionEnter
+      1    0.1%    0.1%  Builtin: ArrayBufferConstructor
+      1    0.1%    0.1%  Builtin: Add_Baseline
+
+ [C++]:
+   ticks  total  nonlib   name
+    403   27.2%   28.5%  epoll_pwait@@GLIBC_2.6
+     66    4.5%    4.7%  __write@@GLIBC_2.2.5
+     46    3.1%    3.2%  pthread_cond_signal@@GLIBC_2.3.2
+     19    1.3%    1.3%  fwrite@@GLIBC_2.2.5
+     17    1.1%    1.2%  __libc_malloc@@GLIBC_2.2.5
+      9    0.6%    0.6%  std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)
+      7    0.5%    0.5%  __read@@GLIBC_2.2.5
+      4    0.3%    0.3%  std::ostream::sentry::sentry(std::ostream&)
+      4    0.3%    0.3%  calloc@@GLIBC_2.2.5
+      4    0.3%    0.3%  _IO_file_xsputn@@GLIBC_2.2.5
+      2    0.1%    0.1%  __pthread_once@GLIBC_2.2.5
+      1    0.1%    0.1%  syscall@@GLIBC_2.2.5
+      1    0.1%    0.1%  std::ostream& std::ostream::_M_insert<long>(long)
+      1    0.1%    0.1%  sigemptyset@@GLIBC_2.2.5
+      1    0.1%    0.1%  pthread_create@GLIBC_2.2.5
+      1    0.1%    0.1%  operator new(unsigned long)
+      1    0.1%    0.1%  operator delete(void*, unsigned long)
+      1    0.1%    0.1%  isprint@@GLIBC_2.2.5
+      1    0.1%    0.1%  cfree@GLIBC_2.2.5
+      1    0.1%    0.1%  __pthread_mutex_lock@GLIBC_2.2.5
+      1    0.1%    0.1%  __open@@GLIBC_2.2.5
+      1    0.1%    0.1%  __madvise@@GLIBC_PRIVATE
+      1    0.1%    0.1%  __clock_gettime@@GLIBC_PRIVATE
+
+ [Summary]:
+   ticks  total  nonlib   name
+    461   31.1%   32.6%  JavaScript
+    593   40.0%   41.9%  C++
+     20    1.3%    1.4%  GC
+     67    4.5%          Shared libraries
+    362   24.4%          Unaccounted
+
+ [C++ entry points]:
+   ticks    cpp   total   name
+     64   38.1%    4.3%  __write@@GLIBC_2.2.5
+     39   23.2%    2.6%  pthread_cond_signal@@GLIBC_2.3.2
+     19   11.3%    1.3%  fwrite@@GLIBC_2.2.5
+     16    9.5%    1.1%  __libc_malloc@@GLIBC_2.2.5
+      9    5.4%    0.6%  std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)
+      4    2.4%    0.3%  std::ostream::sentry::sentry(std::ostream&)
+      4    2.4%    0.3%  calloc@@GLIBC_2.2.5
+      4    2.4%    0.3%  _IO_file_xsputn@@GLIBC_2.2.5
+      2    1.2%    0.1%  __pthread_once@GLIBC_2.2.5
+      1    0.6%    0.1%  syscall@@GLIBC_2.2.5
+      1    0.6%    0.1%  pthread_create@GLIBC_2.2.5
+      1    0.6%    0.1%  operator delete(void*, unsigned long)
+      1    0.6%    0.1%  isprint@@GLIBC_2.2.5
+      1    0.6%    0.1%  __pthread_mutex_lock@GLIBC_2.2.5
+      1    0.6%    0.1%  __open@@GLIBC_2.2.5
+      1    0.6%    0.1%  __madvise@@GLIBC_PRIVATE
+
+ [Bottom up (heavy) profile]:
+  Note: percentage shows a share of a particular caller in the total
+  amount of its parent calls.
+  Callers occupying less than 1.0% are not shown.
+
+   ticks parent  name
+    403   27.2%  epoll_pwait@@GLIBC_2.6
+
+    362   24.4%  UNKNOWN
+     22    6.1%    JS: *open node:internal/fs/promises:633:20
+     12   54.5%      JS: ^readFile node:internal/fs/promises:1237:24
+     11   91.7%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+     11  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    8.3%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      8   36.4%      JS: ^writeFile node:internal/fs/promises:1193:25
+      8  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      8  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    4.5%      JS: *writeFile node:internal/fs/promises:1193:25
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    4.5%      JS: *readFile node:internal/fs/promises:1237:24
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+     20    5.5%    JS: ^readFileHandle node:internal/fs/promises:509:30
+     12   60.0%      Builtin: AsyncFunctionAwaitResolveClosure
+      7   35.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      7  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.0%      JS: *readFile node:internal/fs/promises:1237:24
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+     19    5.2%    JS: ^mkdir node:internal/fs/promises:848:21
+     19  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+     18   94.7%        JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+     18  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.3%        JS: ~build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+     17    4.7%    JS: ^open node:internal/fs/promises:633:20
+      9   52.9%      JS: ^readFile node:internal/fs/promises:1237:24
+      9  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      9  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      8   47.1%      JS: ^writeFile node:internal/fs/promises:1193:25
+      8  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      8  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+     16    4.4%    JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+     15   93.8%      JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      3   20.0%        JS: ~<anonymous> node:tty:1:1
+      3  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      3  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      2   13.3%        JS: ~<anonymous> node:internal/streams/duplex:1:1
+      2  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      2  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.7%        JS: ~initCJSParse node:internal/modules/esm/translators:82:28
+      1  100.0%          JS: ~commonjsStrategy node:internal/modules/esm/translators:354:60
+      1  100.0%            JS: ~callTranslator node:internal/modules/esm/loader:272:28
+      1    6.7%        JS: ~handleMainPromise node:internal/modules/run_main:114:33
+      1  100.0%          JS: ~runMainESM node:internal/modules/run_main:100:20
+      1  100.0%            JS: ~executeUserEntryPoint node:internal/modules/run_main:134:31
+      1    6.7%        JS: ~getSource node:internal/modules/esm/load:40:25
+      1  100.0%          JS: ~defaultLoad node:internal/modules/esm/load:110:27
+      1  100.0%            JS: ~load node:internal/modules/esm/loader:399:13
+      1    6.7%        JS: ~defaultResolve node:internal/modules/esm/loader:380:17
+      1  100.0%          JS: ~resolve node:internal/modules/esm/loader:350:10
+      1  100.0%            JS: ~getModuleJob node:internal/modules/esm/loader:233:21
+      1    6.7%        JS: ~<anonymous> node:internal/streams/operators:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.7%        JS: ~<anonymous> node:internal/streams/compose:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.7%        JS: ~<anonymous> node:internal/perf/usertiming:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.7%        JS: ~<anonymous> node:internal/perf/timerify:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.7%        JS: ~<anonymous> node:internal/modules/esm/module_map:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.7%        JS: ~<anonymous> node:internal/fs/promises:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1    6.3%      JS: ~compileForPublicLoader node:internal/bootstrap/realm:331:25
+      1  100.0%        JS: ~loadBuiltinModule node:internal/modules/helpers:96:27
+      1  100.0%          JS: ~builtinStrategy node:internal/modules/esm/translators:458:52
+      1  100.0%            JS: ~callTranslator node:internal/modules/esm/loader:272:28
+     13    3.6%    JS: ^moduleStrategy node:internal/modules/esm/translators:164:56
+     13  100.0%      JS: ^callTranslator node:internal/modules/esm/loader:272:28
+     13  100.0%        JS: ^moduleProvider node:internal/modules/esm/loader:285:7
+     13  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      9    2.5%    JS: ^write node:internal/fs/promises:718:21
+      5   55.6%      JS: ^writeFileHandle node:internal/fs/promises:474:31
+      5  100.0%        JS: ^writeFile node:internal/fs/promises:1193:25
+      5  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      3   33.3%      Builtin: AsyncFunctionAwaitResolveClosure
+      1   11.1%      JS: *writeFileHandle node:internal/fs/promises:474:31
+      1  100.0%        JS: *writeFile node:internal/fs/promises:1193:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      6    1.7%    JS: ^handleWriteReq node:internal/stream_base_commons:45:24
+      4   66.7%      JS: ^writeGeneric node:internal/stream_base_commons:147:22
+      4  100.0%        JS: ^Socket._writeGeneric node:net:921:42
+      4  100.0%          JS: ^Socket._write node:net:963:35
+      4  100.0%            JS: ^writeOrBuffer node:internal/streams/writable:540:23
+      2   33.3%      JS: *_write node:internal/streams/writable:445:16
+      2  100.0%        JS: *LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      2  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      6    1.7%    JS: *Socket._writeGeneric node:net:921:42
+      6  100.0%      JS: *Writable.write node:internal/streams/writable:496:36
+      4   66.7%        JS: *<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      2   50.0%          JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      2  100.0%            JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2   50.0%          JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      2   33.3%        JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      2  100.0%          JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      2  100.0%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5    1.4%    JS: ^fromStringFast node:buffer:441:24
+      5  100.0%      JS: ^fromString node:buffer:460:20
+      5  100.0%        JS: ^from node:buffer:292:28
+      5  100.0%          JS: ^writeFile node:internal/fs/promises:1193:25
+      5  100.0%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5    1.4%    JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5  100.0%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      5  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      5    1.4%    JS: *parseFrontmatter file:///home/luke/personal/ssg-zero/ssg-zero/dist/frontmatter.js:8:33
+      5  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      5    1.4%    Builtin: AsyncFunctionAwaitResolveClosure
+      4    1.1%    JS: ~moduleStrategy node:internal/modules/esm/translators:164:56
+      3   75.0%      JS: ~callTranslator node:internal/modules/esm/loader:272:28
+      3  100.0%        JS: ~moduleProvider node:internal/modules/esm/loader:285:7
+      3  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%      JS: ^callTranslator node:internal/modules/esm/loader:272:28
+      1  100.0%        JS: ^moduleProvider node:internal/modules/esm/loader:285:7
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      4    1.1%    JS: *LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      3   75.0%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      3  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      4    1.1%    JS: *<anonymous> node:internal/fs/promises:427:5
+
+     66    4.5%  __write@@GLIBC_2.2.5
+     20   30.3%    JS: ^handleWriteReq node:internal/stream_base_commons:45:24
+     16   80.0%      JS: ^writeGeneric node:internal/stream_base_commons:147:22
+     16  100.0%        JS: ^Socket._writeGeneric node:net:921:42
+     16  100.0%          JS: ^Socket._write node:net:963:35
+     16  100.0%            JS: ^writeOrBuffer node:internal/streams/writable:540:23
+      4   20.0%      JS: *_write node:internal/streams/writable:445:16
+      4  100.0%        JS: *LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      4  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3   75.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%            JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+     19   28.8%    JS: *handleWriteReq node:internal/stream_base_commons:45:24
+     19  100.0%      JS: *_write node:internal/streams/writable:445:16
+     19  100.0%        JS: *LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+     14   73.7%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+     10   71.4%            Builtin: AsyncFunctionAwaitResolveClosure
+      4   28.6%            JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      5   26.3%          JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      5  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+     18   27.3%    JS: *Socket._writeGeneric node:net:921:42
+     18  100.0%      JS: *Writable.write node:internal/streams/writable:496:36
+     11   61.1%        JS: *<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      6   54.5%          JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5   83.3%            JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1   16.7%            Builtin: AsyncFunctionAwaitResolveClosure
+      5   45.5%          JS: *LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      4   80.0%            JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1   20.0%            JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      7   38.9%        JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      6   85.7%          JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      4   66.7%            JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1   16.7%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1   16.7%            JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1   14.3%          JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.5%    JS: ~resolvePackageTarget node:internal/modules/esm/resolve:470:30
+      1  100.0%      JS: ~resolvePackageTarget node:internal/modules/esm/resolve:470:30
+      1  100.0%        JS: ~packageExportsResolve node:internal/modules/esm/resolve:576:31
+      1  100.0%          JS: ~packageResolve node:internal/modules/esm/resolve:789:24
+      1  100.0%            JS: ~moduleResolve node:internal/modules/esm/resolve:887:23
+      1    1.5%    JS: ~resolve node:path:1095:10
+      1  100.0%      JS: ~Module._initPaths node:internal/modules/cjs/loader:1521:29
+      1  100.0%        JS: ~initializeCJS node:internal/modules/cjs/loader:382:23
+      1  100.0%          JS: ~initializeCJSLoader node:internal/process/pre_execution:691:29
+      1  100.0%            JS: ~setupUserModules node:internal/process/pre_execution:191:26
+      1    1.5%    JS: ~moduleResolve node:internal/modules/esm/resolve:887:23
+      1  100.0%      JS: ~defaultResolve node:internal/modules/esm/resolve:1055:24
+      1  100.0%        JS: ~defaultResolve node:internal/modules/esm/loader:380:17
+      1  100.0%          JS: ~resolve node:internal/modules/esm/loader:350:10
+      1  100.0%            JS: ~getModuleJob node:internal/modules/esm/loader:233:21
+      1    1.5%    JS: ~image file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/image.mjs:5:31
+      1  100.0%      JS: *inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      1  100.0%        JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1    1.5%    JS: ^handleFdClose node:internal/fs/promises:424:29
+      1  100.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.5%    JS: ^fromString node:buffer:460:20
+      1  100.0%      JS: ^from node:buffer:292:28
+      1  100.0%        JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.5%    JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%      JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1  100.0%        JS: ~<anonymous> node:internal/modules/esm/resolve:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+
+     60    4.0%  /usr/lib/libc.so.6
+      7   11.7%    JS: ^readFileHandle node:internal/fs/promises:509:30
+      4   57.1%      Builtin: AsyncFunctionAwaitResolveClosure
+      3   42.9%      JS: ^readFile node:internal/fs/promises:1237:24
+      3  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      4    6.7%    JS: ^open node:internal/fs/promises:633:20
+      3   75.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      3  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      4    6.7%    Builtin: TypedArrayConstructor
+      2   50.0%      JS: *allocUnsafeSlow node:buffer:411:50
+      2  100.0%        JS: ^readFileHandle node:internal/fs/promises:509:30
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%      JS: *readFileHandle node:internal/fs/promises:509:30
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%      JS: *createUnsafeBuffer node:internal/buffer:1070:28
+      1  100.0%        JS: ^allocUnsafeSlow node:buffer:411:50
+      1  100.0%          JS: ^readFileHandle node:internal/fs/promises:509:30
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      3    5.0%    JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      3  100.0%      JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1   33.3%        JS: ~getTranslators node:internal/modules/esm/loader:52:24
+      1  100.0%          JS: ~ModuleLoader node:internal/modules/esm/loader:82:20
+      1  100.0%            JS: ~ModuleLoader node:internal/modules/esm/loader:126:14
+      1   33.3%        JS: ~<anonymous> node:internal/streams/readable:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1   33.3%        JS: ~<anonymous> node:internal/streams/duplex:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      3    5.0%    JS: *fromString node:buffer:460:20
+      2   66.7%      JS: *writeFile node:internal/fs/promises:1193:25
+      2  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   33.3%      JS: ^from node:buffer:292:28
+      1  100.0%        JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      2    3.3%    JS: ^write node:internal/fs/promises:718:21
+      2  100.0%      JS: ^writeFileHandle node:internal/fs/promises:474:31
+      2  100.0%        JS: ^writeFile node:internal/fs/promises:1193:25
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2    3.3%    JS: ^mkdir node:internal/fs/promises:848:21
+      2  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%        JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2    3.3%    JS: *open node:internal/fs/promises:633:20
+      1   50.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   50.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.7%    JS: ~ParserInline.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_inline.mjs:138:44
+      1  100.0%      JS: ~ParserInline.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_inline.mjs:182:41
+      1  100.0%        JS: ~inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      1  100.0%          JS: ~Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%            JS: ~MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1    1.7%    JS: ^realpathSync node:fs:2625:22
+      1  100.0%      JS: ^finalizeResolution node:internal/modules/esm/resolve:236:28
+      1  100.0%        JS: ^moduleResolve node:internal/modules/esm/resolve:887:23
+      1  100.0%          JS: ^defaultResolve node:internal/modules/esm/resolve:1055:24
+      1  100.0%            JS: ^defaultResolve node:internal/modules/esm/loader:380:17
+      1    1.7%    JS: ^internalBinding node:internal/bootstrap/realm:184:45
+      1  100.0%      JS: ~<anonymous> node:internal/fs/dir:1:1
+      1  100.0%        JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%          JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1  100.0%            JS: ~<anonymous> node:internal/fs/promises:1:1
+      1    1.7%    JS: ^getDirent node:internal/fs/utils:297:19
+      1  100.0%      JS: ^processReadResult node:internal/fs/dir:150:20
+      1  100.0%        JS: ^req.oncomplete node:internal/fs/dir:119:22
+      1    1.7%    JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.7%    JS: *readFileHandle node:internal/fs/promises:509:30
+      1  100.0%      Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.7%    JS: *parseFrontmatter file:///home/luke/personal/ssg-zero/ssg-zero/dist/frontmatter.js:8:33
+      1  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.7%    JS: *handle file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/handler.js:64:11
+      1  100.0%      JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      1  100.0%        JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      1  100.0%          JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.7%    JS: *asText file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/handler.js:75:11
+      1  100.0%      JS: ^handle file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/handler.js:64:11
+      1  100.0%        JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      1  100.0%          JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      1  100.0%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1    1.7%    JS: *FastBuffer node:internal/buffer:960:14
+      1  100.0%      JS: ^createUnsafeBuffer node:internal/buffer:1070:28
+      1  100.0%        JS: ^createPool node:buffer:152:20
+      1  100.0%          JS: ^fromStringFast node:buffer:441:24
+      1  100.0%            JS: ^fromString node:buffer:460:20
+      1    1.7%    JS: *<anonymous> node:internal/fs/promises:427:5
+      1    1.7%    Builtin: StringPrototypeSplit
+      1  100.0%      Script: ~<anonymous> file:///home/luke/personal/ssg-zero/node_modules/entities/lib/esm/generated/decode-data-html.js:1:1
+      1  100.0%        Builtin: GeneratorPrototypeNext
+      1  100.0%          Builtin: CallApiCallbackGeneric
+      1  100.0%            JS: ~run node:internal/modules/esm/module_job:216:12
+      1    1.7%    Builtin: StringPrototypeReplace
+      1  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    1.7%    Builtin: ArrayPrototypeJoin
+      1  100.0%      JS: *paragraph file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/paragraph.mjs:3:35
+      1  100.0%        JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      1  100.0%          JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      1  100.0%            JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+
+     58    3.9%  JS: *text file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_inline/text.mjs:42:30
+     54   93.1%    JS: *inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+     37   68.5%      JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+     37  100.0%        JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+     37  100.0%          JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+     37  100.0%            JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+     12   22.2%      JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+     10   83.3%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+     10  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2   16.7%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      5    9.3%      JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      5  100.0%        JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      5  100.0%          JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      5  100.0%            JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      3    5.2%    JS: ^ParserInline.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_inline.mjs:138:44
+      3  100.0%      JS: ^ParserInline.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_inline.mjs:182:41
+      3  100.0%        JS: ^inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      3  100.0%          JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      3  100.0%            JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1    1.7%    JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%      JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%        JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1  100.0%          JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+
+     46    3.1%  pthread_cond_signal@@GLIBC_2.3.2
+      8   17.4%    JS: *<anonymous> node:internal/fs/promises:427:5
+      7   15.2%    JS: ^readFileHandle node:internal/fs/promises:509:30
+      5   71.4%      JS: ^readFile node:internal/fs/promises:1237:24
+      5  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1   14.3%      JS: *readFile node:internal/fs/promises:1237:24
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1   14.3%      Builtin: AsyncFunctionAwaitResolveClosure
+      7   15.2%    JS: *open node:internal/fs/promises:633:20
+      3   42.9%      JS: ^readFile node:internal/fs/promises:1237:24
+      3  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2   28.6%      JS: ^writeFile node:internal/fs/promises:1193:25
+      1   50.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   50.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   14.3%      JS: *writeFile node:internal/fs/promises:1193:25
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   14.3%      JS: *readFile node:internal/fs/promises:1237:24
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      6   13.0%    JS: ^open node:internal/fs/promises:633:20
+      3   50.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      3  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      3   50.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      3  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      5   10.9%    JS: ^mkdir node:internal/fs/promises:848:21
+      5  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      5  100.0%        JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      5  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      3    6.5%    JS: ^close node:internal/fs/promises:236:11
+      3  100.0%      JS: ^<anonymous> node:internal/fs/promises:427:5
+      1    2.2%    JS: ^write node:internal/fs/promises:718:21
+      1  100.0%      JS: ^writeFileHandle node:internal/fs/promises:474:31
+      1  100.0%        JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    2.2%    JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    2.2%    JS: *readFileHandle node:internal/fs/promises:509:30
+      1  100.0%      Builtin: AsyncFunctionAwaitResolveClosure
+
+     29    2.0%  JS: *StateBlock file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/state_block.mjs:6:21
+     28   96.6%    JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+     28  100.0%      JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+     18   64.3%        JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+     18  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+     18  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      6   21.4%        JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      3   50.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      3   50.0%          JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      4   14.3%        JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      4  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      4  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1    3.4%    JS: *block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%      JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+
+     22    1.5%  Builtin: StringAdd_CheckNone
+     15   68.2%    JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+     13   86.7%      Builtin: AsyncFunctionAwaitResolveClosure
+      2   13.3%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      2  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      3   13.6%    Builtin: AsyncFunctionAwaitResolveClosure
+      1    4.5%    JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    4.5%    JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%      JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    4.5%    JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      1  100.0%      JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      1  100.0%        JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%          JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%            JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1    4.5%    Builtin: StringPrototypeReplace
+      1  100.0%      JS: ^normalize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/normalize.mjs:7:35
+      1  100.0%        JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+
+     20    1.3%  Builtin: LoadIC
+      3   15.0%    JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      3  100.0%      JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      3  100.0%        JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1   33.3%          JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%            JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1   33.3%          JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%            JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1   33.3%          JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%            JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      2   10.0%    JS: ^writeFileHandle node:internal/fs/promises:474:31
+      2  100.0%      JS: ^writeFile node:internal/fs/promises:1193:25
+      2  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      2   10.0%    JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%      JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      2  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      2   10.0%    Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.0%    JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%      Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.0%    JS: ^time file:///home/luke/personal/ssg-zero/ssg-zero/dist/logger.js:3:21
+      1  100.0%      JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      1  100.0%        JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      1  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1    5.0%    JS: ^table file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/table.mjs:55:31
+      1  100.0%      JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      1  100.0%        JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      1  100.0%          JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%            JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1    5.0%    JS: ^reference file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/reference.mjs:3:35
+      1  100.0%      JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      1  100.0%        JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      1  100.0%          JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%            JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1    5.0%    JS: ^paragraph file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_block/paragraph.mjs:3:35
+      1  100.0%      JS: ^ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      1  100.0%        JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      1  100.0%          JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%            JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1    5.0%    JS: ^defaultLoad node:internal/modules/esm/load:110:27
+      1  100.0%      JS: ^load node:internal/modules/esm/loader:399:13
+      1  100.0%        JS: ^moduleProvider node:internal/modules/esm/loader:285:7
+      1  100.0%          JS: ^ModuleJob node:internal/modules/esm/module_job:55:14
+      1  100.0%            JS: ^#createModuleJob node:internal/modules/esm/loader:271:19
+      1    5.0%    JS: ^createPool node:buffer:152:20
+      1  100.0%      JS: ^fromStringFast node:buffer:441:24
+      1  100.0%        JS: ^fromString node:buffer:460:20
+      1  100.0%          JS: ^from node:buffer:292:28
+      1  100.0%            JS: ^writeFile node:internal/fs/promises:1193:25
+      1    5.0%    JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%      JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.0%    JS: ^ParserInline.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_inline.mjs:182:41
+      1  100.0%      JS: ^inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      1  100.0%        JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1    5.0%    JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      1  100.0%      JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.0%    JS: *wrappedFn node:internal/errors:536:21
+      1  100.0%      JS: ^write node:internal/fs/promises:718:21
+      1  100.0%        JS: *writeFileHandle node:internal/fs/promises:474:31
+      1  100.0%          JS: *writeFile node:internal/fs/promises:1193:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+
+     19    1.3%  fwrite@@GLIBC_2.2.5
+      8   42.1%    JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      8  100.0%      JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      3   37.5%        JS: ~<anonymous> node:internal/fs/promises:1:1
+      3  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      3  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1   12.5%        JS: ~load node:internal/modules/esm/loader:399:13
+      1  100.0%          JS: ~moduleProvider node:internal/modules/esm/loader:285:7
+      1  100.0%            JS: ~ModuleJob node:internal/modules/esm/module_job:55:14
+      1   12.5%        JS: ~defaultResolve node:internal/modules/esm/loader:380:17
+      1  100.0%          JS: ~resolve node:internal/modules/esm/loader:350:10
+      1  100.0%            JS: ~getModuleJob node:internal/modules/esm/loader:233:21
+      1   12.5%        JS: ~<anonymous> node:tty:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1   12.5%        JS: ~<anonymous> node:perf_hooks:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      1   12.5%        JS: ~<anonymous> node:internal/streams/duplex:1:1
+      1  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:383:27
+      1  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:420:24
+      2   10.5%    JS: ~realpathSync node:fs:2625:22
+      2  100.0%      JS: ~toRealPath node:internal/modules/helpers:57:20
+      2  100.0%        JS: ~Module._findPath node:internal/modules/cjs/loader:608:28
+      2  100.0%          JS: ~resolveMainPath node:internal/modules/run_main:17:25
+      2  100.0%            JS: ~executeUserEntryPoint node:internal/modules/run_main:134:31
+      1    5.3%    JS: ~toRealPath node:internal/modules/helpers:57:20
+      1  100.0%      JS: ~Module._findPath node:internal/modules/cjs/loader:608:28
+      1  100.0%        JS: ~resolveMainPath node:internal/modules/run_main:17:25
+      1  100.0%          JS: ~executeUserEntryPoint node:internal/modules/run_main:134:31
+      1  100.0%            JS: ~<anonymous> node:internal/main/run_main_module:1:1
+      1    5.3%    JS: ~setSourceMapsEnabled node:internal/source_map/source_map_cache:55:30
+      1  100.0%      JS: ~initializeSourceMapsHandlers node:internal/process/pre_execution:713:38
+      1  100.0%        JS: ~prepareExecution node:internal/process/pre_execution:97:26
+      1  100.0%          JS: ~prepareMainThreadExecution node:internal/process/pre_execution:53:36
+      1  100.0%            JS: ~<anonymous> node:internal/main/run_main_module:1:1
+      1    5.3%    JS: ~resolve node:path:1095:10
+      1  100.0%      JS: ~Module._initPaths node:internal/modules/cjs/loader:1521:29
+      1  100.0%        JS: ~initializeCJS node:internal/modules/cjs/loader:382:23
+      1  100.0%          JS: ~initializeCJSLoader node:internal/process/pre_execution:691:29
+      1  100.0%            JS: ~setupUserModules node:internal/process/pre_execution:191:26
+      1    5.3%    JS: ~processTicksAndRejections node:internal/process/task_queues:67:35
+      1    5.3%    JS: ~prepareExecution node:internal/process/pre_execution:97:26
+      1  100.0%      JS: ~prepareMainThreadExecution node:internal/process/pre_execution:53:36
+      1  100.0%        JS: ~<anonymous> node:internal/main/run_main_module:1:1
+      1    5.3%    JS: ~normalizeString node:path:66:25
+      1  100.0%      JS: ~resolve node:path:1095:10
+      1  100.0%        JS: ~patchProcessObject node:internal/process/pre_execution:221:28
+      1  100.0%          JS: ~prepareExecution node:internal/process/pre_execution:97:26
+      1  100.0%            JS: ~prepareMainThreadExecution node:internal/process/pre_execution:53:36
+      1    5.3%    JS: ~initializeSourceMapsHandlers node:internal/process/pre_execution:713:38
+      1  100.0%      JS: ~prepareExecution node:internal/process/pre_execution:97:26
+      1  100.0%        JS: ~prepareMainThreadExecution node:internal/process/pre_execution:53:36
+      1  100.0%          JS: ~<anonymous> node:internal/main/run_main_module:1:1
+      1    5.3%    JS: ~MarkdownIt file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:217:21
+      1  100.0%      JS: ~MarkdownIt file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:217:21
+      1  100.0%        Script: ~<anonymous> file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:1:1
+      1  100.0%          Builtin: AsyncModuleEvaluate
+      1  100.0%            Builtin: CallApiCallbackGeneric
+      1    5.3%    Builtin: RegExpPrototypeExec
+      1  100.0%      JS: ~resolvePackageTargetString node:internal/modules/esm/resolve:366:36
+      1  100.0%        JS: ~resolvePackageTarget node:internal/modules/esm/resolve:470:30
+      1  100.0%          JS: ~resolvePackageTarget node:internal/modules/esm/resolve:470:30
+      1  100.0%            JS: ~packageExportsResolve node:internal/modules/esm/resolve:576:31
+
+     18    1.2%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined
+      4   22.2%    JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      4  100.0%      JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      4  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3   75.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   25.0%          JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      3   16.7%    JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      3  100.0%      JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      2   66.7%        JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      2  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      2  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1   33.3%        JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      2   11.1%    JS: ^inline file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/inline.mjs:1:32
+      2  100.0%      JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      2  100.0%        JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      2  100.0%          JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      2  100.0%            JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1    5.6%    JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%      Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.6%    JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.6%    JS: ^readFileHandle node:internal/fs/promises:509:30
+      1  100.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.6%    JS: ^nextTick node:internal/process/task_queues:103:18
+      1  100.0%      JS: ^req.oncomplete node:internal/fs/dir:119:22
+      1    5.6%    JS: ^handle file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/handler.js:64:11
+      1  100.0%      JS: ^<anonymous> file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:45:15
+      1  100.0%        JS: ^LOG file:///home/luke/personal/ssg-zero/ssg-zero/dist/slog/base.js:10:24
+      1  100.0%          JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.6%    JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%      JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1  100.0%        JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%          JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.6%    JS: *wrappedFn node:internal/errors:536:21
+      1  100.0%      JS: ^write node:internal/fs/promises:718:21
+      1  100.0%        JS: *writeFileHandle node:internal/fs/promises:474:31
+      1  100.0%          JS: *writeFile node:internal/fs/promises:1193:25
+      1  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.6%    JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%      JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%        JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1  100.0%          JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1    5.6%    Builtin: AsyncFunctionAwaitResolveClosure
+
+     17    1.1%  __libc_malloc@@GLIBC_2.2.5
+      3   17.6%    JS: ^readFileHandle node:internal/fs/promises:509:30
+      3  100.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      3  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      3   17.6%    JS: ^mkdir node:internal/fs/promises:848:21
+      3  100.0%      JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      3  100.0%        JS: ^build file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:24:16
+      3  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   33.3%            Builtin: CallApiCallbackGeneric
+      3   17.6%    JS: *open node:internal/fs/promises:633:20
+      1   33.3%      JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   33.3%      JS: ^readFile node:internal/fs/promises:1237:24
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1   33.3%      JS: *readFile node:internal/fs/promises:1237:24
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      2   11.8%    Builtin: TypedArrayConstructor
+      2  100.0%      JS: *allocUnsafeSlow node:buffer:411:50
+      2  100.0%        JS: ^readFileHandle node:internal/fs/promises:509:30
+      2  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.9%    JS: ^write node:internal/fs/promises:718:21
+      1  100.0%      JS: ^writeFileHandle node:internal/fs/promises:474:31
+      1  100.0%        JS: ^writeFile node:internal/fs/promises:1193:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.9%    JS: ^open node:internal/fs/promises:633:20
+      1  100.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      1  100.0%        JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    5.9%    JS: ^close node:internal/fs/promises:236:11
+      1  100.0%      JS: ^<anonymous> node:internal/fs/promises:427:5
+      1    5.9%    JS: *FastBuffer node:internal/buffer:960:14
+      1  100.0%      JS: ^createUnsafeBuffer node:internal/buffer:1070:28
+      1  100.0%        JS: ^createPool node:buffer:152:20
+      1  100.0%          JS: ^fromStringFast node:buffer:441:24
+      1  100.0%            JS: ^fromString node:buffer:460:20
+      1    5.9%    JS: *<anonymous> node:internal/fs/promises:427:5
+
+     15    1.0%  Builtin: BaselineOutOfLinePrologue
+      3   20.0%    JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      3  100.0%      JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      2   66.7%        JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      2  100.0%          JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      2  100.0%            Builtin: AsyncFunctionAwaitResolveClosure
+      1   33.3%        JS: ^Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%          JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%            JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      2   13.3%    JS: ^readFileHandle node:internal/fs/promises:509:30
+      1   50.0%      JS: ^readFile node:internal/fs/promises:1237:24
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1   50.0%      Builtin: AsyncFunctionAwaitResolveClosure
+      2   13.3%    JS: *ParserBlock.tokenize file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:56:43
+      2  100.0%      JS: ^ParserBlock.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_block.mjs:124:40
+      2  100.0%        JS: ^block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      2  100.0%          JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      2  100.0%            JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1    6.7%    JS: ^StringDecoder node:string_decoder:81:23
+      1  100.0%      JS: ^readFileHandle node:internal/fs/promises:509:30
+      1  100.0%        JS: ^readFile node:internal/fs/promises:1237:24
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    6.7%    JS: ^Socket._writeGeneric node:net:921:42
+      1  100.0%      JS: ^Socket._write node:net:963:35
+      1  100.0%        JS: ^writeOrBuffer node:internal/streams/writable:540:23
+      1  100.0%          JS: ^_write node:internal/streams/writable:445:16
+      1  100.0%            JS: ^Writable.write node:internal/streams/writable:496:36
+      1    6.7%    JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%      JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%        Builtin: AsyncFunctionAwaitResolveClosure
+      1    6.7%    JS: *block file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/rules_core/block.mjs:1:31
+      1  100.0%      JS: *render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%        JS: *renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1  100.0%          Builtin: AsyncFunctionAwaitResolveClosure
+      1    6.7%    JS: *Core.process file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/parser_core.mjs:52:35
+      1  100.0%      JS: ^MarkdownIt.parse file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:504:39
+      1  100.0%        JS: ^MarkdownIt.render file:///home/luke/personal/ssg-zero/node_modules/markdown-it/lib/index.mjs:527:40
+      1  100.0%          JS: ^render file:///home/luke/personal/ssg-zero/site-benchmark/zero.config.js:12:8
+      1  100.0%            JS: ^renderTemplate file:///home/luke/personal/ssg-zero/ssg-zero/dist/ssg.js:86:25
+      1    6.7%    Builtin: PromiseConstructor
+      1  100.0%      JS: ^fn node:internal/util:415:14
+      1  100.0%        JS: ^entries node:internal/fs/dir:273:17
+      1  100.0%          Builtin: AsyncGeneratorPrototypeNext
+      1  100.0%            JS: ^walkFiles file:///home/luke/personal/ssg-zero/ssg-zero/dist/usefule/core.js:54:33
+
