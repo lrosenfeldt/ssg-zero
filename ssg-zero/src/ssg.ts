@@ -1,5 +1,5 @@
 import { basename, dirname, extname, join } from 'node:path';
-import { Writable } from 'node:stream';
+import { type Readable, Writable } from 'node:stream';
 import { cp, mkdir, readFile, writeFile } from 'node:fs';
 import { mkdir as mkdirAsync } from 'node:fs/promises';
 
@@ -7,6 +7,7 @@ import { FileReader, anyToError, walkFiles } from './usefule/core.js';
 import { logger, type Logger } from './logger.js';
 import { ParserResult, parseFrontmatter } from './frontmatter.js';
 import { pipeline } from 'node:stream/promises';
+import { FileWalker } from './usefule/file_walker.js';
 
 type DoneCallback = (error?: NodeJS.ErrnoException | null | undefined) => void;
 
@@ -76,7 +77,9 @@ export class SSG extends Writable {
 		}
 	}
 
-	async build(reader: FileReader = walkFiles(this.inputDir)): Promise<void> {
+	async build(
+		reader: Readable | FileReader = new FileWalker(this.inputDir),
+	): Promise<void> {
 		try {
 			await pipeline(reader, this);
 		} catch (reason) {
