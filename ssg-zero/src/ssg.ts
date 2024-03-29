@@ -36,7 +36,7 @@ export class SSG extends Writable {
 		public readonly fileHandlers: Readonly<Record<string, FileHandler>>,
 		private logger: Logger,
 	) {
-		super({ objectMode: true, highWaterMark: 20 });
+		super({ objectMode: true, highWaterMark: 500 });
 	}
 
 	async setup(): Promise<void> {
