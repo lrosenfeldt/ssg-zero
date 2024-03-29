@@ -3,7 +3,7 @@ import { type Readable, Writable } from 'node:stream';
 import { cp, mkdir, readFile, writeFile } from 'node:fs';
 import { mkdir as mkdirAsync } from 'node:fs/promises';
 
-import { FileReader, anyToError, walkFiles } from './usefule/core.js';
+import { FileReader, anyToError } from './usefule/core.js';
 import { logger, type Logger } from './logger.js';
 import { ParserResult, parseFrontmatter } from './frontmatter.js';
 import { pipeline } from 'node:stream/promises';
