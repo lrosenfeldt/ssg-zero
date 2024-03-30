@@ -29,6 +29,9 @@ export type FileHandler = PassthroughMarker | Renderer;
 export class SSG extends Writable {
 	static passthroughMarker: PassthroughMarker = passthroughMarker;
 
+	private readonly concurrency: number = 20;
+	private running: number = 0;
+
 	constructor(
 		public readonly inputDir: string,
 		public readonly outputDir: string,
@@ -74,6 +77,45 @@ export class SSG extends Writable {
 			this.passthroughFile(filePath, done);
 		} else {
 			this.handleTemplate(filePath, fileType, renderer, done);
+		}
+	}
+
+	_writev(
+		chunks: { chunk: any; encoding: BufferEncoding }[],
+		allDone: (error?: Error | null | undefined) => void,
+	): void {
+		if (this.running > 0) {
+			allDone(
+				new Error(
+					`Expected batches to be passed serially not concurrently. Fuck.`,
+				),
+			);
+			return;
+		}
+
+		let chunkIndex = 0;
+		const done = (error?: Error | null | undefined) => {
+			if (error) {
+				this.running = 0;
+				allDone(error);
+				return;
+			}
+
+			this.running--;
+			if (this.running >= this.concurrency) {
+				return;
+			} else if (chunkIndex < chunks.length) {
+				const { chunk, encoding } = chunks[chunkIndex++];
+				this.running++;
+				this._write(chunk, encoding, done);
+			} else {
+				allDone();
+			}
+		};
+
+		for (; chunkIndex < this.concurrency; ++chunkIndex) {
+			const { chunk, encoding } = chunks[chunkIndex];
+			this._write(chunk, encoding, done);
 		}
 	}
 
