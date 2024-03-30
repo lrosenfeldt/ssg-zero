@@ -56,12 +56,12 @@ PREFIX="${MACHINE}${BRANCH}${DATE}"
 
 if [ -z "$OPT_FORCE" ]; then
   [ -f "./diagnostic/${PREFIX}.v8profile.txt" ] && exit 16
-  [ -f "./diagnostic/${PREFIX}.heapprofile.json" ] && exit 16
+  [ -f "./diagnostic/${PREFIX}.heapprofile" ] && exit 16
   [ -f "./diagnostic/${PREFIX}.cpuprofile.json" ] && exit 16
 fi
 
 npm run --include-workspace-root --if-present compile
-node --heap-prof --heap-prof-name="${PREFIX}.heapprofile.json" --diagnostic-dir=diagnostic zero.config.js
+node --heap-prof --heap-prof-name="${PREFIX}.heapprofile" --diagnostic-dir=diagnostic zero.config.js
 node --cpu-prof --cpu-prof-name="${PREFIX}.cpuprofile.json" --diagnostic-dir=diagnostic zero.config.js
 node --prof zero.config.js
 
