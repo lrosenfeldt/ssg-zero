@@ -6,7 +6,7 @@ const HOOK = `\
 git diff --cached --name-only --diff-filter=d | \
   awk '/\\.ts|js|json/' | \
   awk '!/profile\\.json/' | \
-  xargs npm exec prettier -- --no-error-on-unmatched-pattern --list-different`;
+  xargs npm exec prettier -- --no-error-on-unmatched-pattern --check --no-color`;
 
 const PRE_COMMIT_PATH = './.git/hooks/pre-commit';
 
